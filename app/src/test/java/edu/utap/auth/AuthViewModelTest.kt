@@ -1,8 +1,11 @@
 package edu.utap.auth
 
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.firebase.auth.FirebaseUser
 import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.auth.utils.NetworkUtils
+import edu.utap.auth.utils.NetworkUtilsInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -28,6 +31,8 @@ class AuthViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var mockAuthRepository: AuthRepositoryInterface
+    private lateinit var mockContext: Context
+    private lateinit var mockNetworkUtils: NetworkUtilsInterface
     private lateinit var authViewModel: AuthViewModel
     private lateinit var mockFirebaseUser: FirebaseUser
 
@@ -39,21 +44,32 @@ class AuthViewModelTest {
     fun setup() = runTest {
         Dispatchers.setMain(testDispatcher)
         mockAuthRepository = mock(AuthRepositoryInterface::class.java)
+        mockContext = mock(Context::class.java)
         mockFirebaseUser = mock(FirebaseUser::class.java)
+        
+        // Create a mock implementation of NetworkUtilsInterface
+        mockNetworkUtils = mock(NetworkUtilsInterface::class.java)
+        // Make network always available for tests
+        whenever(mockNetworkUtils.isNetworkAvailable(any())).thenReturn(true)
+        // Set the mock implementation
+        NetworkUtils.setImplementation(mockNetworkUtils)
+        
         // Setup the mock before creating the ViewModel
         whenever(mockAuthRepository.getCurrentUser()).thenReturn(null)
-        authViewModel = AuthViewModel(mockAuthRepository)
+        authViewModel = AuthViewModel(mockAuthRepository, mockContext)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        // Restore default implementation
+        NetworkUtils.setImplementation(edu.utap.auth.utils.NetworkUtilsImpl())
     }
 
     @Test
     fun `initial state is Idle`() = runTest {
         // Create a new ViewModel instance to test initial state
-        val newViewModel = AuthViewModel(mockAuthRepository)
+        val newViewModel = AuthViewModel(mockAuthRepository, mockContext)
         assertEquals(AuthState.Idle, newViewModel.authState.value)
         
         // Then advance the test dispatcher to allow coroutines to complete

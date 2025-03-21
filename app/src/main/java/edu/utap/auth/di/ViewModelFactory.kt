@@ -17,7 +17,10 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
         return when {
             modelClass.isAssignableFrom(AuthViewModel::class.java) -> {
                 val authRepository = AuthModule.provideAuthRepository(context)
-                AuthViewModel(authRepository) as T
+                AuthViewModel(
+                    authRepository,
+                    context = context
+                ) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

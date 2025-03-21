@@ -1,14 +1,17 @@
 package edu.utap.auth
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.auth.utils.NetworkUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
-    private val authRepository: AuthRepositoryInterface
+    private val authRepository: AuthRepositoryInterface,
+    private val context: Context
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -31,6 +34,13 @@ class AuthViewModel(
 
     fun register(email: String, password: String, name: String) {
         _authState.value = AuthState.Loading
+        
+        // Check for network connectivity before attempting registration
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            _authState.value = AuthState.Error("No internet connection. Please check your network settings and try again.")
+            return
+        }
+        
         viewModelScope.launch {
             val result = authRepository.registerUser(email, password, name)
             result.fold(
@@ -46,6 +56,13 @@ class AuthViewModel(
 
     fun login(email: String, password: String) {
         _authState.value = AuthState.Loading
+        
+        // Check for network connectivity before attempting login
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            _authState.value = AuthState.Error("No internet connection. Please check your network settings and try again.")
+            return
+        }
+        
         viewModelScope.launch {
             val result = authRepository.loginUser(email, password)
             result.fold(
@@ -65,4 +82,4 @@ class AuthViewModel(
             _authState.value = AuthState.Unauthenticated
         }
     }
-} 
+}
