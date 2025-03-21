@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SAFloodResponse</string>
+    <string name="discussion">Discussion</string>
+    <string name="report">Report Flood</string>
+    <string name="profile">Profile</string>
+    <string name="dashboard">Dashboard</string>
 </resources>

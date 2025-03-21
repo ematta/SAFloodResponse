@@ -1,0 +1,19 @@
+---
+id: c07d7882-408b-4fc6-8593-cf621bc257a6
+---
+architecture-beta
+    group frontend(cloud)[Frontend]
+
+    service ui_layer(ui)[UI Layer] in frontend
+    service viewmodel_layer(server)[ViewModel Layer] in frontend
+
+    group backend(cloud)[Backend]
+
+    service firebase_auth(database)[Firebase Authentication] in backend
+    service firestore(database)[Firestore Database] in backend
+    service workmanager(server)[WorkManager] in backend
+
+    ui_layer:B --> T:viewmodel_layer
+    viewmodel_layer:B --> T:firebase_auth
+    viewmodel_layer:B --> T:firestore
+    viewmodel_layer:B --> T:workmanager
