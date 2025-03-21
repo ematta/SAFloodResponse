@@ -5,18 +5,25 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import edu.utap.auth.AuthViewModel
 import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import edu.utap.auth.AuthViewModel
+import edu.utap.user.ProfileScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -31,7 +38,7 @@ class MainActivity : ComponentActivity() {
             
             if (isAuthenticated) {
                 SAFloodResponseTheme {
-                    Greeting("SA Flood Response User")
+                    AuthenticatedApp()
                 }
             } else if (showRegisterScreen) {
                 RegisterScreen(
@@ -44,6 +51,70 @@ class MainActivity : ComponentActivity() {
                     authViewModel = authViewModel,
                     onNavigateToRegister = { showRegisterScreen = true },
                     onLoginSuccess = { isAuthenticated = true }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AuthenticatedApp() {
+    val navController = rememberNavController()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route ?: "home"
+    
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = currentRoute == "home",
+                    onClick = {
+                        if (currentRoute != "home") {
+                            navController.navigate("home") {
+                                popUpTo("home") {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    },
+                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+                    label = { Text("Home") }
+                )
+                
+                NavigationBarItem(
+                    selected = currentRoute == "profile",
+                    onClick = {
+                        if (currentRoute != "profile") {
+                            navController.navigate("profile") {
+                                popUpTo("profile") {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    },
+                    icon = { Icon(Icons.Filled.AccountCircle, contentDescription = "Profile") },
+                    label = { Text("Profile") }
+                )
+            }
+        }
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = "home",
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            composable("home") {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Greeting("SA Flood Response User")
+                }
+            }
+            
+            composable("profile") {
+                ProfileScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }
