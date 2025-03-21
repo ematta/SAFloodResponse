@@ -22,19 +22,35 @@ import androidx.navigation.compose.rememberNavController
 import edu.utap.auth.AuthViewModel
 import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
+import edu.utap.auth.db.DatabaseInitializer
+import edu.utap.auth.di.ViewModelFactory
 import edu.utap.ui.theme.SAFloodResponseTheme
 import edu.utap.user.ProfileScreen
 
 class MainActivity : ComponentActivity() {
 
-    val authViewModel: AuthViewModel by viewModels()
+    val authViewModel by viewModels<AuthViewModel> { 
+        ViewModelFactory(applicationContext) 
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialize and log the database structure (only for debugging)
+        // TODO: Remove this in production builds
+        DatabaseInitializer.logDatabaseScript(this)
+        
         enableEdgeToEdge()
         setContent {
             var showRegisterScreen by remember { mutableStateOf(false) }
             var isAuthenticated by remember { mutableStateOf(false) }
+            
+            // Observe authentication state
+            LaunchedEffect(Unit) {
+                authViewModel.authState.collect { state ->
+                    isAuthenticated = state is edu.utap.auth.AuthState.Authenticated
+                }
+            }
             
             if (isAuthenticated) {
                 SAFloodResponseTheme {

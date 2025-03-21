@@ -2,16 +2,13 @@ package edu.utap.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.utap.user.FirebaseUserRepository
-import edu.utap.user.UserProfile
-import edu.utap.user.UserRepository
+import edu.utap.auth.repository.AuthRepositoryInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
-    private val authRepository: AuthRepository = FirebaseAuthRepository(),
-    private val userRepository: UserRepository = FirebaseUserRepository()
+    private val authRepository: AuthRepositoryInterface
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -22,28 +19,22 @@ class AuthViewModel(
     }
 
     private fun checkAuthState() {
-        val currentUser = authRepository.getCurrentUser()
-        _authState.value = if (currentUser != null) {
-            AuthState.Authenticated(currentUser)
-        } else {
-            AuthState.Unauthenticated
+        viewModelScope.launch {
+            val currentUser = authRepository.getCurrentUser()
+            _authState.value = if (currentUser != null) {
+                AuthState.Authenticated(currentUser)
+            } else {
+                AuthState.Unauthenticated
+            }
         }
     }
 
-    fun register(email: String, password: String) {
+    fun register(email: String, password: String, name: String) {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
-            val result = authRepository.registerUser(email, password)
+            val result = authRepository.registerUser(email, password, name)
             result.fold(
                 onSuccess = { user ->
-                    // Create a basic user profile after successful registration
-                    val userProfile = UserProfile(
-                        uid = user.uid,
-                        email = user.email ?: email,
-                        displayName = user.displayName ?: ""
-                    )
-                    userRepository.createUserProfile(userProfile)
-                    
                     _authState.value = AuthState.Authenticated(user)
                 },
                 onFailure = { error ->
@@ -69,7 +60,9 @@ class AuthViewModel(
     }
 
     fun logout() {
-        authRepository.logout()
-        _authState.value = AuthState.Unauthenticated
+        viewModelScope.launch {
+            authRepository.logout()
+            _authState.value = AuthState.Unauthenticated
+        }
     }
 } 

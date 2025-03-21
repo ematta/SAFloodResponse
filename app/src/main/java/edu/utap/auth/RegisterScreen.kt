@@ -35,6 +35,7 @@ fun RegisterScreen(
 ) {
     val authState by authViewModel.authState.collectAsState()
     
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -59,11 +60,12 @@ fun RegisterScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Register",
+            text = "Create an Account",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 24.dp)
         )
         
+        // Display error message if any
         if (errorMessage.isNotEmpty()) {
             Text(
                 text = errorMessage,
@@ -72,70 +74,86 @@ fun RegisterScreen(
             )
         }
         
+        // Name field
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Full Name") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Email field
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            singleLine = true
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         
+        // Password field
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            singleLine = true
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         
+        // Confirm password field
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             label = { Text("Confirm Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            singleLine = true
         )
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
+        // Register button
         Button(
             onClick = {
                 errorMessage = ""
-                if (password != confirmPassword) {
-                    errorMessage = "Passwords do not match"
-                    return@Button
+                // Validate input
+                when {
+                    name.isBlank() -> errorMessage = "Please enter your name"
+                    email.isBlank() -> errorMessage = "Please enter your email"
+                    password.isBlank() -> errorMessage = "Please enter a password"
+                    password != confirmPassword -> errorMessage = "Passwords do not match"
+                    else -> authViewModel.register(email, password, name)
                 }
-                if (password.length < 6) {
-                    errorMessage = "Password must be at least 6 characters"
-                    return@Button
-                }
-                authViewModel.register(email, password)
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() 
-                    && authState !is AuthState.Loading
+            enabled = authState !is AuthState.Loading
         ) {
             if (authState is AuthState.Loading) {
                 CircularProgressIndicator(
-                    modifier = Modifier.height(24.dp),
+                    modifier = Modifier.padding(end = 8.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
                     strokeWidth = 2.dp
                 )
-            } else {
-                Text("Register")
             }
+            Text("Register")
         }
         
-        TextButton(
-            onClick = onNavigateToLogin,
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Already have an account? Login")
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Login navigation link
+        TextButton(onClick = onNavigateToLogin) {
+            Text("Already have an account? Log in")
         }
     }
 } 

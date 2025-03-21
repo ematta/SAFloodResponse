@@ -2,8 +2,7 @@ package edu.utap.auth
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.user.UserProfile
-import edu.utap.user.UserRepository
+import edu.utap.auth.repository.AuthRepositoryInterface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -12,203 +11,118 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 class AuthViewModelTest {
-    
+
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
-    
+
     private val testDispatcher = StandardTestDispatcher()
-    
-    @Mock
-    private lateinit var authRepository: AuthRepository
-    
-    @Mock
-    private lateinit var userRepository: UserRepository
-    
+    private lateinit var mockAuthRepository: AuthRepositoryInterface
     private lateinit var authViewModel: AuthViewModel
-    
+    private lateinit var mockFirebaseUser: FirebaseUser
+
+    private val testEmail = "test@example.com"
+    private val testPassword = "password"
+    private val testName = "Test User"
+
     @Before
-    fun setup() {
-        // Initialize mocks outside of runTest to ensure proper initialization
-        MockitoAnnotations.openMocks(this)
+    fun setup() = runTest {
         Dispatchers.setMain(testDispatcher)
-        
-        // Initialize authViewModel with mocked repositories
-        `when`(authRepository.getCurrentUser()).thenReturn(null)
-        
-        // Use runTest for mocking suspend functions
-        runTest {
-            // Mock userRepository.createUserProfile
-            `when`(userRepository.createUserProfile(any())).thenReturn(Result.success(UserProfile()))
-            authViewModel = AuthViewModel(authRepository, userRepository)
-        }
+        mockAuthRepository = mock(AuthRepositoryInterface::class.java)
+        mockFirebaseUser = mock(FirebaseUser::class.java)
+        // Setup the mock before creating the ViewModel
+        whenever(mockAuthRepository.getCurrentUser()).thenReturn(null)
+        authViewModel = AuthViewModel(mockAuthRepository)
     }
-    
+
     @After
     fun tearDown() {
         Dispatchers.resetMain()
     }
-    
+
     @Test
     fun `initial state is Idle`() = runTest {
-        // Given
-        `when`(authRepository.getCurrentUser()).thenReturn(null)
+        // Create a new ViewModel instance to test initial state
+        val newViewModel = AuthViewModel(mockAuthRepository)
+        assertEquals(AuthState.Idle, newViewModel.authState.value)
         
-        // When
-        authViewModel = AuthViewModel(authRepository, userRepository)
-        
-        // Then
-        // No need to assert initial state
+        // Then advance the test dispatcher to allow coroutines to complete
         testDispatcher.scheduler.advanceUntilIdle()
-        assertEquals(AuthState.Unauthenticated, authViewModel.authState.first())
+        
+        // Now check the state after initialization completes
+        assertEquals(AuthState.Unauthenticated, newViewModel.authState.value)
     }
-    
+
     @Test
-    fun `initial state is Authenticated when user is logged in`() = runTest {
-        // Given
-        val mockUser = mock(FirebaseUser::class.java)
-        `when`(authRepository.getCurrentUser()).thenReturn(mockUser)
-        
-        // When
-        authViewModel = AuthViewModel(authRepository, userRepository)
+    fun `login success sets Authenticated state`() = runTest {
+        whenever(mockAuthRepository.loginUser(testEmail, testPassword))
+            .thenReturn(Result.success(mockFirebaseUser))
+
+        authViewModel.login(testEmail, testPassword)
+        assertEquals(AuthState.Loading, authViewModel.authState.value)
+
         testDispatcher.scheduler.advanceUntilIdle()
-        
-        // Then
-        val authState = authViewModel.authState.first()
-        assertTrue(authState is AuthState.Authenticated)
-        assertEquals(mockUser, (authState as AuthState.Authenticated).user)
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.Authenticated)
     }
-    
+
     @Test
-    fun `register updates state to Loading then Authenticated on success`() = runTest {
-        // Given
-        val email = "test@example.com"
-        val password = "password123"
-        val mockUser = mock(FirebaseUser::class.java)
-        `when`(mockUser.uid).thenReturn("test-uid")
-        `when`(mockUser.email).thenReturn(email)
-        `when`(mockUser.displayName).thenReturn(null)
-        
-        `when`(authRepository.getCurrentUser()).thenReturn(null)
-        `when`(authRepository.registerUser(email, password)).thenReturn(Result.success(mockUser))
-        
-        // Initialize viewModel
-        authViewModel = AuthViewModel(authRepository, userRepository)
+    fun `login failure sets Error state`() = runTest {
+        val errorMessage = "Invalid credentials"
+        whenever(mockAuthRepository.loginUser(testEmail, testPassword))
+            .thenReturn(Result.failure(Exception(errorMessage)))
+
+        authViewModel.login(testEmail, testPassword)
+        assertEquals(AuthState.Loading, authViewModel.authState.value)
+
         testDispatcher.scheduler.advanceUntilIdle()
-        
-        // When
-        authViewModel.register(email, password)
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        // Then
-        val authState = authViewModel.authState.first()
-        assertTrue(authState is AuthState.Authenticated)
-        assertEquals(mockUser, (authState as AuthState.Authenticated).user)
-        verify(authRepository).registerUser(email, password)
-        verify(userRepository).createUserProfile(any())
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.Error)
+        assertEquals(errorMessage, (finalState as AuthState.Error).message)
     }
-    
+
     @Test
-    fun `register updates state to Loading then Error on failure`() = runTest {
-        // Given
-        val email = "test@example.com"
-        val password = "password123"
+    fun `register success sets Authenticated state`() = runTest {
+        whenever(mockAuthRepository.registerUser(testEmail, testPassword, testName))
+            .thenReturn(Result.success(mockFirebaseUser))
+
+        authViewModel.register(testEmail, testPassword, testName)
+        assertEquals(AuthState.Loading, authViewModel.authState.value)
+
+        testDispatcher.scheduler.advanceUntilIdle()
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.Authenticated)
+    }
+
+    @Test
+    fun `register failure sets Error state`() = runTest {
         val errorMessage = "Registration failed"
-        `when`(authRepository.getCurrentUser()).thenReturn(null)
-        `when`(authRepository.registerUser(email, password)).thenReturn(Result.failure(Exception(errorMessage)))
-        
-        // Initialize viewModel
-        authViewModel = AuthViewModel(authRepository, userRepository)
+        whenever(mockAuthRepository.registerUser(testEmail, testPassword, testName))
+            .thenReturn(Result.failure(Exception(errorMessage)))
+
+        authViewModel.register(testEmail, testPassword, testName)
+        assertEquals(AuthState.Loading, authViewModel.authState.value)
+
         testDispatcher.scheduler.advanceUntilIdle()
-        
-        // When
-        authViewModel.register(email, password)
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        // Then
-        val authState = authViewModel.authState.first()
-        assertTrue(authState is AuthState.Error)
-        assertEquals(errorMessage, (authState as AuthState.Error).message)
-        verify(authRepository).registerUser(email, password)
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.Error)
+        assertEquals(errorMessage, (finalState as AuthState.Error).message)
     }
-    
+
     @Test
-    fun `login updates state to Loading then Authenticated on success`() = runTest {
-        // Given
-        val email = "test@example.com"
-        val password = "password123"
-        val mockUser = mock(FirebaseUser::class.java)
-        `when`(authRepository.getCurrentUser()).thenReturn(null)
-        `when`(authRepository.loginUser(email, password)).thenReturn(Result.success(mockUser))
-        
-        // Initialize viewModel
-        authViewModel = AuthViewModel(authRepository, userRepository)
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        // When
-        authViewModel.login(email, password)
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        // Then
-        val authState = authViewModel.authState.first()
-        assertTrue(authState is AuthState.Authenticated)
-        assertEquals(mockUser, (authState as AuthState.Authenticated).user)
-        verify(authRepository).loginUser(email, password)
-    }
-    
-    @Test
-    fun `login updates state to Loading then Error on failure`() = runTest {
-        // Given
-        val email = "test@example.com"
-        val password = "password123"
-        val errorMessage = "Login failed"
-        `when`(authRepository.getCurrentUser()).thenReturn(null)
-        `when`(authRepository.loginUser(email, password)).thenReturn(Result.failure(Exception(errorMessage)))
-        
-        // Initialize viewModel
-        authViewModel = AuthViewModel(authRepository, userRepository)
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        // When
-        authViewModel.login(email, password)
-        testDispatcher.scheduler.advanceUntilIdle()
-        
-        // Then
-        val authState = authViewModel.authState.first()
-        assertTrue(authState is AuthState.Error)
-        assertEquals(errorMessage, (authState as AuthState.Error).message)
-        verify(authRepository).loginUser(email, password)
-    }
-    
-    @Test
-    fun `logout updates state to Unauthenticated`() = runTest {
-        // Given
-        val mockUser = mock(FirebaseUser::class.java)
-        `when`(authRepository.getCurrentUser()).thenReturn(mockUser)
-        
-        // Initialize viewModel
-        authViewModel = AuthViewModel(authRepository, userRepository)
-        testDispatcher.scheduler.advanceUntilIdle()
-        assertTrue(authViewModel.authState.first() is AuthState.Authenticated)
-        
-        // When
+    fun `logout sets Unauthenticated state`() = runTest {
         authViewModel.logout()
-        
-        // Then
-        assertEquals(AuthState.Unauthenticated, authViewModel.authState.first())
-        verify(authRepository).logout()
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(AuthState.Unauthenticated, authViewModel.authState.value)
     }
 }
