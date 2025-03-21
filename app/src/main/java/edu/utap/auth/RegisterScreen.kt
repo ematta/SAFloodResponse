@@ -30,7 +30,7 @@ import edu.utap.auth.utils.ValidationUtils
 
 @Composable
 fun RegisterScreen(
-    authViewModel: AuthViewModel = viewModel(),
+    authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),
     onNavigateToLogin: () -> Unit,
     onRegisterSuccess: () -> Unit
 ) {
