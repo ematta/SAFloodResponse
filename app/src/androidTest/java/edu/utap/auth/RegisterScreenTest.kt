@@ -3,6 +3,7 @@ package edu.utap.auth
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -12,11 +13,21 @@ class RegisterScreenTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+    
+    private lateinit var mockViewModel: MockAuthViewModel
+    private lateinit var testViewModelFactory: TestViewModelFactory
+    
+    @Before
+    fun setup() {
+        mockViewModel = MockAuthViewModel()
+        testViewModelFactory = TestViewModelFactory(mockViewModel)
+        composeTestRule.setViewModelFactory(testViewModelFactory)
+    }
 
     @Test
     fun registerScreen_emptyNameShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContent {
+        composeTestRule.setContentWithTestViewModelFactory {
             RegisterScreen(
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
@@ -33,7 +44,7 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_emptyEmailShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContent {
+        composeTestRule.setContentWithTestViewModelFactory {
             RegisterScreen(
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
@@ -51,7 +62,7 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_invalidEmailShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContent {
+        composeTestRule.setContentWithTestViewModelFactory {
             RegisterScreen(
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
@@ -70,7 +81,7 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_emptyPasswordShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContent {
+        composeTestRule.setContentWithTestViewModelFactory {
             RegisterScreen(
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
@@ -89,7 +100,7 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_shortPasswordShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContent {
+        composeTestRule.setContentWithTestViewModelFactory {
             RegisterScreen(
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
@@ -109,7 +120,7 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_passwordMismatchShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContent {
+        composeTestRule.setContentWithTestViewModelFactory {
             RegisterScreen(
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
@@ -133,7 +144,7 @@ class RegisterScreenTest {
         val mockViewModel = MockAuthViewModel()
         var registrationSuccessful = false
         
-        composeTestRule.setContent {
+        composeTestRule.setContentWithTestViewModelFactory {
             RegisterScreen(
                 authViewModel = mockViewModel,
                 onNavigateToLogin = {},
