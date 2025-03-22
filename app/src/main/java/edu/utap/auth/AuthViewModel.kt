@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class AuthViewModel(
+open class AuthViewModel(
     private val authRepository: AuthRepositoryInterface,
     private val context: Context
-) : ViewModel() {
+) : ViewModel(), AuthViewModelInterface {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
-    val authState: StateFlow<AuthState> = _authState
+    override val authState: StateFlow<AuthState> = _authState
 
     init {
         checkAuthState()
@@ -32,7 +32,7 @@ class AuthViewModel(
         }
     }
 
-    fun register(email: String, password: String, name: String) {
+    override fun register(email: String, password: String, name: String) {
         _authState.value = AuthState.Loading
         
         // Check for network connectivity before attempting registration
@@ -54,7 +54,7 @@ class AuthViewModel(
         }
     }
 
-    fun login(email: String, password: String) {
+    override fun login(email: String, password: String) {
         _authState.value = AuthState.Loading
         
         // Check for network connectivity before attempting login
@@ -76,7 +76,7 @@ class AuthViewModel(
         }
     }
 
-    fun logout() {
+    override fun logout() {
         viewModelScope.launch {
             authRepository.logout()
             _authState.value = AuthState.Unauthenticated

@@ -26,10 +26,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.utap.auth.utils.ValidationUtils
 
 @Composable
 fun RegisterScreen(
-    authViewModel: AuthViewModel = viewModel(),
+    authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),
     onNavigateToLogin: () -> Unit,
     onRegisterSuccess: () -> Unit
 ) {
@@ -40,6 +41,12 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    
+    // Track validation errors for each field
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var confirmPasswordError by remember { mutableStateOf<String?>(null) }
     
     // Check if user is already authenticated
     if (authState is AuthState.Authenticated) {
@@ -77,10 +84,17 @@ fun RegisterScreen(
         // Name field
         OutlinedTextField(
             value = name,
-            onValueChange = { name = it },
+            onValueChange = { 
+                name = it 
+                nameError = null
+            },
             label = { Text("Full Name") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            isError = nameError != null,
+            supportingText = nameError?.let { 
+                { Text(text = it, color = MaterialTheme.colorScheme.error) }
+            }
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -88,11 +102,18 @@ fun RegisterScreen(
         // Email field
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { 
+                email = it 
+                emailError = null
+            },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true
+            singleLine = true,
+            isError = emailError != null,
+            supportingText = emailError?.let { 
+                { Text(text = it, color = MaterialTheme.colorScheme.error) }
+            }
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -100,12 +121,23 @@ fun RegisterScreen(
         // Password field
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { 
+                password = it 
+                passwordError = null
+                // Clear confirm password error if it was a mismatch
+                if (confirmPassword.isNotEmpty() && confirmPassword == password) {
+                    confirmPasswordError = null
+                }
+            },
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true
+            singleLine = true,
+            isError = passwordError != null,
+            supportingText = passwordError?.let { 
+                { Text(text = it, color = MaterialTheme.colorScheme.error) }
+            }
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -113,12 +145,19 @@ fun RegisterScreen(
         // Confirm password field
         OutlinedTextField(
             value = confirmPassword,
-            onValueChange = { confirmPassword = it },
+            onValueChange = { 
+                confirmPassword = it 
+                confirmPasswordError = null
+            },
             label = { Text("Confirm Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true
+            singleLine = true,
+            isError = confirmPasswordError != null,
+            supportingText = confirmPasswordError?.let { 
+                { Text(text = it, color = MaterialTheme.colorScheme.error) }
+            }
         )
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -127,13 +166,43 @@ fun RegisterScreen(
         Button(
             onClick = {
                 errorMessage = ""
-                // Validate input
-                when {
-                    name.isBlank() -> errorMessage = "Please enter your name"
-                    email.isBlank() -> errorMessage = "Please enter your email"
-                    password.isBlank() -> errorMessage = "Please enter a password"
-                    password != confirmPassword -> errorMessage = "Passwords do not match"
-                    else -> authViewModel.register(email, password, name)
+                nameError = null
+                emailError = null
+                passwordError = null
+                confirmPasswordError = null
+                
+                // Validate input using ValidationUtils
+                var isValid = true
+                
+                // Validate name
+                if (name.isBlank()) {
+                    nameError = "Please enter your name"
+                    isValid = false
+                }
+                
+                // Validate email
+                val emailValidation = ValidationUtils.validateEmail(email)
+                if (!emailValidation.first) {
+                    emailError = emailValidation.second
+                    isValid = false
+                }
+                
+                // Validate password
+                val passwordValidation = ValidationUtils.validatePassword(password)
+                if (!passwordValidation.first) {
+                    passwordError = passwordValidation.second
+                    isValid = false
+                }
+                
+                // Validate password confirmation
+                if (password != confirmPassword) {
+                    confirmPasswordError = "Passwords do not match"
+                    isValid = false
+                }
+                
+                // If all validations pass, proceed with registration
+                if (isValid) {
+                    authViewModel.register(email, password, name)
                 }
             },
             modifier = Modifier.fillMaxWidth(),
@@ -156,4 +225,4 @@ fun RegisterScreen(
             Text("Already have an account? Log in")
         }
     }
-} 
+}

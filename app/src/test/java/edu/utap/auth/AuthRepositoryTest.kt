@@ -127,4 +127,4 @@ class AuthRepositoryTest {
         // Then
         verify(firebaseAuth).signOut()
     }
-} 
+}

@@ -22,14 +22,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.utap.auth.utils.ValidationUtils
 
 @Composable
 fun LoginScreen(
-    authViewModel: AuthViewModel = viewModel(),
+    authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),
     onNavigateToRegister: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
@@ -38,6 +40,10 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    
+    // Track validation errors for each field
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
     
     // Check if user is already authenticated
     if (authState is AuthState.Authenticated) {
@@ -73,21 +79,37 @@ fun LoginScreen(
         
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { 
+                email = it 
+                // Clear error when user starts typing
+                emailError = null
+            },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            isError = emailError != null,
+            supportingText = emailError?.let { 
+                { Text(text = it, color = MaterialTheme.colorScheme.error) }
+            }
         )
         
         Spacer(modifier = Modifier.height(16.dp))
         
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { 
+                password = it 
+                // Clear error when user starts typing
+                passwordError = null
+            },
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            isError = passwordError != null,
+            supportingText = passwordError?.let { 
+                { Text(text = it, color = MaterialTheme.colorScheme.error) }
+            }
         )
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -95,10 +117,34 @@ fun LoginScreen(
         Button(
             onClick = {
                 errorMessage = ""
-                authViewModel.login(email, password)
+                
+                // Validate credentials before attempting login
+                val validationResult = ValidationUtils.validateLoginCredentials(email, password)
+                if (!validationResult.first) {
+                    // Handle validation error
+                    val errorMsg = validationResult.second ?: "Invalid credentials"
+                    
+                    // Set specific field error based on validation result
+                    when {
+                        email.isBlank() || !ValidationUtils.validateEmail(email).first -> {
+                            emailError = ValidationUtils.validateEmail(email).second
+                        }
+                        password.isBlank() || !ValidationUtils.validatePassword(password).first -> {
+                            passwordError = ValidationUtils.validatePassword(password).second
+                        }
+                        else -> {
+                            errorMessage = errorMsg
+                        }
+                    }
+                } else {
+                    // Proceed with login if validation passes
+                    authViewModel.login(email, password)
+                }
             },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = email.isNotEmpty() && password.isNotEmpty() && authState !is AuthState.Loading
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("loginButton"),
+            enabled = authState !is AuthState.Loading
         ) {
             if (authState is AuthState.Loading) {
                 CircularProgressIndicator(
@@ -117,4 +163,4 @@ fun LoginScreen(
             Text("Don't have an account? Register")
         }
     }
-} 
+}
