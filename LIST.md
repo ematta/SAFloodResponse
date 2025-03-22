@@ -15,11 +15,11 @@ This document outlines all the activities needed to complete the San Antonio Flo
 
 - [x] Implement user registration screen
   - [x] Email/password registration form
-  - [ ] Form validation
+  - [x] Form validation
   - [ ] Error handling
 - [x] Implement login screen
   - [x] Email/password login form
-  - [ ] Form validation
+  - [x] Form validation
   - [ ] Error handling
 - [x] Create user profile management
   - [ ] Profile creation UI
