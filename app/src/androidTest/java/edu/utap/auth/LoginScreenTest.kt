@@ -35,7 +35,7 @@ class LoginScreenTest {
         }
 
         // When: Click login button with empty email
-        composeTestRule.onNodeWithText("Login").performClick()
+        composeTestRule.onNodeWithTag("loginButton").performClick()
 
         // Then: Email error should be displayed
         composeTestRule.onNodeWithText("Email cannot be empty").assertIsDisplayed()
@@ -53,7 +53,7 @@ class LoginScreenTest {
 
         // When: Enter invalid email and click login
         composeTestRule.onNodeWithText("Email").performTextInput("invalid-email")
-        composeTestRule.onNodeWithText("Login").performClick()
+        composeTestRule.onNodeWithTag("loginButton").performClick()
 
         // Then: Email format error should be displayed
         composeTestRule.onNodeWithText("Please enter a valid email address").assertIsDisplayed()
@@ -71,7 +71,7 @@ class LoginScreenTest {
 
         // When: Enter valid email but empty password and click login
         composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
-        composeTestRule.onNodeWithText("Login").performClick()
+        composeTestRule.onNodeWithTag("loginButton").performClick()
 
         // Then: Password error should be displayed
         composeTestRule.onNodeWithText("Password cannot be empty").assertIsDisplayed()
@@ -90,7 +90,7 @@ class LoginScreenTest {
         // When: Enter valid email but short password and click login
         composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
         composeTestRule.onNodeWithText("Password").performTextInput("12345")
-        composeTestRule.onNodeWithText("Login").performClick()
+        composeTestRule.onNodeWithTag("loginButton").performClick()
 
         // Then: Password length error should be displayed
         composeTestRule.onNodeWithText("Password must be at least 6 characters long").assertIsDisplayed()
@@ -113,7 +113,7 @@ class LoginScreenTest {
         // When: Enter valid inputs for all fields
         composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
         composeTestRule.onNodeWithText("Password").performTextInput("password123")
-        composeTestRule.onNodeWithText("Login").performClick()
+        composeTestRule.onNodeWithTag("loginButton").performClick()
 
         // Then: No error messages should be displayed
         composeTestRule.onNodeWithText("Email cannot be empty").assertDoesNotExist()
