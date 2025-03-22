@@ -3,7 +3,7 @@ package edu.utap.auth.di
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import edu.utap.auth.db.AppDatabase
-import edu.utap.auth.repository.AuthRepository
+import edu.utap.auth.AuthRepository
 import edu.utap.auth.repository.AuthRepositoryInterface
 
 /**
