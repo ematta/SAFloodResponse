@@ -1,5 +1,7 @@
 package edu.utap.user
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +16,8 @@ sealed class UserProfileState {
 }
 
 class UserViewModel(
-    private val userRepository: UserRepository = FirebaseUserRepository()
+    private val userRepository: UserRepository = FirebaseUserRepository(),
+    private val storageUtil: FirebaseStorageUtil = FirebaseStorageUtil()
 ) : ViewModel() {
 
     private val _profileState = MutableStateFlow<UserProfileState>(UserProfileState.Idle)
@@ -94,4 +97,20 @@ class UserViewModel(
             )
         }
     }
-} 
+    
+    fun uploadProfileImage(context: Context, imageUri: Uri, uid: String) {
+        _profileState.value = UserProfileState.Loading
+        viewModelScope.launch {
+            val uploadResult = storageUtil.uploadProfileImage(context, imageUri, uid)
+            uploadResult.fold(
+                onSuccess = { downloadUrl ->
+                    // Update the photo URL in the user profile
+                    updatePhotoUrl(uid, downloadUrl)
+                },
+                onFailure = { error ->
+                    _profileState.value = UserProfileState.Error(error.message ?: "Failed to upload profile image")
+                }
+            )
+        }
+    }
+}

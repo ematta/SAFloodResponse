@@ -46,7 +46,7 @@ class AuthRepository(
                 displayName = name,
                 email = email
             )
-            val profileResult = userRepository.createUserProfile(userProfile)
+            val profileResult: Result<UserProfile> = userRepository.createUserProfile(userProfile)
             if (profileResult.isFailure) {
                 throw profileResult.exceptionOrNull() ?: Exception("Failed to create Firestore profile")
             }

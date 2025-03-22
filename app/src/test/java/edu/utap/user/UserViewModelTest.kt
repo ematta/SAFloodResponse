@@ -1,16 +1,8 @@
 package edu.utap.user
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -18,7 +10,10 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @ExperimentalCoroutinesApi
 class UserViewModelTest {
@@ -26,10 +21,14 @@ class UserViewModelTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private val testDispatcher = StandardTestDispatcher()
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     @Mock
     private lateinit var userRepository: UserRepository
+    
+    @Mock
+    private lateinit var storageUtil: FirebaseStorageUtil
 
     private lateinit var userViewModel: UserViewModel
 
@@ -45,13 +44,7 @@ class UserViewModelTest {
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
-        Dispatchers.setMain(testDispatcher)
-        userViewModel = UserViewModel(userRepository)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
+        userViewModel = UserViewModel(userRepository, storageUtil)
     }
 
     @Test
@@ -61,10 +54,9 @@ class UserViewModelTest {
 
         // When
         userViewModel.getUserProfile(testUid)
-        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        val state = userViewModel.profileState.first()
+        val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
         assertEquals(testUserProfile, (state as UserProfileState.Success).userProfile)
         verify(userRepository).getUserProfile(testUid)
@@ -78,10 +70,9 @@ class UserViewModelTest {
 
         // When
         userViewModel.getUserProfile(testUid)
-        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        val state = userViewModel.profileState.first()
+        val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Error)
         assertEquals(errorMessage, (state as UserProfileState.Error).message)
         verify(userRepository).getUserProfile(testUid)
@@ -94,10 +85,9 @@ class UserViewModelTest {
 
         // When
         userViewModel.createUserProfile(testUserProfile)
-        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        val state = userViewModel.profileState.first()
+        val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
         assertEquals(testUserProfile, (state as UserProfileState.Success).userProfile)
         verify(userRepository).createUserProfile(testUserProfile)
@@ -110,10 +100,9 @@ class UserViewModelTest {
 
         // When
         userViewModel.updateUserProfile(testUserProfile)
-        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        val state = userViewModel.profileState.first()
+        val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
         assertEquals(testUserProfile, (state as UserProfileState.Success).userProfile)
         verify(userRepository).updateUserProfile(testUserProfile)
@@ -128,7 +117,6 @@ class UserViewModelTest {
 
         // When
         userViewModel.updateDisplayName(testUid, displayName)
-        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         verify(userRepository).updateDisplayName(testUid, displayName)
@@ -144,7 +132,6 @@ class UserViewModelTest {
 
         // When
         userViewModel.updatePhotoUrl(testUid, photoUrl)
-        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         verify(userRepository).updatePhotoUrl(testUid, photoUrl)

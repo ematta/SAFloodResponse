@@ -53,12 +53,16 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage.ktx)
     implementation(libs.androidx.navigation.compose)
     
+    // Image loading
+    implementation(libs.coil.compose)
+    
     // Room dependencies
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
     
     testImplementation(libs.junit)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
