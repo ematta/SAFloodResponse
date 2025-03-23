@@ -1,18 +1,18 @@
 package edu.utap.auth
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.utap.auth.repository.AuthRepositoryInterface
 import edu.utap.auth.utils.FirebaseErrorMapper
-import edu.utap.auth.utils.NetworkUtils
+import edu.utap.auth.utils.NetworkUtilsInterface
+import edu.utap.auth.utils.NetworkUtilsProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 open class AuthViewModel(
     private val authRepository: AuthRepositoryInterface,
-    private val context: Context
+    private val networkUtils: NetworkUtilsInterface = NetworkUtilsProvider.getNetworkUtils()
 ) : ViewModel(), AuthViewModelInterface {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
@@ -37,7 +37,7 @@ open class AuthViewModel(
         _authState.value = AuthState.Loading
         
         // Check for network connectivity before attempting registration
-        if (!NetworkUtils.isNetworkAvailable(context)) {
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             _authState.value = AuthState.Error("No internet connection. Please check your network settings and try again.")
             return
         }
@@ -60,7 +60,7 @@ open class AuthViewModel(
         _authState.value = AuthState.Loading
         
         // Check for network connectivity before attempting login
-        if (!NetworkUtils.isNetworkAvailable(context)) {
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             _authState.value = AuthState.Error("No internet connection. Please check your network settings and try again.")
             return
         }
@@ -90,7 +90,7 @@ open class AuthViewModel(
         _authState.value = AuthState.Loading
         
         // Check for network connectivity before attempting password reset
-        if (!NetworkUtils.isNetworkAvailable(context)) {
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             _authState.value = AuthState.Error("No internet connection. Please check your network settings and try again.")
             return
         }
