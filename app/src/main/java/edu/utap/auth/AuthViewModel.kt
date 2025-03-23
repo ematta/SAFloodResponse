@@ -82,4 +82,26 @@ open class AuthViewModel(
             _authState.value = AuthState.Unauthenticated
         }
     }
+
+    override fun resetPassword(email: String) {
+        _authState.value = AuthState.Loading
+        
+        // Check for network connectivity before attempting password reset
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            _authState.value = AuthState.Error("No internet connection. Please check your network settings and try again.")
+            return
+        }
+        
+        viewModelScope.launch {
+            val result = authRepository.resetPassword(email)
+            result.fold(
+                onSuccess = {
+                    _authState.value = AuthState.PasswordResetSent
+                },
+                onFailure = { error ->
+                    _authState.value = AuthState.Error(error.message ?: "Password reset failed")
+                }
+            )
+        }
+    }
 }

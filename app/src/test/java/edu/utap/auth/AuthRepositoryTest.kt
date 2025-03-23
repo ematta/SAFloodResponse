@@ -226,4 +226,42 @@ class AuthRepositoryTest {
         // Then
         Mockito.verify(firebaseAuth).signOut()
     }
+    
+    @Test
+    fun testResetPasswordSuccess() = runTest {
+        // Given
+        val email = "test@example.com"
+        val successTask: Task<Void> = Tasks.forResult(null)
+        
+        // Setup mock behavior
+        Mockito.`when`(firebaseAuth.sendPasswordResetEmail(eq(email)))
+            .thenReturn(successTask)
+        
+        // When
+        val result = authRepository.resetPassword(email)
+        
+        // Then
+        assertTrue("Result should be success, but was ${result.exceptionOrNull()}", result.isSuccess)
+        Mockito.verify(firebaseAuth).sendPasswordResetEmail(eq(email))
+    }
+    
+    @Test
+    fun testResetPasswordFailure() = runTest {
+        // Given
+        val email = "test@example.com"
+        val exception = Exception("Password reset failed")
+        val failureTask: Task<Void> = Tasks.forException(exception)
+        
+        // Setup mock behavior
+        Mockito.`when`(firebaseAuth.sendPasswordResetEmail(eq(email)))
+            .thenReturn(failureTask)
+        
+        // When
+        val result = authRepository.resetPassword(email)
+        
+        // Then
+        assertTrue("Result should be failure", result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
+        Mockito.verify(firebaseAuth).sendPasswordResetEmail(eq(email))
+    }
 }

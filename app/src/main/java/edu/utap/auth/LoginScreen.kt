@@ -2,6 +2,7 @@ package edu.utap.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.utils.ValidationUtils
@@ -33,6 +35,7 @@ import edu.utap.auth.utils.ValidationUtils
 fun LoginScreen(
     authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),
     onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
     val authState by authViewModel.authState.collectAsState()
@@ -112,7 +115,26 @@ fun LoginScreen(
             }
         )
         
-        Spacer(modifier = Modifier.height(24.dp))
+        // Forgot Password link
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(
+                onClick = onNavigateToForgotPassword,
+                modifier = Modifier.testTag("forgotPasswordButton")
+            ) {
+                Text(
+                    text = "Forgot Password?",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
         
         Button(
             onClick = {

@@ -79,6 +79,15 @@ class AuthRepository(
         firebaseAuth.signOut()
     }
     
+    override suspend fun resetPassword(email: String): Result<Unit> {
+        return try {
+            firebaseAuth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
     override suspend fun createLocalUser(user: UserEntity): Result<UserEntity> {
         return try {
             userDao.insertUser(user)

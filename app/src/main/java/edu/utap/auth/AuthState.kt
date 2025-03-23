@@ -8,4 +8,5 @@ sealed class AuthState {
     data object Unauthenticated : AuthState()
     data class Authenticated(val user: FirebaseUser) : AuthState()
     data class Error(val message: String) : AuthState()
+    object PasswordResetSent : AuthState()
 } 

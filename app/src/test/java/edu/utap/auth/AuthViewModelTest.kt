@@ -141,4 +141,44 @@ class AuthViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
         assertEquals(AuthState.Unauthenticated, authViewModel.authState.value)
     }
+
+    @Test
+    fun `resetPassword success sets PasswordResetSent state`() = runTest {
+        whenever(mockAuthRepository.resetPassword(testEmail))
+            .thenReturn(Result.success(Unit))
+
+        authViewModel.resetPassword(testEmail)
+        assertEquals(AuthState.Loading, authViewModel.authState.value)
+
+        testDispatcher.scheduler.advanceUntilIdle()
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.PasswordResetSent)
+    }
+
+    @Test
+    fun `resetPassword failure sets Error state`() = runTest {
+        val errorMessage = "Password reset failed"
+        whenever(mockAuthRepository.resetPassword(testEmail))
+            .thenReturn(Result.failure(Exception(errorMessage)))
+
+        authViewModel.resetPassword(testEmail)
+        assertEquals(AuthState.Loading, authViewModel.authState.value)
+
+        testDispatcher.scheduler.advanceUntilIdle()
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.Error)
+        assertEquals(errorMessage, (finalState as AuthState.Error).message)
+    }
+    
+    @Test
+    fun `resetPassword with no network sets Error state`() = runTest {
+        // Set network as unavailable
+        whenever(mockNetworkUtils.isNetworkAvailable(any())).thenReturn(false)
+        
+        authViewModel.resetPassword(testEmail)
+        
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.Error)
+        assertTrue((finalState as AuthState.Error).message.contains("internet connection"))
+    }
 }

@@ -20,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import edu.utap.auth.AuthViewModel
+import edu.utap.auth.ForgotPasswordScreen
 import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
 import edu.utap.auth.db.DatabaseInitializer
@@ -43,6 +44,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             var showRegisterScreen by remember { mutableStateOf(false) }
+            var showForgotPasswordScreen by remember { mutableStateOf(false) }
             var isAuthenticated by remember { mutableStateOf(false) }
             
             // Observe authentication state
@@ -62,10 +64,16 @@ class MainActivity : ComponentActivity() {
                     onNavigateToLogin = { showRegisterScreen = false },
                     onRegisterSuccess = { isAuthenticated = true }
                 )
+            } else if (showForgotPasswordScreen) {
+                ForgotPasswordScreen(
+                    viewModel = authViewModel,
+                    onNavigateToLogin = { showForgotPasswordScreen = false }
+                )
             } else {
                 LoginScreen(
                     authViewModel = authViewModel,
                     onNavigateToRegister = { showRegisterScreen = true },
+                    onNavigateToForgotPassword = { showForgotPasswordScreen = true },
                     onLoginSuccess = { isAuthenticated = true }
                 )
             }
