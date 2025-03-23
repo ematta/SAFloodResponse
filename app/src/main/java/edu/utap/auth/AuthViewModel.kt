@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.auth.utils.FirebaseErrorMapper
 import edu.utap.auth.utils.NetworkUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,7 +49,8 @@ open class AuthViewModel(
                     _authState.value = AuthState.Authenticated(user)
                 },
                 onFailure = { error ->
-                    _authState.value = AuthState.Error(error.message ?: "Registration failed")
+                    val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
+                    _authState.value = AuthState.Error(errorMessage)
                 }
             )
         }
@@ -70,7 +72,8 @@ open class AuthViewModel(
                     _authState.value = AuthState.Authenticated(user)
                 },
                 onFailure = { error ->
-                    _authState.value = AuthState.Error(error.message ?: "Login failed")
+                    val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
+                    _authState.value = AuthState.Error(errorMessage)
                 }
             )
         }
@@ -99,7 +102,8 @@ open class AuthViewModel(
                     _authState.value = AuthState.PasswordResetSent
                 },
                 onFailure = { error ->
-                    _authState.value = AuthState.Error(error.message ?: "Password reset failed")
+                    val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
+                    _authState.value = AuthState.Error(errorMessage)
                 }
             )
         }
