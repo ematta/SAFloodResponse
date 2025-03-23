@@ -75,9 +75,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.kotlin)
-    testImplementation(libs.mockk)
+    
+    // Mockk for testing (replacing Mockito)
+    testImplementation("io.mockk:mockk:1.13.10")
+    testImplementation("io.mockk:mockk-android:1.13.10")
+    testImplementation("io.mockk:mockk-agent:1.13.10")
+    
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(kotlin("test"))

@@ -64,6 +64,11 @@ class FirebaseStorageUtil(private val firebaseStorage: FirebaseStorage = Firebas
         val contentResolver = context.contentResolver
         val mimeTypeMap = MimeTypeMap.getSingleton()
         
-        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri)) ?: "jpg"
+        val mimeType = contentResolver.getType(uri)
+        return if (mimeType != null) {
+            mimeTypeMap.getExtensionFromMimeType(mimeType) ?: "jpg"
+        } else {
+            "jpg"
+        }
     }
 }

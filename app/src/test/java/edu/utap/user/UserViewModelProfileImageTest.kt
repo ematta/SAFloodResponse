@@ -12,11 +12,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -30,10 +27,19 @@ class UserViewModelProfileImageTest {
     val mainDispatcherRule = MainDispatcherRule()
     
     // Mock dependencies
+    @MockK
     private lateinit var mockUserRepository: UserRepository
+    
+    @MockK
     private lateinit var mockStorageUtil: FirebaseStorageUtil
+    
+    @MockK
     private lateinit var mockContext: Context
+    
+    @MockK
     private lateinit var mockUri: Uri
+    
+    @MockK
     private lateinit var mockNetworkUtils: NetworkUtilsInterface
     
     // Class under test
@@ -53,17 +59,10 @@ class UserViewModelProfileImageTest {
     
     @Before
     fun setup() {
-        MockitoAnnotations.openMocks(this)
+        MockKAnnotations.init(this)
         
-        mockUserRepository = mock()
-        mockStorageUtil = mock()
-        mockContext = mock()
-        mockUri = mock()
-        
-        // Create a mock implementation of NetworkUtilsInterface
-        mockNetworkUtils = mock<NetworkUtilsInterface>()
         // Make network always available for tests
-        whenever(mockNetworkUtils.isNetworkAvailable(any())).thenReturn(true)
+        every { mockNetworkUtils.isNetworkAvailable(any()) } returns true
         // Set the mock implementation
         NetworkUtils.setImplementation(mockNetworkUtils)
         
@@ -83,39 +82,33 @@ class UserViewModelProfileImageTest {
         userViewModel = UserViewModel(mockUserRepository, mockStorageUtil, mockContext)
         assertTrue(userViewModel.profileState.value is UserProfileState.Idle, "Initial state should be Idle")
         
-        whenever(mockStorageUtil.uploadProfileImage(any(), any(), any()))
-            .thenReturn(Result.success(testDownloadUrl))
-        whenever(mockUserRepository.updatePhotoUrl(any(), any()))
-            .thenReturn(Result.success(Unit))
-        whenever(mockUserRepository.getUserProfile(any()))
-            .thenReturn(Result.success(testUserProfile))
+        coEvery { mockStorageUtil.uploadProfileImage(any(), any(), any()) } returns Result.success(testDownloadUrl)
+        coEvery { mockUserRepository.updatePhotoUrl(any(), any()) } returns Result.success(Unit)
+        coEvery { mockUserRepository.getUserProfile(any()) } returns Result.success(testUserProfile)
             
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)
         
         // Assert - verify storageUtil was called
         advanceUntilIdle()
-        verify(mockStorageUtil).uploadProfileImage(mockContext, mockUri, testUid)
+        coVerify { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) }
     }
     
     @Test
     fun `uploadProfileImage updates photoUrl on successful upload`() = runTest {
         // Arrange
-        whenever(mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid))
-            .thenReturn(Result.success(testDownloadUrl))
-        whenever(mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl))
-            .thenReturn(Result.success(Unit))
-        whenever(mockUserRepository.getUserProfile(testUid))
-            .thenReturn(Result.success(testUserProfile.copy(photoUrl = testDownloadUrl)))
+        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns Result.success(testDownloadUrl)
+        coEvery { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) } returns Result.success(Unit)
+        coEvery { mockUserRepository.getUserProfile(testUid) } returns Result.success(testUserProfile.copy(photoUrl = testDownloadUrl))
         
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)
         advanceUntilIdle()
         
         // Assert
-        verify(mockStorageUtil).uploadProfileImage(mockContext, mockUri, testUid)
-        verify(mockUserRepository).updatePhotoUrl(testUid, testDownloadUrl)
-        verify(mockUserRepository).getUserProfile(testUid)
+        coVerify { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) }
+        coVerify { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) }
+        coVerify { mockUserRepository.getUserProfile(testUid) }
         
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
@@ -127,15 +120,14 @@ class UserViewModelProfileImageTest {
         // Arrange
         val errorMessage = "Upload failed"
         val exception = Exception(errorMessage)
-        whenever(mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid))
-            .thenReturn(Result.failure(exception))
+        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns Result.failure(exception)
         
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)
         advanceUntilIdle()
         
         // Assert
-        verify(mockStorageUtil).uploadProfileImage(mockContext, mockUri, testUid)
+        coVerify { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) }
         
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Error)
@@ -147,18 +139,16 @@ class UserViewModelProfileImageTest {
         // Arrange
         val errorMessage = "Failed to update photo URL"
         val exception = Exception(errorMessage)
-        whenever(mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid))
-            .thenReturn(Result.success(testDownloadUrl))
-        whenever(mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl))
-            .thenReturn(Result.failure(exception))
+        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns Result.success(testDownloadUrl)
+        coEvery { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) } returns Result.failure(exception)
         
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)
         advanceUntilIdle()
         
         // Assert
-        verify(mockStorageUtil).uploadProfileImage(mockContext, mockUri, testUid)
-        verify(mockUserRepository).updatePhotoUrl(testUid, testDownloadUrl)
+        coVerify { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) }
+        coVerify { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) }
         
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Error)
@@ -169,21 +159,18 @@ class UserViewModelProfileImageTest {
     fun `uploadProfileImage handles complete flow from upload to profile refresh`() = runTest {
         // Arrange
         val updatedProfile = testUserProfile.copy(photoUrl = testDownloadUrl)
-        whenever(mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid))
-            .thenReturn(Result.success(testDownloadUrl))
-        whenever(mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl))
-            .thenReturn(Result.success(Unit))
-        whenever(mockUserRepository.getUserProfile(testUid))
-            .thenReturn(Result.success(updatedProfile))
+        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns Result.success(testDownloadUrl)
+        coEvery { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) } returns Result.success(Unit)
+        coEvery { mockUserRepository.getUserProfile(testUid) } returns Result.success(updatedProfile)
         
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)
         advanceUntilIdle()
         
         // Assert - Verify the complete flow
-        verify(mockStorageUtil).uploadProfileImage(mockContext, mockUri, testUid)
-        verify(mockUserRepository).updatePhotoUrl(testUid, testDownloadUrl)
-        verify(mockUserRepository).getUserProfile(testUid)
+        coVerify { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) }
+        coVerify { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) }
+        coVerify { mockUserRepository.getUserProfile(testUid) }
         
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
