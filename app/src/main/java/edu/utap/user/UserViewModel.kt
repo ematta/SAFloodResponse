@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.utap.auth.utils.NetworkUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -17,7 +18,8 @@ sealed class UserProfileState {
 
 class UserViewModel(
     private val userRepository: UserRepository = FirebaseUserRepository(),
-    private val storageUtil: FirebaseStorageUtil = FirebaseStorageUtil()
+    private val storageUtil: FirebaseStorageUtil = FirebaseStorageUtil(),
+    var context: Context
 ) : ViewModel() {
 
     private val _profileState = MutableStateFlow<UserProfileState>(UserProfileState.Idle)
@@ -25,6 +27,13 @@ class UserViewModel(
 
     fun createUserProfile(userProfile: UserProfile) {
         _profileState.value = UserProfileState.Loading
+        
+        // Check for network connectivity before attempting to create profile
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
+            return
+        }
+        
         viewModelScope.launch {
             val result = userRepository.createUserProfile(userProfile)
             result.fold(
@@ -40,6 +49,13 @@ class UserViewModel(
 
     fun getUserProfile(uid: String) {
         _profileState.value = UserProfileState.Loading
+        
+        // Check for network connectivity before attempting to get profile
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
+            return
+        }
+        
         viewModelScope.launch {
             val result = userRepository.getUserProfile(uid)
             result.fold(
@@ -55,6 +71,13 @@ class UserViewModel(
 
     fun updateUserProfile(userProfile: UserProfile) {
         _profileState.value = UserProfileState.Loading
+        
+        // Check for network connectivity before attempting to update profile
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
+            return
+        }
+        
         viewModelScope.launch {
             val result = userRepository.updateUserProfile(userProfile)
             result.fold(
@@ -70,11 +93,23 @@ class UserViewModel(
 
     fun updateDisplayName(uid: String, displayName: String) {
         _profileState.value = UserProfileState.Loading
+        
+        // Check for network connectivity before attempting to update display name
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
+            return
+        }
+        
         viewModelScope.launch {
             val result = userRepository.updateDisplayName(uid, displayName)
             result.fold(
                 onSuccess = {
-                    getUserProfile(uid) // Refresh the profile
+                    // Only refresh profile if we have network connectivity
+                    if (NetworkUtils.isNetworkAvailable(context)) {
+                        getUserProfile(uid) // Refresh the profile
+                    } else {
+                        _profileState.value = UserProfileState.Success(UserProfile(uid = uid, displayName = displayName))
+                    }
                 },
                 onFailure = { error ->
                     _profileState.value = UserProfileState.Error(error.message ?: "Failed to update display name")
@@ -85,11 +120,23 @@ class UserViewModel(
 
     fun updatePhotoUrl(uid: String, photoUrl: String) {
         _profileState.value = UserProfileState.Loading
+        
+        // Check for network connectivity before attempting to update photo URL
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
+            return
+        }
+        
         viewModelScope.launch {
             val result = userRepository.updatePhotoUrl(uid, photoUrl)
             result.fold(
                 onSuccess = {
-                    getUserProfile(uid) // Refresh the profile
+                    // Only refresh profile if we have network connectivity
+                    if (NetworkUtils.isNetworkAvailable(context)) {
+                        getUserProfile(uid) // Refresh the profile
+                    } else {
+                        _profileState.value = UserProfileState.Success(UserProfile(uid = uid, photoUrl = photoUrl))
+                    }
                 },
                 onFailure = { error ->
                     _profileState.value = UserProfileState.Error(error.message ?: "Failed to update photo URL")
@@ -98,10 +145,17 @@ class UserViewModel(
         }
     }
     
-    fun uploadProfileImage(context: Context, imageUri: Uri, uid: String) {
+    fun uploadProfileImage(uploadContext: Context, imageUri: Uri, uid: String) {
         _profileState.value = UserProfileState.Loading
+        
+        // Check for network connectivity before attempting to upload image
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
+            return
+        }
+        
         viewModelScope.launch {
-            val uploadResult = storageUtil.uploadProfileImage(context, imageUri, uid)
+            val uploadResult = storageUtil.uploadProfileImage(uploadContext, imageUri, uid)
             uploadResult.fold(
                 onSuccess = { downloadUrl ->
                     // Update the photo URL in the user profile

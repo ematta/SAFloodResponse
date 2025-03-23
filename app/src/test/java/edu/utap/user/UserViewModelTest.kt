@@ -7,11 +7,15 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
+import android.content.Context
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import edu.utap.auth.utils.NetworkUtils
+import edu.utap.auth.utils.NetworkUtilsInterface
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -29,6 +33,11 @@ class UserViewModelTest {
     
     @Mock
     private lateinit var storageUtil: FirebaseStorageUtil
+    
+    @Mock
+    private lateinit var mockContext: Context
+    
+    private lateinit var mockNetworkUtils: NetworkUtilsInterface
 
     private lateinit var userViewModel: UserViewModel
 
@@ -44,7 +53,15 @@ class UserViewModelTest {
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
-        userViewModel = UserViewModel(userRepository, storageUtil)
+        
+        // Create a mock implementation of NetworkUtilsInterface
+        mockNetworkUtils = mock<NetworkUtilsInterface>()
+        // Make network always available for tests
+        whenever(mockNetworkUtils.isNetworkAvailable(any())).thenReturn(true)
+        // Set the mock implementation
+        NetworkUtils.setImplementation(mockNetworkUtils)
+        
+        userViewModel = UserViewModel(userRepository, storageUtil, mockContext)
     }
 
     @Test
@@ -137,4 +154,4 @@ class UserViewModelTest {
         verify(userRepository).updatePhotoUrl(testUid, photoUrl)
         verify(userRepository).getUserProfile(testUid)
     }
-} 
+}

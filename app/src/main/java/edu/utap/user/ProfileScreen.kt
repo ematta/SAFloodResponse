@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -22,12 +23,14 @@ fun ProfileScreen(
     userViewModel: UserViewModel = viewModel(),
     onNavigateBack: () -> Unit = {}
 ) {
-    val profileState by userViewModel.profileState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val viewModelWithContext = remember { userViewModel.apply { this.context = context } }
+    val profileState by viewModelWithContext.profileState.collectAsStateWithLifecycle()
     val currentUser = FirebaseAuth.getInstance().currentUser
     
     LaunchedEffect(currentUser) {
         currentUser?.uid?.let { uid ->
-            userViewModel.getUserProfile(uid)
+            viewModelWithContext.getUserProfile(uid)
         }
     }
     
@@ -109,7 +112,7 @@ fun ProfileScreen(
                                     displayName = currentUser.displayName ?: "",
                                     email = currentUser.email ?: ""
                                 )
-                                userViewModel.createUserProfile(newProfile)
+                                viewModelWithContext.createUserProfile(newProfile)
                             }
                         }) {
                             Text("Create Profile")
@@ -139,7 +142,7 @@ fun ProfileScreen(
                                     photoUrl = photoUrl,
                                     onImageSelected = { uri ->
                                         currentUser?.uid?.let { uid ->
-                                            userViewModel.uploadProfileImage(context, uri, uid)
+                                            viewModelWithContext.uploadProfileImage(context, uri, uid)
                                         }
                                     }
                                 )
@@ -186,7 +189,7 @@ fun ProfileScreen(
                                             phoneNumber = phoneNumber,
                                             address = address
                                         )
-                                        userViewModel.updateUserProfile(updatedProfile)
+                                        viewModelWithContext.updateUserProfile(updatedProfile)
                                         isEditing = false
                                     }
                                 },

@@ -3,9 +3,12 @@ package edu.utap.user
 import android.content.Context
 import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import edu.utap.auth.utils.NetworkUtils
+import edu.utap.auth.utils.NetworkUtilsInterface
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -31,6 +34,7 @@ class UserViewModelProfileImageTest {
     private lateinit var mockStorageUtil: FirebaseStorageUtil
     private lateinit var mockContext: Context
     private lateinit var mockUri: Uri
+    private lateinit var mockNetworkUtils: NetworkUtilsInterface
     
     // Class under test
     private lateinit var userViewModel: UserViewModel
@@ -56,14 +60,27 @@ class UserViewModelProfileImageTest {
         mockContext = mock()
         mockUri = mock()
         
-        userViewModel = UserViewModel(mockUserRepository, mockStorageUtil)
+        // Create a mock implementation of NetworkUtilsInterface
+        mockNetworkUtils = mock<NetworkUtilsInterface>()
+        // Make network always available for tests
+        whenever(mockNetworkUtils.isNetworkAvailable(any())).thenReturn(true)
+        // Set the mock implementation
+        NetworkUtils.setImplementation(mockNetworkUtils)
+        
+        userViewModel = UserViewModel(mockUserRepository, mockStorageUtil, mockContext)
+    }
+    
+    @After
+    fun tearDown() {
+        // Restore default implementation
+        NetworkUtils.setImplementation(edu.utap.auth.utils.NetworkUtilsImpl())
     }
     
     @Test
     fun `uploadProfileImage updates state to Loading then calls storageUtil`() = runTest {
         // Arrange
         val initialState = UserProfileState.Idle
-        userViewModel = UserViewModel(mockUserRepository, mockStorageUtil)
+        userViewModel = UserViewModel(mockUserRepository, mockStorageUtil, mockContext)
         assertTrue(userViewModel.profileState.value is UserProfileState.Idle, "Initial state should be Idle")
         
         whenever(mockStorageUtil.uploadProfileImage(any(), any(), any()))
