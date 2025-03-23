@@ -28,7 +28,11 @@ class NetworkMonitor(private val context: Context) {
      * Returns a Flow of NetworkState that emits the current network state and subsequent changes
      */
     fun networkState(): Flow<NetworkState> = callbackFlow {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        if (connectivityManager == null) {
+            trySend(NetworkState.UNAVAILABLE)
+            return@callbackFlow
+        }
         
         // Check initial state
         val isConnected = NetworkUtils.isNetworkAvailable(context)
