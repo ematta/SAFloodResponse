@@ -8,6 +8,7 @@ import edu.utap.auth.db.UserEntity
 import edu.utap.auth.repository.AuthRepositoryInterface
 import edu.utap.auth.repository.toUserEntity
 import edu.utap.auth.repository.updateFromFirebaseUser
+import edu.utap.auth.utils.FirebaseErrorMapper
 import edu.utap.user.UserProfile
 import edu.utap.user.UserRepository
 import edu.utap.user.FirebaseUserRepository
@@ -53,7 +54,7 @@ class AuthRepository(
             
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
         }
     }
 
@@ -67,7 +68,7 @@ class AuthRepository(
             
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
         }
     }
 
@@ -84,7 +85,7 @@ class AuthRepository(
             firebaseAuth.sendPasswordResetEmail(email).await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
         }
     }
     
@@ -107,7 +108,7 @@ class AuthRepository(
             
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
         }
     }
 

@@ -261,7 +261,7 @@ class AuthRepositoryTest {
         
         // Then
         assertTrue("Result should be failure", result.isFailure)
-        assertEquals(exception, result.exceptionOrNull())
+        assertEquals(exception.message, result.exceptionOrNull()?.message)
         Mockito.verify(firebaseAuth).sendPasswordResetEmail(eq(email))
     }
 }

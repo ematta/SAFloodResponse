@@ -6,6 +6,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.auth.FirebaseAuthMultiFactorException
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 
 /**
  * Utility class to map Firebase authentication exceptions to user-friendly error messages
@@ -20,7 +22,11 @@ object FirebaseErrorMapper {
     fun getErrorMessage(exception: Throwable): String {
         return when (exception) {
             // Network related errors
-            is FirebaseNetworkException -> "Unable to connect to the server. Please check your internet connection and try again."
+            is FirebaseNetworkException -> "Connection failed. Please check your internet and try again."
+
+            // Multi-factor auth errors
+            is FirebaseAuthMultiFactorException -> "Additional verification required. Please check your authentication app."
+            is FirebaseAuthRecentLoginRequiredException -> "Recent login required for security. Please sign in again."
             
             // Invalid credentials
             is FirebaseAuthInvalidCredentialsException -> {
@@ -58,8 +64,14 @@ object FirebaseErrorMapper {
             is FirebaseAuthException -> {
                 when (exception.errorCode) {
                     "ERROR_OPERATION_NOT_ALLOWED" -> "This operation is not allowed. Please contact support."
-                    "ERROR_TOO_MANY_REQUESTS" -> "Too many unsuccessful attempts. Please try again later or reset your password."
-                    "ERROR_REQUIRES_RECENT_LOGIN" -> "This operation requires recent authentication. Please log in again before retrying."
+                    "ERROR_TOO_MANY_REQUESTS" -> "Too many attempts. Account temporarily locked. Try again in 5 minutes or reset password."
+                    "ERROR_INVALID_VERIFICATION_CODE" -> "Invalid verification code. Please check the code sent to your email/phone."
+                    "ERROR_MISSING_VERIFICATION_CODE" -> "Missing verification code. Please enter the code from your authentication app."
+                    "ERROR_SECOND_FACTOR_REQUIRED" -> "Two-factor authentication required. Please check your second factor method."
+                    "invalid-phone-number" -> "Invalid phone number format. Please use international format (+1xxx...)"
+                    "requires-recent-login" -> "Security check required. Please sign in again to complete this action."
+                    "unverified-email" -> "Email verification required. Please check your inbox and verify your email."
+                    "quota-exceeded" -> "Account quota exceeded. Please contact support for assistance."
                     else -> "Authentication error: ${exception.message}"
                 }
             }
