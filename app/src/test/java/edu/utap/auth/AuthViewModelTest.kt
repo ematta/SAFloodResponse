@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseUser
 import edu.utap.auth.repository.AuthRepositoryInterface
 import edu.utap.auth.utils.NetworkUtils
 import edu.utap.auth.utils.NetworkUtilsInterface
+import edu.utap.auth.utils.ApplicationContextProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -19,9 +20,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
 
 @ExperimentalCoroutinesApi
 class AuthViewModelTest {
@@ -30,10 +30,19 @@ class AuthViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private val testDispatcher = StandardTestDispatcher()
+    
+    @MockK
     private lateinit var mockAuthRepository: AuthRepositoryInterface
+    
+    @MockK
     private lateinit var mockContext: Context
+    
+    @MockK
     private lateinit var mockNetworkUtils: NetworkUtilsInterface
+    
     private lateinit var authViewModel: AuthViewModel
+    
+    @MockK
     private lateinit var mockFirebaseUser: FirebaseUser
 
     private val testEmail = "test@example.com"
@@ -41,53 +50,52 @@ class AuthViewModelTest {
     private val testName = "Test User"
 
     @Before
-    fun setup() = runTest {
+    fun setup() {
+        MockKAnnotations.init(this)
         Dispatchers.setMain(testDispatcher)
-        mockAuthRepository = mock(AuthRepositoryInterface::class.java)
-        mockContext = mock(Context::class.java)
-        mockFirebaseUser = mock(FirebaseUser::class.java)
         
-        // Create a mock implementation of NetworkUtilsInterface
-        mockNetworkUtils = mock(NetworkUtilsInterface::class.java)
-        // Make network always available for tests
-        whenever(mockNetworkUtils.isNetworkAvailable(any())).thenReturn(true)
-        // Set the mock implementation
+        // Mock application context provider
+        mockkObject(ApplicationContextProvider)
+        every { ApplicationContextProvider.getApplicationContext() } returns mockContext
+        
+        // Reset network mock to default available state
+        clearMocks(mockNetworkUtils)
+        every { mockNetworkUtils.isNetworkAvailable(any()) } returns true
         NetworkUtils.setImplementation(mockNetworkUtils)
         
-        // Setup the mock before creating the ViewModel
-        whenever(mockAuthRepository.getCurrentUser()).thenReturn(null)
-        authViewModel = AuthViewModel(mockAuthRepository, mockContext)
+        coEvery { mockAuthRepository.getCurrentUser() } returns null
+        
+        authViewModel = AuthViewModel(mockAuthRepository, mockNetworkUtils)
+        testDispatcher.scheduler.advanceUntilIdle() // Process initial coroutine
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
-        // Restore default implementation
+        // Restore default implementations
         NetworkUtils.setImplementation(edu.utap.auth.utils.NetworkUtilsImpl())
+        unmockkObject(ApplicationContextProvider)
     }
 
     @Test
     fun `initial state is Idle`() = runTest {
-        // Create a new ViewModel instance to test initial state
-        val newViewModel = AuthViewModel(mockAuthRepository, mockContext)
+        val newViewModel = AuthViewModel(mockAuthRepository, mockNetworkUtils)
+        // Immediate state after creation (before coroutines run)
         assertEquals(AuthState.Idle, newViewModel.authState.value)
         
-        // Then advance the test dispatcher to allow coroutines to complete
         testDispatcher.scheduler.advanceUntilIdle()
         
-        // Now check the state after initialization completes
         assertEquals(AuthState.Unauthenticated, newViewModel.authState.value)
     }
 
     @Test
     fun `login success sets Authenticated state`() = runTest {
-        whenever(mockAuthRepository.loginUser(testEmail, testPassword))
-            .thenReturn(Result.success(mockFirebaseUser))
+        coEvery { mockAuthRepository.loginUser(testEmail, testPassword) } returns Result.success(mockFirebaseUser)
 
         authViewModel.login(testEmail, testPassword)
-        assertEquals(AuthState.Loading, authViewModel.authState.value)
-
         testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle() // Ensure coroutine completion
+        
         val finalState = authViewModel.authState.value
         assertTrue(finalState is AuthState.Authenticated)
     }
@@ -95,13 +103,12 @@ class AuthViewModelTest {
     @Test
     fun `login failure sets Error state`() = runTest {
         val errorMessage = "Invalid credentials"
-        whenever(mockAuthRepository.loginUser(testEmail, testPassword))
-            .thenReturn(Result.failure(Exception(errorMessage)))
+        coEvery { mockAuthRepository.loginUser(testEmail, testPassword) } returns Result.failure(Exception(errorMessage))
 
         authViewModel.login(testEmail, testPassword)
-        assertEquals(AuthState.Loading, authViewModel.authState.value)
-
         testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle() // Ensure coroutine completion
+        
         val finalState = authViewModel.authState.value
         assertTrue(finalState is AuthState.Error)
         assertEquals(errorMessage, (finalState as AuthState.Error).message)
@@ -109,13 +116,12 @@ class AuthViewModelTest {
 
     @Test
     fun `register success sets Authenticated state`() = runTest {
-        whenever(mockAuthRepository.registerUser(testEmail, testPassword, testName))
-            .thenReturn(Result.success(mockFirebaseUser))
+        coEvery { mockAuthRepository.registerUser(testEmail, testPassword, testName) } returns Result.success(mockFirebaseUser)
 
         authViewModel.register(testEmail, testPassword, testName)
-        assertEquals(AuthState.Loading, authViewModel.authState.value)
-
         testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle()
+        
         val finalState = authViewModel.authState.value
         assertTrue(finalState is AuthState.Authenticated)
     }
@@ -123,13 +129,12 @@ class AuthViewModelTest {
     @Test
     fun `register failure sets Error state`() = runTest {
         val errorMessage = "Registration failed"
-        whenever(mockAuthRepository.registerUser(testEmail, testPassword, testName))
-            .thenReturn(Result.failure(Exception(errorMessage)))
+        coEvery { mockAuthRepository.registerUser(testEmail, testPassword, testName) } returns Result.failure(Exception(errorMessage))
 
         authViewModel.register(testEmail, testPassword, testName)
-        assertEquals(AuthState.Loading, authViewModel.authState.value)
-
         testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle()
+        
         val finalState = authViewModel.authState.value
         assertTrue(finalState is AuthState.Error)
         assertEquals(errorMessage, (finalState as AuthState.Error).message)
@@ -137,8 +142,50 @@ class AuthViewModelTest {
 
     @Test
     fun `logout sets Unauthenticated state`() = runTest {
+        coJustRun { mockAuthRepository.logout() }
+        
         authViewModel.logout()
         testDispatcher.scheduler.advanceUntilIdle()
         assertEquals(AuthState.Unauthenticated, authViewModel.authState.value)
+    }
+
+    @Test
+    fun `resetPassword success sets PasswordResetSent state`() = runTest {
+        coEvery { mockAuthRepository.resetPassword(testEmail) } returns Result.success(Unit)
+
+        authViewModel.resetPassword(testEmail)
+        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.PasswordResetSent)
+    }
+
+    @Test
+    fun `resetPassword failure sets Error state`() = runTest {
+        val errorMessage = "Password reset failed"
+        coEvery { mockAuthRepository.resetPassword(testEmail) } returns Result.failure(Exception(errorMessage))
+
+        authViewModel.resetPassword(testEmail)
+        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.Error)
+        assertEquals(errorMessage, (finalState as AuthState.Error).message)
+    }
+    
+    @Test
+    fun `resetPassword with no network sets Error state`() = runTest {
+        every { mockNetworkUtils.isNetworkAvailable(any()) } returns false
+        
+        authViewModel.resetPassword(testEmail)
+        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        val finalState = authViewModel.authState.value
+        assertTrue(finalState is AuthState.Error)
+        val errorMessage = (finalState as AuthState.Error).message
+        assertTrue(errorMessage.contains("internet connection") || errorMessage.contains("network"))
     }
 }

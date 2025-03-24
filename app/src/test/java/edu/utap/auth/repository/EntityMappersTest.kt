@@ -5,26 +5,26 @@ import com.google.firebase.auth.FirebaseUser
 import edu.utap.auth.db.UserEntity
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.whenever
+import io.mockk.every
+import io.mockk.mockk
 
 class EntityMappersTest {
     
     @Test
     fun `toUserEntity creates UserEntity from FirebaseUser`() {
         // Setup
-        val mockUser = mock(FirebaseUser::class.java)
-        val mockUri = mock(Uri::class.java)
+        val mockUser = mockk<FirebaseUser>()
+        val mockUri = mockk<Uri>()
         val userId = "test-uid"
         val displayName = "Test User"
         val email = "test@example.com"
         val photoUrl = "https://example.com/photo.jpg"
         
-        whenever(mockUser.uid).thenReturn(userId)
-        whenever(mockUser.displayName).thenReturn(displayName)
-        whenever(mockUser.email).thenReturn(email)
-        whenever(mockUser.photoUrl).thenReturn(mockUri)
-        whenever(mockUri.toString()).thenReturn(photoUrl)
+        every { mockUser.uid } returns userId
+        every { mockUser.displayName } returns displayName
+        every { mockUser.email } returns email
+        every { mockUser.photoUrl } returns mockUri
+        every { mockUri.toString() } returns photoUrl
         
         // Execute
         val result = mockUser.toUserEntity()
@@ -40,13 +40,13 @@ class EntityMappersTest {
     @Test
     fun `toUserEntity handles null values from FirebaseUser`() {
         // Setup
-        val mockUser = mock(FirebaseUser::class.java)
+        val mockUser = mockk<FirebaseUser>()
         val userId = "test-uid"
         
-        whenever(mockUser.uid).thenReturn(userId)
-        whenever(mockUser.displayName).thenReturn(null)
-        whenever(mockUser.email).thenReturn(null)
-        whenever(mockUser.photoUrl).thenReturn(null)
+        every { mockUser.uid } returns userId
+        every { mockUser.displayName } returns null
+        every { mockUser.email } returns null
+        every { mockUser.photoUrl } returns null
         
         // Execute
         val result = mockUser.toUserEntity()
@@ -62,8 +62,8 @@ class EntityMappersTest {
     @Test
     fun `updateFromFirebaseUser updates UserEntity correctly`() {
         // Setup
-        val mockUser = mock(FirebaseUser::class.java)
-        val mockUri = mock(Uri::class.java)
+        val mockUser = mockk<FirebaseUser>()
+        val mockUri = mockk<Uri>()
         
         val userId = "test-uid"
         val oldName = "Old Name"
@@ -81,10 +81,10 @@ class EntityMappersTest {
             role = "admin"
         )
         
-        whenever(mockUser.displayName).thenReturn(newName)
-        whenever(mockUser.email).thenReturn(newEmail)
-        whenever(mockUser.photoUrl).thenReturn(mockUri)
-        whenever(mockUri.toString()).thenReturn(newPhoto)
+        every { mockUser.displayName } returns newName
+        every { mockUser.email } returns newEmail
+        every { mockUser.photoUrl } returns mockUri
+        every { mockUri.toString() } returns newPhoto
         
         // Execute
         val result = existingEntity.updateFromFirebaseUser(mockUser)
@@ -100,7 +100,7 @@ class EntityMappersTest {
     @Test
     fun `updateFromFirebaseUser preserves existing values when Firebase values are null`() {
         // Setup
-        val mockUser = mock(FirebaseUser::class.java)
+        val mockUser = mockk<FirebaseUser>()
         
         val userId = "test-uid"
         val name = "Existing Name"
@@ -115,9 +115,9 @@ class EntityMappersTest {
             role = "volunteer"
         )
         
-        whenever(mockUser.displayName).thenReturn(null)
-        whenever(mockUser.email).thenReturn(null)
-        whenever(mockUser.photoUrl).thenReturn(null)
+        every { mockUser.displayName } returns null
+        every { mockUser.email } returns null
+        every { mockUser.photoUrl } returns null
         
         // Execute
         val result = existingEntity.updateFromFirebaseUser(mockUser)

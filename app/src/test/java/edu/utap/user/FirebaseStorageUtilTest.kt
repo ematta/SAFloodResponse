@@ -1,0 +1,198 @@
+package edu.utap.user
+
+import android.content.ContentResolver
+import android.content.Context
+import android.net.Uri
+import android.webkit.MimeTypeMap
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
+import java.util.UUID
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlinx.coroutines.tasks.await
+
+@ExperimentalCoroutinesApi
+class FirebaseStorageUtilTest {
+    
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+    
+    @MockK
+    private lateinit var mockStorage: FirebaseStorage
+    
+    @MockK
+    private lateinit var mockStorageRef: StorageReference
+    
+    @MockK
+    private lateinit var mockProfileImagesRef: StorageReference
+    
+    @MockK
+    private lateinit var mockContext: Context
+    
+    @MockK
+    private lateinit var mockContentResolver: ContentResolver
+    
+    @MockK
+    private lateinit var mockUri: Uri
+    
+    @MockK
+    private lateinit var mockUploadTask: UploadTask
+    
+    @MockK
+    private lateinit var mockUploadTaskSnapshot: UploadTask.TaskSnapshot
+    
+    private lateinit var storageUtil: FirebaseStorageUtil
+    
+    // Test data
+    private val testUserId = "test-user-id"
+    private val testDownloadUrl = "https://example.com/test-image.jpg"
+    private val testMimeType = "image/jpeg"
+    private val testFileExtension = "jpg"
+    
+    @Before
+    fun setup() {
+        MockKAnnotations.init(this)
+        
+        // Mock MimeTypeMap singleton method calls directly
+        mockkStatic(MimeTypeMap::class)
+        every { MimeTypeMap.getSingleton() } returns mockk {
+            every { getExtensionFromMimeType(testMimeType) } returns testFileExtension
+        }
+        
+        // Setup context and content resolver
+        every { mockContext.contentResolver } returns mockContentResolver
+        every { mockContentResolver.getType(mockUri) } returns testMimeType
+        
+        // Setup storage references
+        every { mockStorage.reference } returns mockStorageRef
+        every { mockStorageRef.child(any()) } returns mockProfileImagesRef
+        
+        // Setup upload task
+        every { mockProfileImagesRef.putFile(mockUri) } returns mockUploadTask
+        every { mockUploadTask.addOnSuccessListener(any()) } returns mockUploadTask
+        every { mockUploadTask.addOnFailureListener(any()) } returns mockUploadTask
+        
+        // Setup download URL task
+        val mockDownloadUrlTask = mockk<Task<Uri>>()
+        every { mockProfileImagesRef.downloadUrl } returns mockDownloadUrlTask
+        every { mockDownloadUrlTask.isComplete } returns true
+        every { mockDownloadUrlTask.isSuccessful } returns true
+        every { mockDownloadUrlTask.result } returns mockUri
+        every { mockDownloadUrlTask.exception } returns null
+        every { mockUri.toString() } returns testDownloadUrl
+        
+        storageUtil = FirebaseStorageUtil(mockStorage)
+    }
+    
+    @Test
+    fun `uploadProfileImage should upload file and return download URL on success`() = runTest {
+        // Arrange
+        // Mock the kotlinx.coroutines.tasks.await extension function
+        mockkStatic("kotlinx.coroutines.tasks.TasksKt")
+        coEvery { mockUploadTask.await() } returns mockUploadTaskSnapshot
+        
+        val mockDownloadUrlTask = mockk<Task<Uri>>()
+        every { mockProfileImagesRef.downloadUrl } returns mockDownloadUrlTask
+        every { mockDownloadUrlTask.isComplete } returns true
+        every { mockDownloadUrlTask.isSuccessful } returns true
+        every { mockDownloadUrlTask.result } returns mockUri
+        every { mockDownloadUrlTask.exception } returns null
+        coEvery { mockDownloadUrlTask.await() } returns mockUri
+        
+        // Act
+        val result = storageUtil.uploadProfileImage(mockContext, mockUri, testUserId)
+        
+        // Assert
+        assertTrue(result.isSuccess)
+        assertEquals(testDownloadUrl, result.getOrNull())
+        verify { mockProfileImagesRef.putFile(mockUri) }
+        verify { mockProfileImagesRef.downloadUrl }
+        
+        unmockkStatic("kotlinx.coroutines.tasks.TasksKt")
+    }
+    
+    @Test
+    fun `uploadProfileImage should return failure when upload fails`() = runTest {
+        // Arrange
+        val testException = Exception("Upload failed")
+        
+        // Mock the kotlinx.coroutines.tasks.await extension function
+        mockkStatic("kotlinx.coroutines.tasks.TasksKt")
+        coEvery { mockUploadTask.await() } throws testException
+        
+        // Act
+        val result = storageUtil.uploadProfileImage(mockContext, mockUri, testUserId)
+        
+        // Assert
+        assertTrue(result.isFailure)
+        assertEquals(testException, result.exceptionOrNull())
+        verify { mockProfileImagesRef.putFile(mockUri) }
+        
+        unmockkStatic("kotlinx.coroutines.tasks.TasksKt")
+    }
+    
+    @Test
+    fun `uploadProfileImage should return failure when getting download URL fails`() = runTest {
+        // Arrange
+        val testException = Exception("Failed to get download URL")
+        
+        // Mock the kotlinx.coroutines.tasks.await extension function
+        mockkStatic("kotlinx.coroutines.tasks.TasksKt")
+        coEvery { mockUploadTask.await() } returns mockUploadTaskSnapshot
+        
+        val mockDownloadUrlTask = mockk<Task<Uri>>()
+        every { mockProfileImagesRef.downloadUrl } returns mockDownloadUrlTask
+        every { mockDownloadUrlTask.isComplete } returns true
+        every { mockDownloadUrlTask.isSuccessful } returns false
+        every { mockDownloadUrlTask.exception } returns testException
+        coEvery { mockDownloadUrlTask.await() } throws testException
+        
+        // Act
+        val result = storageUtil.uploadProfileImage(mockContext, mockUri, testUserId)
+        
+        // Assert
+        assertTrue(result.isFailure)
+        assertEquals(testException, result.exceptionOrNull())
+        verify { mockProfileImagesRef.putFile(mockUri) }
+        verify { mockProfileImagesRef.downloadUrl }
+        
+        unmockkStatic("kotlinx.coroutines.tasks.TasksKt")
+    }
+    
+    @Test
+    fun `uploadProfileImage should use jpg as default extension when mime type is null`() = runTest {
+        // Arrange
+        every { mockContentResolver.getType(mockUri) } returns null
+        
+        // Mock the kotlinx.coroutines.tasks.await extension function
+        mockkStatic("kotlinx.coroutines.tasks.TasksKt")
+        coEvery { mockUploadTask.await() } returns mockUploadTaskSnapshot
+        
+        val mockDownloadUrlTask = mockk<Task<Uri>>()
+        every { mockProfileImagesRef.downloadUrl } returns mockDownloadUrlTask
+        every { mockDownloadUrlTask.isComplete } returns true
+        every { mockDownloadUrlTask.isSuccessful } returns true
+        every { mockDownloadUrlTask.result } returns mockUri
+        every { mockDownloadUrlTask.exception } returns null
+        coEvery { mockDownloadUrlTask.await() } returns mockUri
+        
+        // Act
+        val result = storageUtil.uploadProfileImage(mockContext, mockUri, testUserId)
+        
+        // Assert
+        assertTrue(result.isSuccess)
+        verify { mockStorageRef.child(match { it.contains(".jpg") }) }
+        
+        unmockkStatic("kotlinx.coroutines.tasks.TasksKt")
+    }
+} 

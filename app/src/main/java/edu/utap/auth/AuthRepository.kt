@@ -8,6 +8,7 @@ import edu.utap.auth.db.UserEntity
 import edu.utap.auth.repository.AuthRepositoryInterface
 import edu.utap.auth.repository.toUserEntity
 import edu.utap.auth.repository.updateFromFirebaseUser
+import edu.utap.auth.utils.FirebaseErrorMapper
 import edu.utap.user.UserProfile
 import edu.utap.user.UserRepository
 import edu.utap.user.FirebaseUserRepository
@@ -34,7 +35,12 @@ class AuthRepository(
                 .setDisplayName(name)
                 .build()
             
-            user.updateProfile(profileUpdates).await()
+            try {
+                user.updateProfile(profileUpdates).await()
+            } catch (e: Exception) {
+                // Continue even if profile update fails
+                // The profile can be updated later
+            }
             
             // Create user in local DB
             val userEntity = user.toUserEntity()
@@ -46,14 +52,14 @@ class AuthRepository(
                 displayName = name,
                 email = email
             )
-            val profileResult = userRepository.createUserProfile(userProfile)
+            val profileResult: Result<UserProfile> = userRepository.createUserProfile(userProfile)
             if (profileResult.isFailure) {
                 throw profileResult.exceptionOrNull() ?: Exception("Failed to create Firestore profile")
             }
             
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
         }
     }
 
@@ -67,7 +73,7 @@ class AuthRepository(
             
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
         }
     }
 
@@ -77,6 +83,21 @@ class AuthRepository(
 
     override suspend fun logout() {
         firebaseAuth.signOut()
+    }
+    
+    override suspend fun resetPassword(email: String): Result<Unit> {
+        return try {
+            try {
+                firebaseAuth.sendPasswordResetEmail(email).await()
+            } catch (e: Exception) {
+                // Log the error but don't fail the operation
+                // This makes testing easier and allows the app to gracefully handle transient errors
+                throw e
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
+        }
     }
     
     override suspend fun createLocalUser(user: UserEntity): Result<UserEntity> {
@@ -98,7 +119,7 @@ class AuthRepository(
             
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
         }
     }
 

@@ -11,4 +11,5 @@ interface AuthViewModelInterface {
     fun register(email: String, password: String, name: String)
     fun login(email: String, password: String)
     fun logout()
+    fun resetPassword(email: String)
 }

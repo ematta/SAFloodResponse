@@ -10,6 +10,7 @@ interface AuthRepositoryInterface {
     suspend fun loginUser(email: String, password: String): Result<FirebaseUser>
     suspend fun getCurrentUser(): FirebaseUser?
     suspend fun logout()
+    suspend fun resetPassword(email: String): Result<Unit>
     
     // Local user management methods
     suspend fun createLocalUser(user: UserEntity): Result<UserEntity>

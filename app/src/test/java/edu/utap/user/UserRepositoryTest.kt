@@ -8,34 +8,35 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.CollectionReference
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito.*
-import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
+import io.mockk.*
+import io.mockk.impl.annotations.MockK
 
 @ExperimentalCoroutinesApi
 class UserRepositoryTest {
 
-    @Mock
+    @MockK
     private lateinit var firebaseAuth: FirebaseAuth
 
-    @Mock
+    @MockK
     private lateinit var firestore: FirebaseFirestore
 
-    @Mock
+    @MockK
     private lateinit var documentReference: DocumentReference
 
-    @Mock
+    @MockK
     private lateinit var documentSnapshot: DocumentSnapshot
+    
+    @MockK
+    private lateinit var collectionReference: CollectionReference
 
-    @Mock
+    @MockK
     private lateinit var firebaseUser: FirebaseUser
 
     private lateinit var userRepository: UserRepository
@@ -51,11 +52,11 @@ class UserRepositoryTest {
 
     @Before
     fun setup() {
-        MockitoAnnotations.openMocks(this)
+        MockKAnnotations.init(this)
         
         // Setup Firestore mocking
-        `when`(firestore.collection("users")).thenReturn(mock())
-        `when`(firestore.collection("users").document(testUid)).thenReturn(documentReference)
+        every { firestore.collection("users") } returns collectionReference
+        every { collectionReference.document(testUid) } returns documentReference
         
         // Set up complete successful tasks
         val setTask = Tasks.forResult<Void>(null)
@@ -63,17 +64,17 @@ class UserRepositoryTest {
         val updateProfileTask = Tasks.forResult<Void>(null)
         
         // Setup document reference mock
-        `when`(documentReference.set(any())).thenReturn(setTask)
-        `when`(documentReference.get()).thenReturn(getTask)
+        every { documentReference.set(any()) } returns setTask
+        every { documentReference.get() } returns getTask
         
         // Setup document snapshot
-        whenever(documentSnapshot.exists()).thenReturn(true)
-        whenever(documentSnapshot.toObject(UserProfile::class.java)).thenReturn(testUserProfile)
+        every { documentSnapshot.exists() } returns true
+        every { documentSnapshot.toObject(UserProfile::class.java) } returns testUserProfile
         
         // Setup Firebase Auth
-        whenever(firebaseAuth.currentUser).thenReturn(firebaseUser)
-        whenever(firebaseUser.uid).thenReturn(testUid)
-        whenever(firebaseUser.updateProfile(any())).thenReturn(updateProfileTask)
+        every { firebaseAuth.currentUser } returns firebaseUser
+        every { firebaseUser.uid } returns testUid
+        every { firebaseUser.updateProfile(any()) } returns updateProfileTask
         
         userRepository = FirebaseUserRepository(firebaseAuth, firestore)
     }
@@ -86,7 +87,7 @@ class UserRepositoryTest {
         // Then
         assertTrue(result.isSuccess)
         assertEquals(testUserProfile, result.getOrNull())
-        verify(documentReference).set(testUserProfile)
+        verify { documentReference.set(testUserProfile) }
     }
 
     @Test
@@ -97,20 +98,20 @@ class UserRepositoryTest {
         // Then
         assertTrue(result.isSuccess)
         assertEquals(testUserProfile, result.getOrNull())
-        verify(documentReference).get()
+        verify { documentReference.get() }
     }
 
     @Test
     fun `getUserProfile should return failure when document does not exist`() = runTest {
         // Given document does not exist
-        whenever(documentSnapshot.exists()).thenReturn(false)
+        every { documentSnapshot.exists() } returns false
         
         // When
         val result = userRepository.getUserProfile(testUid)
         
         // Then
         assertTrue(result.isFailure)
-        verify(documentReference).get()
+        verify { documentReference.get() }
     }
 
     @Test
@@ -121,7 +122,7 @@ class UserRepositoryTest {
         // Then
         assertTrue(result.isSuccess)
         assertEquals(testUserProfile, result.getOrNull())
-        verify(documentReference).set(testUserProfile)
+        verify { documentReference.set(testUserProfile) }
     }
 
     @Test
@@ -141,7 +142,7 @@ class UserRepositoryTest {
         
         // Then
         assertTrue(result.isFailure)
-        verify(firebaseUser, never()).updateProfile(any())
+        verify(exactly = 0) { firebaseUser.updateProfile(any()) }
     }
 
     @Test
@@ -161,6 +162,6 @@ class UserRepositoryTest {
         
         // Then
         assertTrue(result.isFailure)
-        verify(firebaseUser, never()).updateProfile(any())
+        verify(exactly = 0) { firebaseUser.updateProfile(any()) }
     }
 } 

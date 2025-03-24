@@ -1,5 +1,6 @@
 package edu.utap.user
 
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -8,9 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -124,6 +127,25 @@ fun ProfileScreen(
                     ) {
                         if (isEditing) {
                             // Edit mode
+                            val context = LocalContext.current
+                            
+                            // Profile image picker
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                ProfileImagePicker(
+                                    photoUrl = photoUrl,
+                                    onImageSelected = { uri ->
+                                        currentUser?.uid?.let { uid ->
+                                            userViewModel.uploadProfileImage(context, uri, uid)
+                                        }
+                                    }
+                                )
+                            }
+                            
                             OutlinedTextField(
                                 value = displayName,
                                 onValueChange = { displayName = it },
@@ -151,13 +173,6 @@ fun ProfileScreen(
                                 value = address,
                                 onValueChange = { address = it },
                                 label = { Text("Address") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            
-                            OutlinedTextField(
-                                value = photoUrl,
-                                onValueChange = { photoUrl = it },
-                                label = { Text("Photo URL") },
                                 modifier = Modifier.fillMaxWidth()
                             )
                             
@@ -231,4 +246,4 @@ fun ProfileRow(
             modifier = Modifier.padding(vertical = 8.dp)
         )
     }
-} 
+}
