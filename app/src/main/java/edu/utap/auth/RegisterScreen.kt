@@ -49,14 +49,20 @@ fun RegisterScreen(
     var confirmPasswordError by remember { mutableStateOf<String?>(null) }
     
     // Check if user is already authenticated
-    if (authState is AuthState.Authenticated) {
+    if (authState is AuthState.Idle.Authenticated) {
         onRegisterSuccess()
         return
     }
     
     // Update error message when auth state contains an error
     if (authState is AuthState.Error) {
-        errorMessage = (authState as AuthState.Error).message
+        errorMessage = when (authState) {
+            is AuthState.Error.Generic -> (authState as AuthState.Error.Generic).message
+            is AuthState.Error.Network -> (authState as AuthState.Error.Network).message
+            is AuthState.Error.Authentication -> (authState as AuthState.Error.Authentication).message
+            is AuthState.Error.Validation -> (authState as AuthState.Error.Validation).message
+            else -> "Unknown error occurred"
+        }
     }
     
     Column(
@@ -181,16 +187,14 @@ fun RegisterScreen(
                 }
                 
                 // Validate email
-                val emailValidation = ValidationUtils.validateEmail(email)
-                if (!emailValidation.first) {
-                    emailError = emailValidation.second
+                if (!ValidationUtils.isValidEmail(email)) {
+                    emailError = "Please enter a valid email address"
                     isValid = false
                 }
                 
                 // Validate password
-                val passwordValidation = ValidationUtils.validatePassword(password)
-                if (!passwordValidation.first) {
-                    passwordError = passwordValidation.second
+                if (!ValidationUtils.isValidPassword(password)) {
+                    passwordError = "Password must be at least 6 characters"
                     isValid = false
                 }
                 

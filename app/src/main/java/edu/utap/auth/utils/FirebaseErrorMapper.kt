@@ -10,13 +10,26 @@ import com.google.firebase.auth.FirebaseAuthMultiFactorException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 
 /**
- * Utility class to map Firebase authentication exceptions to user-friendly error messages
+ * Utility object for mapping Firebase-specific exceptions to user-friendly error messages.
+ * 
+ * This mapper converts technical Firebase error messages into clear, actionable messages
+ * that can be displayed to users. It handles common authentication errors such as:
+ * - Invalid credentials
+ * - User not found
+ * - Email already in use
+ * - Weak password
+ * - Network issues
  */
 object FirebaseErrorMapper {
     
     /**
-     * Maps a Firebase exception to a user-friendly error message
-     * @param exception The exception to map
+     * Converts a Firebase exception into a user-friendly error message.
+     * 
+     * This method examines the type of exception and returns an appropriate
+     * error message that explains the issue in non-technical terms and
+     * provides guidance on how to resolve it.
+     * 
+     * @param exception The exception thrown by Firebase
      * @return A user-friendly error message
      */
     fun getErrorMessage(exception: Throwable): String {
@@ -78,6 +91,38 @@ object FirebaseErrorMapper {
             
             // Default case for other exceptions
             else -> exception.message ?: "An unexpected error occurred. Please try again."
+        }
+    }
+    
+    /**
+     * Maps a Firebase authentication exception to a user-friendly error message.
+     * 
+     * This method examines the type of exception thrown by Firebase Authentication
+     * and returns an appropriate message that explains the issue in terms that
+     * non-technical users can understand and potentially resolve.
+     * 
+     * @param exception The Firebase exception to map
+     * @return A user-friendly error message explaining the authentication failure
+     */
+    fun mapFirebaseAuthError(exception: Exception): String {
+        return when (exception) {
+            // User doesn't exist in Firebase Authentication
+            is FirebaseAuthInvalidUserException -> "User not found. Please check your email or register."
+            
+            // Invalid login credentials (wrong email/password combination)
+            is FirebaseAuthInvalidCredentialsException -> "Invalid credentials. Please check your email and password."
+            
+            // Email already in use by another account
+            is FirebaseAuthUserCollisionException -> "An account already exists with this email address."
+            
+            // Password doesn't meet Firebase's strength requirements
+            is FirebaseAuthWeakPasswordException -> "Password is too weak. Please use a stronger password."
+            
+            // Network connectivity issues
+            is FirebaseNetworkException -> "Network error. Please check your internet connection."
+            
+            // Fallback for any other unexpected authentication errors
+            else -> "Authentication failed: ${exception.message}"
         }
     }
 }

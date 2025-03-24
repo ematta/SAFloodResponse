@@ -1,31 +1,34 @@
 package edu.utap.user
 
-import android.content.Context
-import android.net.Uri
-import edu.utap.auth.utils.ApplicationContextProvider
-
 /**
- * A provider for FirebaseStorageUtilInterface that uses the application context
- * This helps avoid memory leaks by ensuring we don't hold references to Activity contexts
+ * Provider for Firebase Storage utility functions.
+ * 
+ * This singleton object provides access to the FirebaseStorageUtilInterface implementation.
+ * It follows the service locator pattern, allowing the actual implementation
+ * to be swapped out, particularly useful for testing with mock implementations.
  */
-class StorageUtilProvider {
-    companion object {
-        private val storageUtil = FirebaseStorageUtil()
-        
-        /**
-         * Get a FirebaseStorageUtilInterface instance that uses the application context
-         */
-        fun getStorageUtil(): FirebaseStorageUtilInterface {
-            return object : FirebaseStorageUtilInterface {
-                override suspend fun uploadProfileImage(context: Context, imageUri: Uri, userId: String): Result<String> {
-                    // Ignore the passed context and use application context with storageUtil
-                    return storageUtil.uploadProfileImage(ApplicationContextProvider.getApplicationContext(), imageUri, userId)
-                }
-                
-                override suspend fun deleteProfileImage(imageUrl: String): Result<Unit> {
-                    return storageUtil.deleteProfileImage(imageUrl)
-                }
-            }
-        }
+object StorageUtilProvider {
+    // Default implementation of storage utilities
+    private var storageUtil: FirebaseStorageUtilInterface = FirebaseStorageUtil()
+    
+    /**
+     * Gets the current Firebase Storage utilities implementation.
+     * 
+     * @return The current FirebaseStorageUtilInterface implementation
+     */
+    fun getStorageUtil(): FirebaseStorageUtilInterface {
+        return storageUtil
+    }
+    
+    /**
+     * Sets a custom Firebase Storage utilities implementation.
+     * 
+     * This method is primarily used for testing to inject mock implementations.
+     * 
+     * @param util The FirebaseStorageUtilInterface implementation to use
+     */
+    // For testing purposes only
+    fun setStorageUtil(util: FirebaseStorageUtilInterface) {
+        storageUtil = util
     }
 }

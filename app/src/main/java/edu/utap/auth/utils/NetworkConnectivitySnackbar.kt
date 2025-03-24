@@ -18,17 +18,18 @@ import androidx.compose.ui.unit.dp
 /**
  * A composable that displays a snackbar when network connectivity changes
  * @param modifier Modifier to apply to the snackbar host
+ * @param networkMonitor NetworkMonitor to monitor network state
  * @param onNetworkAvailable Callback when network becomes available
  * @param onNetworkUnavailable Callback when network becomes unavailable
  */
 @Composable
 fun NetworkConnectivitySnackbar(
     modifier: Modifier = Modifier,
+    networkMonitor: NetworkMonitor,
     onNetworkAvailable: () -> Unit = {},
     onNetworkUnavailable: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val networkMonitor = remember { NetworkMonitor(context) }
     val networkState by networkMonitor.networkState().collectAsState(initial = NetworkState.AVAILABLE)
     val snackbarHostState = remember { SnackbarHostState() }
     

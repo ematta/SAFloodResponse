@@ -7,13 +7,17 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import android.content.Context
+import android.net.Uri
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import edu.utap.auth.utils.NetworkUtils
 import edu.utap.auth.utils.NetworkUtilsInterface
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.After
+import java.io.File
+import java.io.IOException
 
 @ExperimentalCoroutinesApi
 class UserViewModelTest {
@@ -73,7 +77,7 @@ class UserViewModelTest {
         // Then
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
-        assertEquals(testUserProfile, (state as UserProfileState.Success).userProfile)
+        assertEquals(testUserProfile, (state as UserProfileState.Success).profile)
         coVerify { userRepository.getUserProfile(testUid) }
     }
 
@@ -89,7 +93,7 @@ class UserViewModelTest {
         // Then
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Error)
-        assertEquals(errorMessage, (state as UserProfileState.Error).message)
+        assertEquals(errorMessage, (state as UserProfileState.Error.Generic).message)
         coVerify { userRepository.getUserProfile(testUid) }
     }
 
@@ -104,7 +108,7 @@ class UserViewModelTest {
         // Then
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
-        assertEquals(testUserProfile, (state as UserProfileState.Success).userProfile)
+        assertEquals(testUserProfile, (state as UserProfileState.Success).profile)
         coVerify { userRepository.createUserProfile(testUserProfile) }
     }
 
@@ -119,7 +123,7 @@ class UserViewModelTest {
         // Then
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
-        assertEquals(testUserProfile, (state as UserProfileState.Success).userProfile)
+        assertEquals(testUserProfile, (state as UserProfileState.Success).profile)
         coVerify { userRepository.updateUserProfile(testUserProfile) }
     }
 
@@ -138,6 +142,42 @@ class UserViewModelTest {
         coVerify { userRepository.getUserProfile(testUid) }
     }
 
+    @Test
+    fun `uploadProfileImage should call repository and then refresh profile on success updatesState`() = runTest {
+        val testUri = mockk<Uri>(relaxed = true)
+        val testFile = mockk<File>(relaxed = true)
+        coEvery { storageUtil.uploadProfileImage(any(), any(), any()) } returns Result.success("https://test.com/image.jpg")
+        coEvery { userRepository.updatePhotoUrl(any(), any()) } returns Result.success(Unit)
+        coEvery { userRepository.getUserProfile(any()) } returns Result.success(UserProfile(uid = testUid, photoUrl = "https://test.com/image.jpg"))
+
+        userViewModel.uploadProfileImage(mockContext, testUri, testUid)
+        advanceUntilIdle()
+
+        // Verify state transitions
+        val state = userViewModel.profileState.value
+        assertTrue(state is UserProfileState.Success)
+        assertEquals("https://test.com/image.jpg", (state as UserProfileState.Success).profile.photoUrl)
+
+        coVerify { storageUtil.uploadProfileImage(mockContext, testUri, testUid) }
+        assertEquals((userViewModel.profileState.value as UserProfileState.Success).profile.photoUrl, "https://test.com/image.jpg")
+    }
+
+    @Test
+    fun `uploadProfileImage with failure setsError`() = runTest {
+        val testUri = mockk<Uri>(relaxed = true)
+        coEvery { storageUtil.uploadProfileImage(any(), any(), any()) } returns Result.failure(IOException("Upload failed"))
+
+        userViewModel.uploadProfileImage(mockContext, testUri, testUid)
+        advanceUntilIdle()
+
+        // Verify state transitions
+        val state = userViewModel.profileState.value
+        assertTrue(state is UserProfileState.Error)
+
+        assertEquals((userViewModel.profileState.value as UserProfileState.Error.Generic).message,
+            "Upload failed")
+    }
+
     @After
     fun tearDown() {
         // Restore default implementation
@@ -145,6 +185,7 @@ class UserViewModelTest {
         
         // Reset ApplicationContextProvider mock
         TestApplicationContextProvider.resetMock()
+        unmockkAll()
     }
 
     @Test

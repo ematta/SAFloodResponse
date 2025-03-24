@@ -3,21 +3,34 @@ package edu.utap.auth.utils
 import android.content.Context
 
 /**
- * A provider for NetworkUtilsInterface that uses the application context
- * This helps avoid memory leaks by ensuring we don't hold references to Activity contexts
+ * Provider for network utility functions.
+ * 
+ * This singleton object provides access to the NetworkUtilsInterface implementation.
+ * It follows the service locator pattern, allowing the actual implementation
+ * to be swapped out, particularly useful for testing.
  */
-class NetworkUtilsProvider {
-    companion object {
-        /**
-         * Get a NetworkUtilsInterface instance that uses the application context
-         */
-        fun getNetworkUtils(): NetworkUtilsInterface {
-            return object : NetworkUtilsInterface {
-                override fun isNetworkAvailable(context: Context): Boolean {
-                    // Ignore the passed context and use NetworkUtils with application context
-                    return NetworkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())
-                }
-            }
-        }
+object NetworkUtilsProvider {
+    // Default implementation of network utilities
+    private var networkUtils: NetworkUtilsInterface = NetworkUtilsImpl()
+    
+    /**
+     * Gets the current network utilities implementation.
+     * 
+     * @return The current NetworkUtilsInterface implementation
+     */
+    fun getNetworkUtils(): NetworkUtilsInterface {
+        return networkUtils
+    }
+    
+    /**
+     * Sets a custom network utilities implementation.
+     * 
+     * This method is primarily used for testing to inject mock implementations.
+     * 
+     * @param utils The NetworkUtilsInterface implementation to use
+     */
+    // For testing purposes only
+    fun setNetworkUtils(utils: NetworkUtilsInterface) {
+        networkUtils = utils
     }
 }

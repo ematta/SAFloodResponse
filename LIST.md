@@ -16,11 +16,11 @@ This document outlines all the activities needed to complete the San Antonio Flo
 - [x] Implement user registration screen
   - [x] Email/password registration form
   - [x] Form validation
-  - [ ] Error handling
+  - [x] Error handling
 - [x] Implement login screen
   - [x] Email/password login form
   - [x] Form validation
-  - [ ] Error handling
+  - [x] Error handling
 - [x] Create user profile management
   - [ ] Profile creation UI
   - [x] Profile editing UI
@@ -37,13 +37,13 @@ This document outlines all the activities needed to complete the San Antonio Flo
 
 ## Map Feature
 
-- [ ] Set up Google Maps integration
-  - [ ] Configure API keys
-  - [ ] Implement map view
-  - [ ] Set up map styling
-- [ ] Implement location services
-  - [ ] User location tracking
-  - [ ] Location permission handling
+- [x] Set up Google Maps integration
+  - [x] Configure API keys
+  - [x] Implement map view
+  - [x] Set up map styling
+- [x] Implement location services
+  - [x] User location tracking
+  - [x] Location permission handling
 - [ ] Create flood report visualization
   - [ ] Custom markers for flood reports
   - [ ] Severity-based marker styling

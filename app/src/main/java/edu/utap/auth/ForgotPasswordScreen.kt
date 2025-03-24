@@ -49,7 +49,7 @@ fun ForgotPasswordScreen(
     
     LaunchedEffect(authState) {
         when (authState) {
-            is AuthState.PasswordResetSent -> {
+            is AuthState.Idle.PasswordResetSent -> {
                 // Navigate back to login screen when password reset email is sent
                 onNavigateToLogin()
             }
@@ -155,8 +155,15 @@ fun ForgotPasswordScreen(
                 
                 // Error Message
                 if (authState is AuthState.Error) {
+                    val errorMessage = when (authState) {
+                        is AuthState.Error.Generic -> (authState as AuthState.Error.Generic).message
+                        is AuthState.Error.Network -> (authState as AuthState.Error.Network).message
+                        is AuthState.Error.Authentication -> (authState as AuthState.Error.Authentication).message
+                        is AuthState.Error.Validation -> (authState as AuthState.Error.Validation).message
+                        else -> "Unknown error occurred"
+                    }
                     Text(
-                        text = (authState as AuthState.Error).message,
+                        text = errorMessage,
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 8.dp)
@@ -165,4 +172,4 @@ fun ForgotPasswordScreen(
             }
         }
     }
-} 
+}

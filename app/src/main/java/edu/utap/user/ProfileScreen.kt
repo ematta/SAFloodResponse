@@ -1,21 +1,32 @@
 package edu.utap.user
 
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.icons.twotone.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
+import edu.utap.ui.components.*
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,24 +36,24 @@ fun ProfileScreen(
 ) {
     val profileState by userViewModel.profileState.collectAsStateWithLifecycle()
     val currentUser = FirebaseAuth.getInstance().currentUser
-    
+
     LaunchedEffect(currentUser) {
         currentUser?.uid?.let { uid ->
             userViewModel.getUserProfile(uid)
         }
     }
     
-    var displayName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
-    var photoUrl by remember { mutableStateOf("") }
+    var displayName by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var phoneNumber by rememberSaveable { mutableStateOf("") }
+    var address by rememberSaveable { mutableStateOf("") }
+    var photoUrl by rememberSaveable { mutableStateOf("") }
     
-    var isEditing by remember { mutableStateOf(false) }
+    var isEditing by rememberSaveable { mutableStateOf(false) }
     
     LaunchedEffect(profileState) {
         if (profileState is UserProfileState.Success) {
-            val profile = (profileState as UserProfileState.Success).userProfile
+            val profile = (profileState as UserProfileState.Success).profile
             displayName = profile.displayName
             email = profile.email
             phoneNumber = profile.phoneNumber
@@ -81,12 +92,9 @@ fun ProfileScreen(
         ) {
             when (profileState) {
                 is UserProfileState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    LoadingIndicator()
                 }
                 is UserProfileState.Error -> {
-                    val errorMessage = (profileState as UserProfileState.Error).message
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -94,15 +102,13 @@ fun ProfileScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = errorMessage,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        ErrorMessage(message = "Holder")
                         
-                        Spacer(modifier = Modifier.height(16.dp))
+                        SpacerHeight(16)
                         
-                        Button(onClick = {
+                        AppButton(
+                            text = "Create Profile",
+                            onClick = {
                             currentUser?.uid?.let { uid ->
                                 // Create a default profile if none exists
                                 val newProfile = UserProfile(
@@ -112,9 +118,7 @@ fun ProfileScreen(
                                 )
                                 userViewModel.createUserProfile(newProfile)
                             }
-                        }) {
-                            Text("Create Profile")
-                        }
+                        })
                     }
                 }
                 else -> {
@@ -146,37 +150,34 @@ fun ProfileScreen(
                                 )
                             }
                             
-                            OutlinedTextField(
+                            AppTextField(
                                 value = displayName,
                                 onValueChange = { displayName = it },
-                                label = { Text("Display Name") },
-                                modifier = Modifier.fillMaxWidth()
+                                label = "Display Name"
                             )
                             
-                            OutlinedTextField(
+                            AppTextField(
                                 value = email,
                                 onValueChange = { email = it },
-                                label = { Text("Email") },
-                                modifier = Modifier.fillMaxWidth(),
+                                label = "Email",
                                 enabled = false // Email changes require re-authentication
                             )
                             
-                            OutlinedTextField(
+                            AppTextField(
                                 value = phoneNumber,
                                 onValueChange = { phoneNumber = it },
-                                label = { Text("Phone Number") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                                modifier = Modifier.fillMaxWidth()
+                                label = "Phone Number",
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                             )
                             
-                            OutlinedTextField(
+                            AppTextField(
                                 value = address,
                                 onValueChange = { address = it },
-                                label = { Text("Address") },
-                                modifier = Modifier.fillMaxWidth()
+                                label = "Address"
                             )
                             
-                            Button(
+                            AppButton(
+                                text = "Save",
                                 onClick = {
                                     currentUser?.uid?.let { uid ->
                                         val updatedProfile = UserProfile(
@@ -192,9 +193,7 @@ fun ProfileScreen(
                                     }
                                 },
                                 modifier = Modifier.align(Alignment.End)
-                            ) {
-                                Text("Save")
-                            }
+                            )
                         } else {
                             // View mode
                             ProfileRow(
@@ -245,5 +244,54 @@ fun ProfileRow(
         HorizontalDivider(
             modifier = Modifier.padding(vertical = 8.dp)
         )
+    }
+}
+
+@Composable
+fun ProfileImagePicker(
+    photoUrl: String,
+    onImageSelected: (Uri) -> Unit
+) {
+    val context = LocalContext.current
+    val file = remember { File.createTempFile("profile_", ".jpg", context.cacheDir) }
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) onImageSelected(uri)
+        }
+    )
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let(onImageSelected)
+        }
+    )
+
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        if (photoUrl.isNotEmpty()) {
+            // Existing image loading logic
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                IconButton(onClick = { cameraLauncher.launch(uri) }) {
+                    Icon(Icons.TwoTone.PlayArrow, "Take Photo")
+                }
+                Text("OR", style = MaterialTheme.typography.bodySmall)
+                IconButton(onClick = { galleryLauncher.launch("image/*") }) {
+                    Icon(Icons.TwoTone.Edit, "Choose from Gallery")
+                }
+            }
+        }
     }
 }

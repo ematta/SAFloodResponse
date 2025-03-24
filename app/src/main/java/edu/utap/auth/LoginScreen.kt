@@ -49,14 +49,20 @@ fun LoginScreen(
     var passwordError by remember { mutableStateOf<String?>(null) }
     
     // Check if user is already authenticated
-    if (authState is AuthState.Authenticated) {
+    if (authState is AuthState.Idle.Authenticated) {
         onLoginSuccess()
         return
     }
     
     // Update error message when auth state contains an error
     if (authState is AuthState.Error) {
-        errorMessage = (authState as AuthState.Error).message
+        errorMessage = when (authState) {
+            is AuthState.Error.Generic -> (authState as AuthState.Error.Generic).message
+            is AuthState.Error.Network -> (authState as AuthState.Error.Network).message
+            is AuthState.Error.Authentication -> (authState as AuthState.Error.Authentication).message
+            is AuthState.Error.Validation -> (authState as AuthState.Error.Validation).message
+            else -> "Unknown error occurred"
+        }
     }
     
     Column(
@@ -141,22 +147,24 @@ fun LoginScreen(
                 errorMessage = ""
                 
                 // Validate credentials before attempting login
-                val validationResult = ValidationUtils.validateLoginCredentials(email, password)
-                if (!validationResult.first) {
+                var isValid = true
+                
+                // Validate email
+                if (!ValidationUtils.isValidEmail(email)) {
+                    emailError = "Please enter a valid email address"
+                    isValid = false
+                }
+                
+                // Validate password
+                if (!ValidationUtils.isValidPassword(password)) {
+                    passwordError = "Password must be at least 6 characters"
+                    isValid = false
+                }
+                
+                if (!isValid) {
                     // Handle validation error
-                    val errorMsg = validationResult.second ?: "Invalid credentials"
-                    
-                    // Set specific field error based on validation result
-                    when {
-                        email.isBlank() || !ValidationUtils.validateEmail(email).first -> {
-                            emailError = ValidationUtils.validateEmail(email).second
-                        }
-                        password.isBlank() || !ValidationUtils.validatePassword(password).first -> {
-                            passwordError = ValidationUtils.validatePassword(password).second
-                        }
-                        else -> {
-                            errorMessage = errorMsg
-                        }
+                    if (emailError == null && passwordError == null) {
+                        errorMessage = "Invalid credentials"
                     }
                 } else {
                     // Proceed with login if validation passes

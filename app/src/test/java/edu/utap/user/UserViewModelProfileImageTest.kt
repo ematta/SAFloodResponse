@@ -84,7 +84,7 @@ class UserViewModelProfileImageTest {
     @Test
     fun `uploadProfileImage updates state to Loading then calls storageUtil`() = runTest {
         // Arrange
-        val initialState = UserProfileState.Idle
+        val initialState = UserProfileState.Idle.Initial
         userViewModel = UserViewModel(mockUserRepository, mockStorageUtil, mockNetworkUtils)
         assertTrue(userViewModel.profileState.value is UserProfileState.Idle, "Initial state should be Idle")
         
@@ -118,7 +118,7 @@ class UserViewModelProfileImageTest {
         
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
-        assertEquals(testDownloadUrl, (state as UserProfileState.Success).userProfile.photoUrl)
+        assertEquals(testDownloadUrl, (state as UserProfileState.Success).profile.photoUrl)
     }
     
     @Test
@@ -137,7 +137,7 @@ class UserViewModelProfileImageTest {
         
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Error)
-        assertEquals(errorMessage, (state as UserProfileState.Error).message)
+        assertEquals(errorMessage, (state as UserProfileState.Error.Generic).message)
     }
     
     @Test
@@ -158,7 +158,7 @@ class UserViewModelProfileImageTest {
         
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Error)
-        assertEquals(errorMessage, (state as UserProfileState.Error).message)
+        assertEquals(errorMessage, (state as UserProfileState.Error.Generic).message)
     }
     
     @Test
@@ -180,6 +180,6 @@ class UserViewModelProfileImageTest {
         
         val state = userViewModel.profileState.value
         assertTrue(state is UserProfileState.Success)
-        assertEquals(updatedProfile, (state as UserProfileState.Success).userProfile)
+        assertEquals(updatedProfile, (state as UserProfileState.Success).profile)
     }
 }

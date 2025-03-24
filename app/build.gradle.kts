@@ -11,6 +11,9 @@ android {
     compileSdk = 35
 
     defaultConfig {
+        val properties = org.jetbrains.kotlin.konan.properties.Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        manifestPlaceholders["MAPS_API_KEY"] = properties.getProperty("MAPS_API_KEY", "")
         applicationId = "edu.utap"
         minSdk = 24
         targetSdk = 35
@@ -39,6 +42,10 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -64,6 +71,10 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     
+    // Google Maps
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+
     testImplementation(libs.junit)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
