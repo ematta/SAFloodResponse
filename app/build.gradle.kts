@@ -77,9 +77,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     
     // Mockk for testing (replacing Mockito)
-    testImplementation("io.mockk:mockk:1.13.10")
-    testImplementation("io.mockk:mockk-android:1.13.10")
-    testImplementation("io.mockk:mockk-agent:1.13.10")
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
     
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.arch.core.testing)

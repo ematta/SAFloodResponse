@@ -23,14 +23,12 @@ fun ProfileScreen(
     userViewModel: UserViewModel = viewModel(),
     onNavigateBack: () -> Unit = {}
 ) {
-    val context = LocalContext.current
-    val viewModelWithContext = remember { userViewModel.apply { this.context = context } }
-    val profileState by viewModelWithContext.profileState.collectAsStateWithLifecycle()
+    val profileState by userViewModel.profileState.collectAsStateWithLifecycle()
     val currentUser = FirebaseAuth.getInstance().currentUser
     
     LaunchedEffect(currentUser) {
         currentUser?.uid?.let { uid ->
-            viewModelWithContext.getUserProfile(uid)
+            userViewModel.getUserProfile(uid)
         }
     }
     
@@ -112,7 +110,7 @@ fun ProfileScreen(
                                     displayName = currentUser.displayName ?: "",
                                     email = currentUser.email ?: ""
                                 )
-                                viewModelWithContext.createUserProfile(newProfile)
+                                userViewModel.createUserProfile(newProfile)
                             }
                         }) {
                             Text("Create Profile")
@@ -142,7 +140,7 @@ fun ProfileScreen(
                                     photoUrl = photoUrl,
                                     onImageSelected = { uri ->
                                         currentUser?.uid?.let { uid ->
-                                            viewModelWithContext.uploadProfileImage(context, uri, uid)
+                                            userViewModel.uploadProfileImage(context, uri, uid)
                                         }
                                     }
                                 )
@@ -189,7 +187,7 @@ fun ProfileScreen(
                                             phoneNumber = phoneNumber,
                                             address = address
                                         )
-                                        viewModelWithContext.updateUserProfile(updatedProfile)
+                                        userViewModel.updateUserProfile(updatedProfile)
                                         isEditing = false
                                     }
                                 },

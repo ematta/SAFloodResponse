@@ -13,6 +13,7 @@ import edu.utap.auth.utils.NetworkUtils
 import edu.utap.auth.utils.NetworkUtilsInterface
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.junit.After
 
 @ExperimentalCoroutinesApi
 class UserViewModelTest {
@@ -55,7 +56,10 @@ class UserViewModelTest {
         // Set the mock implementation
         NetworkUtils.setImplementation(mockNetworkUtils)
         
-        userViewModel = UserViewModel(userRepository, storageUtil, mockContext)
+        // Mock ApplicationContextProvider to return mockContext
+        TestApplicationContextProvider.mockApplicationContext(mockContext)
+        
+        userViewModel = UserViewModel(userRepository, storageUtil, mockNetworkUtils)
     }
 
     @Test
@@ -132,6 +136,15 @@ class UserViewModelTest {
         // Then
         coVerify { userRepository.updateDisplayName(testUid, displayName) }
         coVerify { userRepository.getUserProfile(testUid) }
+    }
+
+    @After
+    fun tearDown() {
+        // Restore default implementation
+        NetworkUtils.setImplementation(edu.utap.auth.utils.NetworkUtilsImpl())
+        
+        // Reset ApplicationContextProvider mock
+        TestApplicationContextProvider.resetMock()
     }
 
     @Test

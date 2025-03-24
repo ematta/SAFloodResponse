@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.utap.auth.utils.ApplicationContextProvider
 import edu.utap.auth.utils.NetworkUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +19,8 @@ sealed class UserProfileState {
 
 class UserViewModel(
     private val userRepository: UserRepository = FirebaseUserRepository(),
-    private val storageUtil: FirebaseStorageUtil = FirebaseStorageUtil(),
-    var context: Context
+    private val storageUtil: FirebaseStorageUtilInterface = StorageUtilProvider.getStorageUtil(),
+    private val networkUtils: edu.utap.auth.utils.NetworkUtilsInterface = edu.utap.auth.utils.NetworkUtilsProvider.getNetworkUtils()
 ) : ViewModel() {
 
     private val _profileState = MutableStateFlow<UserProfileState>(UserProfileState.Idle)
@@ -29,7 +30,7 @@ class UserViewModel(
         _profileState.value = UserProfileState.Loading
         
         // Check for network connectivity before attempting to create profile
-        if (!NetworkUtils.isNetworkAvailable(context)) {
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
             return
         }
@@ -51,7 +52,7 @@ class UserViewModel(
         _profileState.value = UserProfileState.Loading
         
         // Check for network connectivity before attempting to get profile
-        if (!NetworkUtils.isNetworkAvailable(context)) {
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
             return
         }
@@ -73,7 +74,7 @@ class UserViewModel(
         _profileState.value = UserProfileState.Loading
         
         // Check for network connectivity before attempting to update profile
-        if (!NetworkUtils.isNetworkAvailable(context)) {
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
             return
         }
@@ -95,7 +96,7 @@ class UserViewModel(
         _profileState.value = UserProfileState.Loading
         
         // Check for network connectivity before attempting to update display name
-        if (!NetworkUtils.isNetworkAvailable(context)) {
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
             return
         }
@@ -105,7 +106,7 @@ class UserViewModel(
             result.fold(
                 onSuccess = {
                     // Only refresh profile if we have network connectivity
-                    if (NetworkUtils.isNetworkAvailable(context)) {
+                    if (networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
                         getUserProfile(uid) // Refresh the profile
                     } else {
                         _profileState.value = UserProfileState.Success(UserProfile(uid = uid, displayName = displayName))
@@ -122,7 +123,7 @@ class UserViewModel(
         _profileState.value = UserProfileState.Loading
         
         // Check for network connectivity before attempting to update photo URL
-        if (!NetworkUtils.isNetworkAvailable(context)) {
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
             return
         }
@@ -132,7 +133,7 @@ class UserViewModel(
             result.fold(
                 onSuccess = {
                     // Only refresh profile if we have network connectivity
-                    if (NetworkUtils.isNetworkAvailable(context)) {
+                    if (networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
                         getUserProfile(uid) // Refresh the profile
                     } else {
                         _profileState.value = UserProfileState.Success(UserProfile(uid = uid, photoUrl = photoUrl))
@@ -149,7 +150,7 @@ class UserViewModel(
         _profileState.value = UserProfileState.Loading
         
         // Check for network connectivity before attempting to upload image
-        if (!NetworkUtils.isNetworkAvailable(context)) {
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             _profileState.value = UserProfileState.Error("No internet connection. Please check your network settings and try again.")
             return
         }
