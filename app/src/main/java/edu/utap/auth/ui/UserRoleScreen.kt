@@ -17,19 +17,16 @@ import edu.utap.auth.utils.RoleUtils
 
 /**
  * Screen for administrators to manage user roles in the application.
- * 
+ *
  * This screen is protected by permission checks to ensure only admin users can access it.
  * It displays a list of all users and allows changing their roles.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserRoleScreen(
-    authViewModel: AuthViewModel = viewModel(),
-    onNavigateBack: () -> Unit
-) {
+fun UserRoleScreen(authViewModel: AuthViewModel = viewModel(), onNavigateBack: () -> Unit) {
     // Get the list of all users from the repository
     val users by authViewModel.observeAllUsers().collectAsStateWithLifecycle(emptyList())
-    
+
     // Permissions check to ensure only admins can access this screen
     PermissionCheck(
         requiredRole = RoleUtils.ROLE_ADMIN,
@@ -74,9 +71,9 @@ fun UserRoleScreen(
                     text = "You don't have permission to access this page",
                     style = MaterialTheme.typography.titleLarge
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Button(onClick = onNavigateBack) {
                     Text("Go Back")
                 }
@@ -87,18 +84,15 @@ fun UserRoleScreen(
 
 /**
  * Composable for a single user item in the role management list.
- * 
+ *
  * @param user The user entity to display
  * @param onRoleChange Callback for when the user's role is changed
  */
 @Composable
-fun UserRoleItem(
-    user: UserEntity,
-    onRoleChange: (String, String) -> Unit
-) {
+fun UserRoleItem(user: UserEntity, onRoleChange: (String, String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val roles = RoleUtils.getAllRoles()
-    
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,14 +107,14 @@ fun UserRoleItem(
                 text = user.name,
                 style = MaterialTheme.typography.titleMedium
             )
-            
+
             Text(
                 text = user.email,
                 style = MaterialTheme.typography.bodyMedium
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -128,14 +122,14 @@ fun UserRoleItem(
                     text = "Current Role: ",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                
+
                 Box {
                     Button(
                         onClick = { expanded = true }
                     ) {
                         Text(user.role)
                     }
-                    
+
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
@@ -152,7 +146,7 @@ fun UserRoleItem(
                     }
                 }
             }
-            
+
             Text(
                 text = RoleUtils.roleDescriptions[user.role] ?: "",
                 style = MaterialTheme.typography.bodySmall,
@@ -160,4 +154,4 @@ fun UserRoleItem(
             )
         }
     }
-} 
+}

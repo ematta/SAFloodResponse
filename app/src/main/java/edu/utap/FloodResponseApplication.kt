@@ -8,10 +8,10 @@ import edu.utap.auth.utils.ApplicationContextProvider
  * Initializes application-wide components
  */
 class FloodResponseApplication : Application() {
-    
+
     override fun onCreate() {
         super.onCreate()
-        
+
         // Initialize the ApplicationContextProvider with the application context
         ApplicationContextProvider.init(this)
     }

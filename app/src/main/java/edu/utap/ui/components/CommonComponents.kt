@@ -51,11 +51,7 @@ fun AppTextField(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppButton(
-    onClick: () -> Unit,
-    text: String,
-    modifier: Modifier = Modifier,
-) {
+fun AppButton(onClick: () -> Unit, text: String, modifier: Modifier = Modifier) {
     var loading by remember { mutableStateOf(false) }
     var enabled by remember { mutableStateOf(false) }
 
@@ -64,7 +60,6 @@ fun AppButton(
         modifier = modifier,
         enabled = enabled && !loading
     ) {
-
         if (loading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
@@ -77,10 +72,7 @@ fun AppButton(
 }
 
 @Composable
-fun ErrorMessage(
-    message: String,
-    modifier: Modifier = Modifier
-) {
+fun ErrorMessage(message: String, modifier: Modifier = Modifier) {
     Text(
         text = message,
         color = MaterialTheme.colorScheme.error,

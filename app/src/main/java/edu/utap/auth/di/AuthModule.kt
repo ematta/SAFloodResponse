@@ -2,8 +2,8 @@ package edu.utap.auth.di
 
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
-import edu.utap.auth.db.AppDatabase
 import edu.utap.auth.AuthRepository
+import edu.utap.auth.db.AppDatabase
 import edu.utap.auth.repository.AuthRepositoryInterface
 
 /**
@@ -11,18 +11,17 @@ import edu.utap.auth.repository.AuthRepositoryInterface
  * This could be replaced with Hilt/Dagger in a more complex application
  */
 object AuthModule {
-    
+
     private var authRepository: AuthRepositoryInterface? = null
-    
-    fun provideAuthRepository(context: Context): AuthRepositoryInterface {
-        return authRepository ?: synchronized(this) {
+
+    fun provideAuthRepository(context: Context): AuthRepositoryInterface =
+        authRepository ?: synchronized(this) {
             val database = AppDatabase.getDatabase(context)
             val userDao = database.userDao()
             val firebaseAuth = FirebaseAuth.getInstance()
-            
+
             AuthRepository(firebaseAuth, userDao).also {
                 authRepository = it
             }
         }
-    }
-} 
+}

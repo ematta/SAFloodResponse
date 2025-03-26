@@ -5,7 +5,7 @@ import java.util.regex.Pattern
 
 /**
  * Utility object for input validation functions.
- * 
+ *
  * This object provides methods to validate user input such as email addresses,
  * passwords, and names. These validation functions are used throughout the
  * application to ensure data integrity before processing or storing user data.
@@ -22,42 +22,37 @@ object ValidationUtils {
 
     /**
      * Validates an email address format.
-     * 
+     *
      * Uses Android's built-in pattern matcher to verify that the email
      * follows a standard email format (username@domain.tld).
-     * 
+     *
      * @param email The email address to validate
      * @return true if the email is valid, false otherwise
      */
-    fun isValidEmail(email: String): Boolean {
-        return email.isNotEmpty() && getEmailPattern().matcher(email).matches()
-    }
-    
+    fun isValidEmail(email: String): Boolean =
+        email.isNotEmpty() && getEmailPattern().matcher(email).matches()
+
     /**
      * Validates a password's strength.
-     * 
+     *
      * Currently only checks for minimum length of 6 characters.
      * Could be extended in the future to check for complexity requirements
      * such as special characters, numbers, or mixed case.
-     * 
+     *
      * @param password The password to validate
      * @return true if the password meets the minimum requirements, false otherwise
      */
-    fun isValidPassword(password: String): Boolean {
-        return password.length >= 6
-    }
-    
+    fun isValidPassword(password: String): Boolean = password.length >= 6
+
     /**
      * Validates a user's display name.
-     * 
+     *
      * Ensures the name is not empty and doesn't exceed the maximum allowed length.
-     * 
+     *
      * @param name The display name to validate
      * @return true if the name is valid, false otherwise
      */
-    fun isValidName(name: String): Boolean {
-        return name.isNotEmpty() && name.length <= 50
-    }
+    fun isValidName(name: String): Boolean = name.isNotEmpty() && name.length <= 50
 
     /**
      * Validates an email address.
@@ -106,7 +101,7 @@ object ValidationUtils {
         }
         if (password.length < 6) {
             return Pair(false, "Password must be at least 6 characters long")
-            }
+        }
         return Pair(true, null)
     }
 
@@ -134,12 +129,12 @@ object ValidationUtils {
         if (!emailValidation.first) {
             return emailValidation
         }
-        
+
         val passwordValidation = validatePassword(password)
         if (!passwordValidation.first) {
             return passwordValidation
         }
-        
+
         return Pair(true, null)
     }
 }

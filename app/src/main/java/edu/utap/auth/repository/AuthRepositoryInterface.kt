@@ -11,17 +11,17 @@ interface AuthRepositoryInterface {
     suspend fun getCurrentUser(): FirebaseUser?
     suspend fun logout()
     suspend fun resetPassword(email: String): Result<Unit>
-    
+
     // Local user management methods
     suspend fun createLocalUser(user: UserEntity): Result<UserEntity>
     suspend fun getLocalUserByEmail(email: String): Result<UserEntity>
     suspend fun getLocalUserById(userId: String): Result<UserEntity>
     suspend fun updateLocalUser(user: UserEntity): Result<UserEntity>
-    
+
     // Sync methods
     suspend fun syncUserToLocal(remoteUser: FirebaseUser): Result<UserEntity>
     suspend fun isAuthenticated(): Boolean
-    
+
     // Observe user flow
     fun observeLocalUsers(): Flow<List<UserEntity>>
-} 
+}

@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -40,36 +40,40 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit
 ) {
     val authState by authViewModel.authState.collectAsState()
-    
+
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    
+
     // Track validation errors for each field
     var nameError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
     var confirmPasswordError by remember { mutableStateOf<String?>(null) }
-    
+
     // Check if user is already authenticated
     if (authState is AuthState.Idle.Authenticated) {
         onRegisterSuccess()
         return
     }
-    
+
     // Update error message when auth state contains an error
     if (authState is AuthState.Error) {
         errorMessage = when (authState) {
-            is AuthState.Error.Generic -> (authState as AuthState.Error.Generic).message
-            is AuthState.Error.Network -> (authState as AuthState.Error.Network).message
-            is AuthState.Error.Authentication -> (authState as AuthState.Error.Authentication).message
-            is AuthState.Error.Validation -> (authState as AuthState.Error.Validation).message
+            is AuthState.Error.Generic ->
+                (authState as AuthState.Error.Generic).message
+            is AuthState.Error.Network ->
+                (authState as AuthState.Error.Network).message
+            is AuthState.Error.Authentication ->
+                (authState as AuthState.Error.Authentication).message
+            is AuthState.Error.Validation ->
+                (authState as AuthState.Error.Validation).message
             else -> "Unknown error occurred"
         }
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -82,7 +86,7 @@ fun RegisterScreen(
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 24.dp)
         )
-        
+
         // Display error message if any
         if (errorMessage.isNotEmpty()) {
             Text(
@@ -91,30 +95,30 @@ fun RegisterScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
-        
+
         // Name field
         OutlinedTextField(
             value = name,
-            onValueChange = { 
-                name = it 
+            onValueChange = {
+                name = it
                 nameError = null
             },
             label = { Text("Full Name") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             isError = nameError != null,
-            supportingText = nameError?.let { 
+            supportingText = nameError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Email field
         OutlinedTextField(
             value = email,
-            onValueChange = { 
-                email = it 
+            onValueChange = {
+                email = it
                 emailError = null
             },
             label = { Text("Email") },
@@ -122,18 +126,18 @@ fun RegisterScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true,
             isError = emailError != null,
-            supportingText = emailError?.let { 
+            supportingText = emailError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Password field
         OutlinedTextField(
             value = password,
-            onValueChange = { 
-                password = it 
+            onValueChange = {
+                password = it
                 passwordError = null
                 // Clear confirm password error if it was a mismatch
                 if (confirmPassword.isNotEmpty() && confirmPassword == password) {
@@ -146,18 +150,18 @@ fun RegisterScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             singleLine = true,
             isError = passwordError != null,
-            supportingText = passwordError?.let { 
+            supportingText = passwordError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Confirm password field
         OutlinedTextField(
             value = confirmPassword,
-            onValueChange = { 
-                confirmPassword = it 
+            onValueChange = {
+                confirmPassword = it
                 confirmPasswordError = null
             },
             label = { Text("Confirm Password") },
@@ -166,13 +170,13 @@ fun RegisterScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             singleLine = true,
             isError = confirmPasswordError != null,
-            supportingText = confirmPasswordError?.let { 
+            supportingText = confirmPasswordError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Register button
         Button(
             onClick = {
@@ -181,34 +185,34 @@ fun RegisterScreen(
                 emailError = null
                 passwordError = null
                 confirmPasswordError = null
-                
+
                 // Validate input using ValidationUtils
                 var isValid = true
-                
+
                 // Validate name
                 if (name.isBlank()) {
                     nameError = "Please enter your name"
                     isValid = false
                 }
-                
+
                 // Validate email
                 if (!ValidationUtils.isValidEmail(email)) {
                     emailError = "Please enter a valid email address"
                     isValid = false
                 }
-                
+
                 // Validate password
                 if (!ValidationUtils.isValidPassword(password)) {
                     passwordError = "Password must be at least 6 characters"
                     isValid = false
                 }
-                
+
                 // Validate password confirmation
                 if (password != confirmPassword) {
                     confirmPasswordError = "Passwords do not match"
                     isValid = false
                 }
-                
+
                 // If all validations pass, proceed with registration
                 if (isValid) {
                     authViewModel.register(email, password, name)
@@ -226,9 +230,9 @@ fun RegisterScreen(
             }
             Text("Register")
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Login navigation link
         TextButton(onClick = onNavigateToLogin) {
             Text("Already have an account? Log in")
@@ -238,7 +242,7 @@ fun RegisterScreen(
 
 /**
  * Special registration screen with role selection for admin use.
- * 
+ *
  * This version of the registration screen includes a role selector
  * and should only be accessible to admin users for creating accounts
  * with specific roles.
@@ -250,22 +254,22 @@ fun AdminRegisterScreen(
     onRegisterSuccess: () -> Unit
 ) {
     val authState by authViewModel.authState.collectAsState()
-    
+
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf(RoleUtils.ROLE_REGULAR) }
     var errorMessage by remember { mutableStateOf("") }
-    
+
     var nameError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
     var confirmPasswordError by remember { mutableStateOf<String?>(null) }
-    
+
     val roles = RoleUtils.getAllRoles()
     var dropdownExpanded by remember { mutableStateOf(false) }
-    
+
     // Check if admin is creating an account for someone else
     if (authState is AuthState.Idle.Authenticated) {
         val viewModel = authViewModel as AuthViewModel
@@ -275,18 +279,22 @@ fun AdminRegisterScreen(
             return
         }
     }
-    
+
     // Update error message when auth state contains an error
     if (authState is AuthState.Error) {
         errorMessage = when (authState) {
-            is AuthState.Error.Generic -> (authState as AuthState.Error.Generic).message
-            is AuthState.Error.Network -> (authState as AuthState.Error.Network).message
-            is AuthState.Error.Authentication -> (authState as AuthState.Error.Authentication).message
-            is AuthState.Error.Validation -> (authState as AuthState.Error.Validation).message
+            is AuthState.Error.Generic ->
+                (authState as AuthState.Error.Generic).message
+            is AuthState.Error.Network ->
+                (authState as AuthState.Error.Network).message
+            is AuthState.Error.Authentication ->
+                (authState as AuthState.Error.Authentication).message
+            is AuthState.Error.Validation ->
+                (authState as AuthState.Error.Validation).message
             else -> "Unknown error occurred"
         }
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -299,7 +307,7 @@ fun AdminRegisterScreen(
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 24.dp)
         )
-        
+
         // Display error message if any
         if (errorMessage.isNotEmpty()) {
             Text(
@@ -308,47 +316,47 @@ fun AdminRegisterScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
-        
+
         // Name field
         OutlinedTextField(
             value = name,
-            onValueChange = { 
-                name = it 
+            onValueChange = {
+                name = it
                 nameError = null
             },
             label = { Text("Full Name") },
             modifier = Modifier.fillMaxWidth(),
             isError = nameError != null,
-            supportingText = nameError?.let { 
+            supportingText = nameError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Email field
         OutlinedTextField(
             value = email,
-            onValueChange = { 
-                email = it 
+            onValueChange = {
+                email = it
                 emailError = null
             },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             isError = emailError != null,
-            supportingText = emailError?.let { 
+            supportingText = emailError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Password field
         OutlinedTextField(
             value = password,
-            onValueChange = { 
-                password = it 
+            onValueChange = {
+                password = it
                 passwordError = null
             },
             label = { Text("Password") },
@@ -356,18 +364,18 @@ fun AdminRegisterScreen(
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             isError = passwordError != null,
-            supportingText = passwordError?.let { 
+            supportingText = passwordError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Confirm password field
         OutlinedTextField(
             value = confirmPassword,
-            onValueChange = { 
-                confirmPassword = it 
+            onValueChange = {
+                confirmPassword = it
                 confirmPasswordError = null
             },
             label = { Text("Confirm Password") },
@@ -375,13 +383,13 @@ fun AdminRegisterScreen(
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             isError = confirmPasswordError != null,
-            supportingText = confirmPasswordError?.let { 
+            supportingText = confirmPasswordError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // Role selection
         Box(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
@@ -395,11 +403,11 @@ fun AdminRegisterScreen(
                         // Icon for dropdown
                     }
                 },
-                supportingText = { 
-                    Text(text = RoleUtils.roleDescriptions[selectedRole] ?: "") 
+                supportingText = {
+                    Text(text = RoleUtils.roleDescriptions[selectedRole] ?: "")
                 }
             )
-            
+
             DropdownMenu(
                 expanded = dropdownExpanded,
                 onDismissRequest = { dropdownExpanded = false },
@@ -416,9 +424,9 @@ fun AdminRegisterScreen(
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Register button
         Button(
             onClick = {
@@ -427,34 +435,34 @@ fun AdminRegisterScreen(
                 emailError = null
                 passwordError = null
                 confirmPasswordError = null
-                
+
                 // Validate input using ValidationUtils
                 var isValid = true
-                
+
                 // Validate name
                 if (name.isBlank()) {
                     nameError = "Please enter a name"
                     isValid = false
                 }
-                
+
                 // Validate email
                 if (!ValidationUtils.isValidEmail(email)) {
                     emailError = "Please enter a valid email address"
                     isValid = false
                 }
-                
+
                 // Validate password
                 if (!ValidationUtils.isValidPassword(password)) {
                     passwordError = "Password must be at least 6 characters"
                     isValid = false
                 }
-                
+
                 // Validate password confirmation
                 if (password != confirmPassword) {
                     confirmPasswordError = "Passwords do not match"
                     isValid = false
                 }
-                
+
                 // If all validations pass, proceed with registration
                 if (isValid) {
                     authViewModel.register(email, password, name, selectedRole)
@@ -473,9 +481,9 @@ fun AdminRegisterScreen(
             }
             Text("Create User Account")
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Cancel button
         TextButton(onClick = onNavigateBack) {
             Text("Cancel")

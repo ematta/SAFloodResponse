@@ -17,36 +17,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ForgotPasswordScreen(
-    viewModel: AuthViewModelInterface,
-    onNavigateToLogin: () -> Unit
-) {
+fun ForgotPasswordScreen(viewModel: AuthViewModelInterface, onNavigateToLogin: () -> Unit) {
     val authState by viewModel.authState.collectAsState()
-    
+
+    val emailMessage = when (authState) {
+        is AuthState.Idle.PasswordResetSent -> "Password reset email sent. Check your inbox."
+        else -> ""
+    }
+
     var email by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf<String?>(null) }
-    
+
     val isEmailValid = remember(email) {
-        email.trim().isNotEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
+        email.trim().isNotEmpty() &&
+            android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
     }
-    
+
     // Function to validate form and submit
     val validateAndSendResetEmail = {
         var isValid = true
-        
+
         // Validate email
         if (!isEmailValid) {
             emailError = "Please enter a valid email address"
             isValid = false
         }
-        
+
         if (isValid) {
             viewModel.resetPassword(email.trim())
         }
-        
+
         isValid
     }
-    
+
     LaunchedEffect(authState) {
         when (authState) {
             is AuthState.Idle.PasswordResetSent -> {
@@ -56,7 +59,7 @@ fun ForgotPasswordScreen(
             else -> { /* Do nothing */ }
         }
     }
-    
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -75,7 +78,7 @@ fun ForgotPasswordScreen(
                     contentDescription = "Back to Login"
                 )
             }
-            
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -88,17 +91,17 @@ fun ForgotPasswordScreen(
                     text = "Forgot Password",
                     style = MaterialTheme.typography.headlineMedium
                 )
-                
+
                 Text(
-                    text = "Enter your email address and we'll send you a link to reset your password",
+                    text = emailMessage,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                
+
                 // Email Field
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { 
+                    onValueChange = {
                         email = it
                         emailError = null
                     },
@@ -132,7 +135,7 @@ fun ForgotPasswordScreen(
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 // Reset Password Button
                 Button(
                     onClick = { validateAndSendResetEmail() },
@@ -152,14 +155,18 @@ fun ForgotPasswordScreen(
                         Text("Send Reset Link")
                     }
                 }
-                
+
                 // Error Message
                 if (authState is AuthState.Error) {
                     val errorMessage = when (authState) {
-                        is AuthState.Error.Generic -> (authState as AuthState.Error.Generic).message
-                        is AuthState.Error.Network -> (authState as AuthState.Error.Network).message
-                        is AuthState.Error.Authentication -> (authState as AuthState.Error.Authentication).message
-                        is AuthState.Error.Validation -> (authState as AuthState.Error.Validation).message
+                        is AuthState.Error.Generic ->
+                            (authState as AuthState.Error.Generic).message
+                        is AuthState.Error.Network ->
+                            (authState as AuthState.Error.Network).message
+                        is AuthState.Error.Authentication ->
+                            (authState as AuthState.Error.Authentication).message
+                        is AuthState.Error.Validation ->
+                            (authState as AuthState.Error.Validation).message
                         else -> "Unknown error occurred"
                     }
                     Text(

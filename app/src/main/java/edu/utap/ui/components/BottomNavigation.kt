@@ -11,10 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 
 @Composable
-fun AppBottomNavigation(
-    navController: NavController,
-    currentRoute: String
-) {
+fun AppBottomNavigation(navController: NavController, currentRoute: String) {
     NavigationBar {
         NavigationBarItem(
             selected = currentRoute == "home",
@@ -30,7 +27,7 @@ fun AppBottomNavigation(
             icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
             label = { Text("Home") }
         )
-        
+
         NavigationBarItem(
             selected = currentRoute == "profile",
             onClick = {
