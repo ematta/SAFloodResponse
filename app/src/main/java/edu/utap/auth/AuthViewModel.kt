@@ -171,7 +171,10 @@ open class AuthViewModel(
                     // Fetch and update the current user entity
                     val userResult = authRepository.getLocalUserById(user.uid)
                     userResult.onSuccess { userEntity ->
-                        _currentUser.value = userEntity
+                        // Ensure we're properly handling the UserEntity type
+                        if (userEntity is UserEntity) {
+                            _currentUser.value = userEntity
+                        }
                     }
                 },
                 onFailure = { error ->

@@ -1,7 +1,6 @@
 package edu.utap.user
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -73,12 +72,12 @@ class FirebaseUserRepository(
 
     /**
      * Creates a new user profile in Firestore and updates Firebase Auth profile.
-     * 
+     *
      * This method performs a multi-step process:
      * 1. Stores the complete profile in Firestore
      * 2. Updates the Firebase Auth user profile with display name if provided
      * 3. Updates the Firebase Auth user profile with photo URL if provided
-     * 
+     *
      * @param userProfile The user profile to create
      * @return Result containing the created profile or an error
      */
@@ -88,17 +87,17 @@ class FirebaseUserRepository(
             usersCollection.document(userProfile.uid)
                 .set(userProfile)
                 .await()
-            
+
             // Update display name in Firebase Auth if provided
             if (userProfile.displayName.isNotEmpty()) {
                 updateDisplayName(userProfile.uid, userProfile.displayName)
             }
-            
+
             // Update photo URL in Firebase Auth if provided
             if (userProfile.photoUrl.isNotEmpty()) {
                 updatePhotoUrl(userProfile.uid, userProfile.photoUrl)
             }
-            
+
             Result.success(userProfile)
         } catch (e: Exception) {
             Result.failure(e)
@@ -107,27 +106,35 @@ class FirebaseUserRepository(
 
     /**
      * Retrieves a user profile from Firestore by user ID.
-     * 
+     *
      * This method queries the Firestore database for a user document with the specified ID.
      * If found, it converts the document to a UserProfile object.
-     * 
+     *
      * @param uid The unique identifier of the user to retrieve
      * @return Result containing the user profile or an error if not found or parsing fails
      */
     override suspend fun getUserProfile(uid: String): Result<UserProfile> {
-        return try {
-            val document = usersCollection.document(uid).get().await()
-            if (document != null && document.exists()) {
-                val userProfile = document.toObject(UserProfile::class.java)
-                userProfile?.let {
-                    Result.success(it)
-                } ?: Result.failure(Exception("Failed to parse user profile"))
+        var status: Result<UserProfile> = Result.failure(Exception("User profile not found"))
+        val document = usersCollection.document(uid).get().await()
+        if (document != null && document.exists()) {
+            // Manually construct UserProfile from document data to ensure proper field mapping
+            val data = document.data
+            if (data != null) {
+                val userProfile = UserProfile(
+                    uid = data["uid"] as? String ?: "",
+                    displayName = data["displayName"] as? String ?: "",
+                    email = data["email"] as? String ?: "",
+                    photoUrl = data["photoUrl"] as? String ?: "",
+                    phoneNumber = data["phoneNumber"] as? String ?: "",
+                    address = data["address"] as? String ?: "",
+                    createdAt = (data["createdAt"] as? Long) ?: System.currentTimeMillis()
+                )
+                status = Result.success(userProfile)
             } else {
-                Result.failure(Exception("User profile not found"))
+                status = Result.failure(Exception("Failed to parse user profile: document data is null"))
             }
-        } catch (e: Exception) {
-            Result.failure(e)
         }
+        return status
     }
 
     /**
