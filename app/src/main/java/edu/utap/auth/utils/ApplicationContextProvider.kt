@@ -9,7 +9,7 @@ import android.content.Context
  */
 object ApplicationContextProvider {
     private lateinit var applicationContext: Context
-    
+
     /**
      * Initialize with the application context
      * This should be called in the Application class's onCreate method
@@ -17,13 +17,15 @@ object ApplicationContextProvider {
     fun init(application: Application) {
         applicationContext = application.applicationContext
     }
-    
+
     /**
      * Get the application context
      */
     fun getApplicationContext(): Context {
         if (!::applicationContext.isInitialized) {
-            throw IllegalStateException("ApplicationContextProvider not initialized. Call init() first.")
+            throw IllegalStateException(
+                "ApplicationContextProvider not initialized. Call init() first."
+            )
         }
         return applicationContext
     }

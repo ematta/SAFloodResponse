@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.StateFlow
  */
 interface AuthViewModelInterface {
     val authState: StateFlow<AuthState>
-    
+
     fun register(
-        email: String, 
-        password: String, 
-        name: String, 
+        email: String,
+        password: String,
+        name: String,
         role: String = RoleUtils.ROLE_REGULAR
     )
     fun login(email: String, password: String)

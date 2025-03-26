@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.utils.ValidationUtils
@@ -39,32 +38,36 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit
 ) {
     val authState by authViewModel.authState.collectAsState()
-    
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    
+
     // Track validation errors for each field
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
-    
+
     // Check if user is already authenticated
     if (authState is AuthState.Idle.Authenticated) {
         onLoginSuccess()
         return
     }
-    
+
     // Update error message when auth state contains an error
     if (authState is AuthState.Error) {
         errorMessage = when (authState) {
-            is AuthState.Error.Generic -> (authState as AuthState.Error.Generic).message
-            is AuthState.Error.Network -> (authState as AuthState.Error.Network).message
-            is AuthState.Error.Authentication -> (authState as AuthState.Error.Authentication).message
-            is AuthState.Error.Validation -> (authState as AuthState.Error.Validation).message
+            is AuthState.Error.Generic ->
+                (authState as AuthState.Error.Generic).message
+            is AuthState.Error.Network ->
+                (authState as AuthState.Error.Network).message
+            is AuthState.Error.Authentication ->
+                (authState as AuthState.Error.Authentication).message
+            is AuthState.Error.Validation ->
+                (authState as AuthState.Error.Validation).message
             else -> "Unknown error occurred"
         }
     }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -77,7 +80,7 @@ fun LoginScreen(
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 24.dp)
         )
-        
+
         if (errorMessage.isNotEmpty()) {
             Text(
                 text = errorMessage,
@@ -85,11 +88,11 @@ fun LoginScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
-        
+
         OutlinedTextField(
             value = email,
-            onValueChange = { 
-                email = it 
+            onValueChange = {
+                email = it
                 // Clear error when user starts typing
                 emailError = null
             },
@@ -97,17 +100,17 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             isError = emailError != null,
-            supportingText = emailError?.let { 
+            supportingText = emailError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         OutlinedTextField(
             value = password,
-            onValueChange = { 
-                password = it 
+            onValueChange = {
+                password = it
                 // Clear error when user starts typing
                 passwordError = null
             },
@@ -116,11 +119,11 @@ fun LoginScreen(
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             isError = passwordError != null,
-            supportingText = passwordError?.let { 
+            supportingText = passwordError?.let {
                 { Text(text = it, color = MaterialTheme.colorScheme.error) }
             }
         )
-        
+
         // Forgot Password link
         Row(
             modifier = Modifier
@@ -135,32 +138,32 @@ fun LoginScreen(
                 Text(
                     text = "Forgot Password?",
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Button(
             onClick = {
                 errorMessage = ""
-                
+
                 // Validate credentials before attempting login
                 var isValid = true
-                
+
                 // Validate email
                 if (!ValidationUtils.isValidEmail(email)) {
                     emailError = "Please enter a valid email address"
                     isValid = false
                 }
-                
+
                 // Validate password
                 if (!ValidationUtils.isValidPassword(password)) {
                     passwordError = "Password must be at least 6 characters"
                     isValid = false
                 }
-                
+
                 if (!isValid) {
                     // Handle validation error
                     if (emailError == null && passwordError == null) {
@@ -185,7 +188,7 @@ fun LoginScreen(
                 Text("Login")
             }
         }
-        
+
         TextButton(
             onClick = onNavigateToRegister,
             modifier = Modifier.padding(top = 16.dp)

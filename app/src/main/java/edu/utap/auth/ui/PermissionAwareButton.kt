@@ -12,10 +12,10 @@ import edu.utap.auth.utils.RoleUtils
 
 /**
  * A button that is only visible to users with sufficient permissions.
- * 
+ *
  * This composable is useful for conditionally showing UI elements based on the user's role.
  * For example, admin-only features or volunteer-specific actions.
- * 
+ *
  * @param text The text to display on the button
  * @param requiredRole The minimum role required to see the button
  * @param onClick The action to perform when the button is clicked
@@ -32,7 +32,7 @@ fun PermissionAwareButton(
     authViewModel: AuthViewModel = viewModel()
 ) {
     val currentUser by authViewModel.currentUser.collectAsState()
-    
+
     // Only render the button if the user has sufficient permissions
     if (currentUser != null && RoleUtils.hasPermission(currentUser!!.role, requiredRole)) {
         Button(
@@ -43,4 +43,4 @@ fun PermissionAwareButton(
             Text(text)
         }
     }
-} 
+}

@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,9 +29,11 @@ fun NetworkConnectivitySnackbar(
     onNetworkUnavailable: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val networkState by networkMonitor.networkState().collectAsState(initial = NetworkState.AVAILABLE)
+    val networkState by networkMonitor.networkState().collectAsState(
+        initial = NetworkState.AVAILABLE
+    )
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     LaunchedEffect(networkState) {
         when (networkState) {
             NetworkState.AVAILABLE -> {
@@ -55,7 +56,7 @@ fun NetworkConnectivitySnackbar(
             }
         }
     }
-    
+
     SnackbarHost(
         hostState = snackbarHostState,
         modifier = modifier.padding(16.dp),

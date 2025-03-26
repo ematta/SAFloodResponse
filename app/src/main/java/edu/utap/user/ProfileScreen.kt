@@ -30,10 +30,7 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(
-    userViewModel: UserViewModel = viewModel(),
-    onNavigateBack: () -> Unit = {}
-) {
+fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: () -> Unit = {}) {
     val profileState by userViewModel.profileState.collectAsStateWithLifecycle()
     val currentUser = FirebaseAuth.getInstance().currentUser
 
@@ -42,15 +39,15 @@ fun ProfileScreen(
             userViewModel.getUserProfile(uid)
         }
     }
-    
+
     var displayName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var phoneNumber by rememberSaveable { mutableStateOf("") }
     var address by rememberSaveable { mutableStateOf("") }
     var photoUrl by rememberSaveable { mutableStateOf("") }
-    
+
     var isEditing by rememberSaveable { mutableStateOf(false) }
-    
+
     LaunchedEffect(profileState) {
         if (profileState is UserProfileState.Success) {
             val profile = (profileState as UserProfileState.Success).profile
@@ -61,7 +58,7 @@ fun ProfileScreen(
             photoUrl = profile.photoUrl
         }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -103,22 +100,23 @@ fun ProfileScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         ErrorMessage(message = "Holder")
-                        
+
                         SpacerHeight(16)
-                        
+
                         AppButton(
                             text = "Create Profile",
                             onClick = {
-                            currentUser?.uid?.let { uid ->
-                                // Create a default profile if none exists
-                                val newProfile = UserProfile(
-                                    uid = uid,
-                                    displayName = currentUser.displayName ?: "",
-                                    email = currentUser.email ?: ""
-                                )
-                                userViewModel.createUserProfile(newProfile)
+                                currentUser?.uid?.let { uid ->
+                                    // Create a default profile if none exists
+                                    val newProfile = UserProfile(
+                                        uid = uid,
+                                        displayName = currentUser.displayName ?: "",
+                                        email = currentUser.email ?: ""
+                                    )
+                                    userViewModel.createUserProfile(newProfile)
+                                }
                             }
-                        })
+                        )
                     }
                 }
                 else -> {
@@ -132,7 +130,7 @@ fun ProfileScreen(
                         if (isEditing) {
                             // Edit mode
                             val context = LocalContext.current
-                            
+
                             // Profile image picker
                             Box(
                                 modifier = Modifier
@@ -149,33 +147,33 @@ fun ProfileScreen(
                                     }
                                 )
                             }
-                            
+
                             AppTextField(
                                 value = displayName,
                                 onValueChange = { displayName = it },
                                 label = "Display Name"
                             )
-                            
+
                             AppTextField(
                                 value = email,
                                 onValueChange = { email = it },
                                 label = "Email",
                                 enabled = false // Email changes require re-authentication
                             )
-                            
+
                             AppTextField(
                                 value = phoneNumber,
                                 onValueChange = { phoneNumber = it },
                                 label = "Phone Number",
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
                             )
-                            
+
                             AppTextField(
                                 value = address,
                                 onValueChange = { address = it },
                                 label = "Address"
                             )
-                            
+
                             AppButton(
                                 text = "Save",
                                 onClick = {
@@ -200,17 +198,17 @@ fun ProfileScreen(
                                 label = "Display Name",
                                 value = displayName
                             )
-                            
+
                             ProfileRow(
                                 label = "Email",
                                 value = email
                             )
-                            
+
                             ProfileRow(
                                 label = "Phone Number",
                                 value = phoneNumber
                             )
-                            
+
                             ProfileRow(
                                 label = "Address",
                                 value = address
@@ -224,10 +222,7 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileRow(
-    label: String,
-    value: String
-) {
+fun ProfileRow(label: String, value: String) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -235,12 +230,12 @@ fun ProfileRow(
             text = label,
             style = MaterialTheme.typography.bodySmall
         )
-        
+
         Text(
             text = value.ifEmpty { "Not provided" },
             style = MaterialTheme.typography.bodyLarge
         )
-        
+
         HorizontalDivider(
             modifier = Modifier.padding(vertical = 8.dp)
         )
@@ -248,10 +243,7 @@ fun ProfileRow(
 }
 
 @Composable
-fun ProfileImagePicker(
-    photoUrl: String,
-    onImageSelected: (Uri) -> Unit
-) {
+fun ProfileImagePicker(photoUrl: String, onImageSelected: (Uri) -> Unit) {
     val context = LocalContext.current
     val file = remember { File.createTempFile("profile_", ".jpg", context.cacheDir) }
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)

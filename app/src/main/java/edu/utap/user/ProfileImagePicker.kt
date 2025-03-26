@@ -29,14 +29,14 @@ fun ProfileImagePicker(
     enabled: Boolean = true
 ) {
     val context = LocalContext.current
-    
+
     // Image picker launcher
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let { onImageSelected(it) }
     }
-    
+
     Box(modifier = modifier) {
         // Profile image
         Card(
@@ -49,7 +49,7 @@ fun ProfileImagePicker(
                         launcher.launch("image/*")
                     }
                 },
-            shape = CircleShape,
+            shape = CircleShape
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 if (photoUrl.isNotEmpty()) {
@@ -76,7 +76,7 @@ fun ProfileImagePicker(
                 }
             }
         }
-        
+
         // Edit icon
         if (enabled) {
             Surface(

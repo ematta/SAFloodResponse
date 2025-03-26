@@ -1,16 +1,15 @@
 package edu.utap.location
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 
-class LocationPermissionHandler(private val activity: ComponentActivity) : DefaultLifecycleObserver {
+class LocationPermissionHandler(private val activity: ComponentActivity) :
+    DefaultLifecycleObserver {
     private var locationPermissionRequest = registerForPermissions()
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -25,7 +24,7 @@ class LocationPermissionHandler(private val activity: ComponentActivity) : Defau
     ) { permissions ->
         when {
             permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) ||
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
                 // Precise or approximate location access granted
                 onPermissionGranted()
             }
@@ -36,10 +35,7 @@ class LocationPermissionHandler(private val activity: ComponentActivity) : Defau
         }
     }
 
-    fun checkAndRequestLocationPermission(
-        onGranted: () -> Unit = {},
-        onDenied: () -> Unit = {}
-    ) {
+    fun checkAndRequestLocationPermission(onGranted: () -> Unit = {}, onDenied: () -> Unit = {}) {
         onPermissionGranted = onGranted
         onPermissionDenied = onDenied
 
@@ -49,21 +45,21 @@ class LocationPermissionHandler(private val activity: ComponentActivity) : Defau
         }
     }
 
-    private fun hasLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            activity,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
+    private fun hasLocationPermission(): Boolean = ContextCompat.checkSelfPermission(
+        activity,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED ||
         ContextCompat.checkSelfPermission(
             activity,
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-    }
 
     private fun requestLocationPermission() {
-        locationPermissionRequest.launch(arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ))
+        locationPermissionRequest.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
     }
 }
