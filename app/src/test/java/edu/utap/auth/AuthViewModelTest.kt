@@ -84,6 +84,10 @@ class AuthViewModelTest {
         
         coEvery { mockAuthRepository.getCurrentUser() } returns null
         
+        // Mock UserEntity for getLocalUserById calls
+        val mockUserEntity = mockk<edu.utap.auth.db.UserEntity>(relaxed = true)
+        coEvery { mockAuthRepository.getLocalUserById(any()) } returns Result.success(mockUserEntity)
+        
         authViewModel = AuthViewModel(mockAuthRepository, mockNetworkUtils)
         testDispatcher.scheduler.advanceUntilIdle() // Process initial coroutine
     }
