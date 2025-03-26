@@ -75,6 +75,9 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.maps.compose)
 
+    // OkHttp for NOAA API
+    implementation(libs.okhttp)
+
     testImplementation(libs.junit)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -91,6 +94,9 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.mockk.android)
     testImplementation(libs.mockk.agent)
+    
+    // Turbine for testing Flow emissions
+    testImplementation(libs.turbine)
     
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.arch.core.testing)

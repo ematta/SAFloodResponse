@@ -8,19 +8,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import edu.utap.location.LocationPermissionHandler
+import edu.utap.weather.WeatherViewModel
 
 @Composable
 fun DashboardScreen(
     navController: NavController,
     locationPermissionHandler: LocationPermissionHandler,
+    weatherViewModel: WeatherViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     var isLocationPermissionGranted by remember { mutableStateOf(false) }
+    val floodAlerts by weatherViewModel.floodAlerts.collectAsState()
+    val isLoading by weatherViewModel.isLoading.collectAsState()
+    val error by weatherViewModel.error.collectAsState()
 
     LaunchedEffect(Unit) {
         locationPermissionHandler.checkAndRequestLocationPermission(
@@ -34,13 +41,56 @@ fun DashboardScreen(
         position = CameraPosition.fromLatLngZoom(sanAntonio, 12f)
     }
 
+    // Fetch flood alerts when the screen is loaded
+    LaunchedEffect(Unit) {
+        weatherViewModel.fetchFloodAlerts(sanAntonio.latitude, sanAntonio.longitude)
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         // Google Map
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(isMyLocationEnabled = isLocationPermissionGranted)
-        )
+        ) {
+            // Add markers for flood alerts
+            floodAlerts.forEach { alert ->
+                Marker(
+                    state = MarkerState(position = LatLng(alert.latitude, alert.longitude)),
+                    title =
+                        alert.title,
+                    snippet = alert.description,
+                    icon = BitmapDescriptorFactory.defaultMarker(
+                        when (alert.severity.lowercase()) {
+                            "extreme" -> BitmapDescriptorFactory.HUE_RED
+                            "severe" -> BitmapDescriptorFactory.HUE_ORANGE
+                            "moderate" -> BitmapDescriptorFactory.HUE_YELLOW
+                            else -> BitmapDescriptorFactory.HUE_BLUE
+                        }
+                    )
+                )
+            }
+        }
+
+        // Show loading indicator
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(48.dp)
+            )
+        }
+
+        // Show error message if any
+        error?.let { errorMessage ->
+            Snackbar(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(16.dp)
+            ) {
+                Text(errorMessage)
+            }
+        }
 
         if (!isLocationPermissionGranted) {
             Snackbar(
@@ -92,15 +142,15 @@ fun DashboardScreen(
             )
         }
 
-        // Floating Action Button for adding markers/reports
+        // Floating Action Button for refreshing alerts
         FloatingActionButton(
-            onClick = { /* Handle adding new markers/reports */ },
+            onClick = { weatherViewModel.fetchFloodAlerts(sanAntonio.latitude, sanAntonio.longitude) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
                 .padding(bottom = 80.dp) // Add padding to place above navigation bar
         ) {
-            Icon(Icons.Default.Add, contentDescription = "Add Report")
+            Icon(Icons.Default.Refresh, contentDescription = "Refresh Alerts")
         }
     }
 }
