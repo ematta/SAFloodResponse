@@ -1,5 +1,6 @@
 package edu.utap.auth
 
+import edu.utap.auth.utils.RoleUtils
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -8,7 +9,12 @@ import kotlinx.coroutines.flow.StateFlow
 interface AuthViewModelInterface {
     val authState: StateFlow<AuthState>
     
-    fun register(email: String, password: String, name: String)
+    fun register(
+        email: String, 
+        password: String, 
+        name: String, 
+        role: String = RoleUtils.ROLE_REGULAR
+    )
     fun login(email: String, password: String)
     fun logout()
     fun resetPassword(email: String)

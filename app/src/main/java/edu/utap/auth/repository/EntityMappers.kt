@@ -2,11 +2,12 @@ package edu.utap.auth.repository
 
 import com.google.firebase.auth.FirebaseUser
 import edu.utap.auth.db.UserEntity
+import edu.utap.auth.utils.RoleUtils
 
 /**
  * Extension function to create a UserEntity from a FirebaseUser
  */
-fun FirebaseUser.toUserEntity(role: String = "regular"): UserEntity {
+fun FirebaseUser.toUserEntity(role: String = RoleUtils.ROLE_REGULAR): UserEntity {
     return UserEntity(
         userId = this.uid,
         name = this.displayName ?: "",

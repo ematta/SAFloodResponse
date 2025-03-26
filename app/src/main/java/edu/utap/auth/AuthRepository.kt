@@ -66,7 +66,13 @@ class AuthRepository(
                 }
                 
                 // Step 3: Create user in local Room database
-                val userEntity = user.toUserEntity()
+                val userEntity = UserEntity(
+                    userId = user.uid,
+                    name = name,
+                    email = email,
+                    profilePic = user.photoUrl?.toString(),
+                    role = "regular"
+                )
                 createLocalUser(userEntity)
                 
                 // Step 4: Create user profile in Firestore

@@ -2,11 +2,13 @@ package edu.utap.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.utap.auth.db.UserEntity
 import edu.utap.auth.repository.AuthRepositoryInterface
 import edu.utap.auth.utils.FirebaseErrorMapper
 import edu.utap.auth.utils.NetworkUtilsInterface
 import edu.utap.auth.utils.NetworkUtilsProvider
 import edu.utap.auth.utils.ApplicationContextProvider
+import edu.utap.auth.utils.RoleUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,6 +23,7 @@ import kotlinx.coroutines.launch
  * - Password reset
  * - Logout
  * - Authentication state management
+ * - Role-based access control
  * 
  * It also includes network connectivity checks before attempting operations
  * that require internet access.
@@ -33,6 +36,10 @@ open class AuthViewModel(
     // StateFlow to expose authentication state to UI components
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle.Initial)
     override val authState: StateFlow<AuthState> = _authState
+    
+    // StateFlow to expose the current user entity
+    private val _currentUser = MutableStateFlow<UserEntity?>(null)
+    val currentUser: StateFlow<UserEntity?> = _currentUser
 
     init {
         // Check authentication state when ViewModel is created
@@ -48,13 +55,20 @@ open class AuthViewModel(
      */
     private fun checkAuthState() {
         viewModelScope.launch {
-            val currentUser = authRepository.getCurrentUser()
-            _authState.value = if (currentUser != null) {
+            val firebaseUser = authRepository.getCurrentUser()
+            if (firebaseUser != null) {
                 // User is authenticated
-                AuthState.Idle.Authenticated(currentUser)
+                _authState.value = AuthState.Idle.Authenticated(firebaseUser)
+                
+                // Fetch and update the current user entity
+                val userResult = authRepository.getLocalUserById(firebaseUser.uid)
+                userResult.onSuccess { userEntity ->
+                    _currentUser.value = userEntity
+                }
             } else {
                 // User is not authenticated
-                AuthState.Idle.Unauthenticated
+                _authState.value = AuthState.Idle.Unauthenticated
+                _currentUser.value = null
             }
         }
     }
@@ -74,8 +88,14 @@ open class AuthViewModel(
      * @param email User's email address
      * @param password User's password
      * @param name User's display name
+     * @param role User's role (defaults to regular user)
      */
-    override fun register(email: String, password: String, name: String) {
+    override fun register(
+        email: String,
+        password: String,
+        name: String,
+        role: String
+    ) {
         // Update state to indicate loading
         _authState.value = AuthState.Loading.Registration
         
@@ -92,6 +112,19 @@ open class AuthViewModel(
                 onSuccess = { user ->
                     // Registration successful, update state to authenticated
                     _authState.value = AuthState.Idle.Authenticated(user)
+                    
+                    // Fetch and update the current user entity
+                    val userResult = authRepository.getLocalUserById(user.uid)
+                    userResult.onSuccess { userEntity ->
+                        // Update user role if needed
+                        if (userEntity.role != role) {
+                            val updatedUser = userEntity.copy(role = role)
+                            authRepository.updateLocalUser(updatedUser)
+                            _currentUser.value = updatedUser
+                        } else {
+                            _currentUser.value = userEntity
+                        }
+                    }
                 },
                 onFailure = { error ->
                     // Registration failed, map error to user-friendly message
@@ -134,6 +167,13 @@ open class AuthViewModel(
                 onSuccess = { user ->
                     // Login successful, update state to authenticated
                     _authState.value = AuthState.Idle.Authenticated(user)
+                    
+                    // Fetch and update the current user entity
+                    val userResult = authRepository.getLocalUserById(user.uid)
+                    userResult.onSuccess { userEntity ->
+                        // No need to check type as userEntity is already of correct type
+                        _currentUser.value = userEntity
+                    }
                 },
                 onFailure = { error ->
                     // Login failed, map error to user-friendly message
@@ -159,6 +199,7 @@ open class AuthViewModel(
             authRepository.logout()
             // Update state to unauthenticated
             _authState.value = AuthState.Idle.Unauthenticated
+            _currentUser.value = null
         }
     }
 
@@ -202,4 +243,67 @@ open class AuthViewModel(
             )
         }
     }
+    
+    /**
+     * Updates the role of a user.
+     * 
+     * This method allows changing a user's role, which affects their permissions 
+     * throughout the application.
+     * 
+     * Note: This should typically only be called by admin users.
+     * 
+     * @param userId The ID of the user to update
+     * @param newRole The new role to assign to the user
+     * @return Result indicating success or failure of the operation
+     */
+    fun updateUserRole(userId: String, newRole: String): Result<UserEntity> {
+        return try {
+            var result: Result<UserEntity> = Result.failure(Exception("Role update failed"))
+            
+            viewModelScope.launch {
+                val userResult = authRepository.getLocalUserById(userId)
+                userResult.onSuccess { userEntity ->
+                    if (userEntity.role != newRole) {
+                        val updatedUser = userEntity.copy(role = newRole)
+                        result = authRepository.updateLocalUser(updatedUser)
+                        
+                        // If this is the current user, update the currentUser flow
+                        if (userId == _currentUser.value?.userId) {
+                            _currentUser.value = updatedUser
+                        }
+                    } else {
+                        // Role already set to requested value
+                        result = Result.success(userEntity)
+                    }
+                }
+            }
+            
+            result
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Checks if the current user has a specific permission.
+     * 
+     * @param requiredRole The minimum role required for the permission
+     * @return true if the user has the required permission, false otherwise
+     */
+    fun hasPermission(requiredRole: String): Boolean {
+        val user = _currentUser.value ?: return false
+        return RoleUtils.hasPermission(user.role, requiredRole)
+    }
+    
+    /**
+     * Observes all users in the system.
+     * 
+     * This method returns a Flow of all UserEntity objects in the database,
+     * which can be collected to display user lists or perform batch operations.
+     * 
+     * Note: This should typically only be accessed by admin users.
+     * 
+     * @return Flow of all users in the system
+     */
+    fun observeAllUsers() = authRepository.observeLocalUsers()
 }

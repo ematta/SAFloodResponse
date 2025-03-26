@@ -70,6 +70,15 @@ class UserRepositoryTest {
         // Setup document snapshot
         every { documentSnapshot.exists() } returns true
         every { documentSnapshot.toObject(UserProfile::class.java) } returns testUserProfile
+        every { documentSnapshot.data } returns mapOf(
+            "uid" to testUserProfile.uid,
+            "displayName" to testUserProfile.displayName,
+            "email" to testUserProfile.email,
+            "photoUrl" to testUserProfile.photoUrl,
+            "phoneNumber" to testUserProfile.phoneNumber,
+            "address" to testUserProfile.address,
+            "createdAt" to testUserProfile.createdAt
+        )
         
         // Setup Firebase Auth
         every { firebaseAuth.currentUser } returns firebaseUser
@@ -164,4 +173,4 @@ class UserRepositoryTest {
         assertTrue(result.isFailure)
         verify(exactly = 0) { firebaseUser.updateProfile(any()) }
     }
-} 
+}
