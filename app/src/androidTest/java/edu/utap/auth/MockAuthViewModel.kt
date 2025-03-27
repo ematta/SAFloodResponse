@@ -14,12 +14,16 @@ class MockAuthViewModel(
     
     private val _authState = MutableStateFlow<AuthState>(initialState)
     override val authState: StateFlow<AuthState> = _authState
-    
-    override fun register(email: String, password: String, name: String) {
+    override fun register(
+        email: String,
+        password: String,
+        name: String,
+        role: String
+    ) {
         _authState.value = AuthState.Loading.Registration
         _authState.value = registerBehavior(email, password, name)
     }
-    
+
     override fun login(email: String, password: String) {
         _authState.value = AuthState.Loading.Login
         _authState.value = AuthState.Idle.Unauthenticated

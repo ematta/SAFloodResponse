@@ -30,7 +30,8 @@ class LoginScreenTest {
         composeTestRule.setContentWithTestViewModelFactory {
             LoginScreen(
                 onNavigateToRegister = {},
-                onLoginSuccess = {}
+                onLoginSuccess = {},
+                onNavigateToForgotPassword = {}
             )
         }
 
@@ -47,7 +48,8 @@ class LoginScreenTest {
         composeTestRule.setContentWithTestViewModelFactory {
             LoginScreen(
                 onNavigateToRegister = {},
-                onLoginSuccess = {}
+                onLoginSuccess = {},
+                onNavigateToForgotPassword = {}
             )
         }
 
@@ -65,7 +67,8 @@ class LoginScreenTest {
         composeTestRule.setContentWithTestViewModelFactory {
             LoginScreen(
                 onNavigateToRegister = {},
-                onLoginSuccess = {}
+                onLoginSuccess = {},
+                onNavigateToForgotPassword = {}
             )
         }
 
@@ -83,7 +86,8 @@ class LoginScreenTest {
         composeTestRule.setContentWithTestViewModelFactory {
             LoginScreen(
                 onNavigateToRegister = {},
-                onLoginSuccess = {}
+                onLoginSuccess = {},
+                onNavigateToForgotPassword = {}
             )
         }
 
@@ -106,7 +110,8 @@ class LoginScreenTest {
             LoginScreen(
                 authViewModel = mockViewModel,
                 onNavigateToRegister = {},
-                onLoginSuccess = { loginSuccessful = true }
+                onLoginSuccess = { loginSuccessful = true },
+                onNavigateToForgotPassword = {}
             )
         }
 
