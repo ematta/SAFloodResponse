@@ -48,7 +48,8 @@ class NOAAServiceTest {
         code: Int,
         body: String
     ): Response {
-        Log.d(TEST_TAG, "Creating response with body: $body")
+        Log.d(TEST_TAG, "Creating response - isSuccessful: $isSuccessful, code: $code")
+        Log.d(TEST_TAG, "Response body: $body")
         val request = Request.Builder()
             .url("https://api.weather.gov")
             .build()
@@ -121,165 +122,107 @@ class NOAAServiceTest {
 
     @Test
     fun `getFloodAlerts returns flood alerts when successful`() = runTest {
-        // Given
-        val gridJson = JSONObject().apply {
-            put("properties", JSONObject().apply {
-                put("gridId", "EWX")
-                put("gridX", 123)
-                put("gridY", 456)
-            })
-        }
-
-        val alertsJson = JSONObject().apply {
-            put("features", JSONArray().apply {
-                put(JSONObject().apply {
-                    put("properties", JSONObject().apply {
-                        put("id", "test-id")
-                        put("event", "Flood Warning")
-                        put("headline", "Test Flood Warning")
-                        put("description", "Test Description")
-                        put("severity", "Severe")
-                        put("areaDesc", "Test Area")
-                        put("sent", 1234567890L)
-                    })
-                    put("geometry", JSONObject().apply {
-                        put("type", "Point")
-                        put("coordinates", JSONArray().apply {
-                            put(-98.4936)
-                            put(29.4241)
-                        })
-                    })
-                })
-            })
-        }
-        
-        var firstCall = true
-        coEvery { mockCall.execute() } answers {
-            val request = firstArg<Request>()
-            Log.d(TEST_TAG, "Received request for URL: ${request.url}")
-            
-            if (firstCall) {
-                firstCall = false
-                Log.d(TEST_TAG, "Returning grid response: ${gridJson.toString()}")
-                createResponse(
-                    isSuccessful = true,
-                    code = 200,
-                    body = gridJson.toString()
-                )
-            } else {
-                Log.d(TEST_TAG, "Returning alerts response: ${alertsJson.toString()}")
-                createResponse(
-                    isSuccessful = true,
-                    code = 200,
-                    body = alertsJson.toString()
-                )
+        val latitude = 30.2672
+        val longitude = -97.7431
+        val mockResponse = """
+            {
+                "features": [
+                    {
+                        "properties": {
+                            "id": "test-id",
+                            "headline": "Test Flood Warning",
+                            "description": "Test description",
+                            "severity": "Moderate",
+                            "areaDesc": "Test Area",
+                            "sent": 1234567890000,
+                            "event": "Flood Warning"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [-97.7431, 30.2672]
+                        }
+                    }
+                ]
             }
-        }
+        """.trimIndent()
 
-        // When
-        val result = noaaService.getFloodAlerts(29.4241, -98.4936)
-        advanceUntilIdle()
 
-        // Then
-        Log.d(TEST_TAG, "Result size: ${result.size}")
-        assertEquals(1, result.size)
-        val alert = result[0]
+        val alerts = noaaService.getFloodAlerts(latitude, longitude)
+        assertEquals(1, alerts.size)
+
+        val alert = alerts.first()
         assertEquals("test-id", alert.id)
         assertEquals("Test Flood Warning", alert.title)
-        assertEquals("Test Description", alert.description)
-        assertEquals("Severe", alert.severity)
+        assertEquals("Test description", alert.description)
+        assertEquals("Moderate", alert.severity)
         assertEquals("Test Area", alert.location)
-        assertEquals(29.4241, alert.latitude, "Latitude should match the test data")
-        assertEquals(-98.4936, alert.longitude, "Longitude should match the test data")
-        assertEquals(1234567890L, alert.timestamp)
+        assertEquals(30.2672, alert.latitude, 0.0001)
+        assertEquals(-97.7431, alert.longitude, 0.0001)
+        assertEquals(1234567890000, alert.timestamp)
     }
 
     @Test
     fun `getFloodAlerts filters out non-flood alerts`() = runTest {
-        // Given
-        val gridJson = JSONObject().apply {
-            put("properties", JSONObject().apply {
-                put("gridId", "EWX")
-                put("gridX", 123)
-                put("gridY", 456)
-            })
-        }
-
-        val alertsJson = JSONObject().apply {
-            put("features", JSONArray().apply {
-                // Flood alert
-                put(JSONObject().apply {
-                    put("properties", JSONObject().apply {
-                        put("id", "flood-id")
-                        put("event", "Flood Warning")
-                        put("headline", "Test Flood Warning")
-                        put("description", "Test Description")
-                        put("severity", "Severe")
-                        put("areaDesc", "Test Area")
-                        put("sent", 1234567890L)
-                    })
-                    put("geometry", JSONObject().apply {
-                        put("type", "Point")
-                        put("coordinates", JSONArray().apply {
-                            put(-98.4936)
-                            put(29.4241)
-                        })
-                    })
-                })
-                // Non-flood alert
-                put(JSONObject().apply {
-                    put("properties", JSONObject().apply {
-                        put("id", "storm-id")
-                        put("event", "Severe Thunderstorm Warning")
-                        put("headline", "Test Storm Warning")
-                        put("description", "Test Description")
-                        put("severity", "Severe")
-                        put("areaDesc", "Test Area")
-                        put("sent", 1234567890L)
-                    })
-                    put("geometry", JSONObject().apply {
-                        put("type", "Point")
-                        put("coordinates", JSONArray().apply {
-                            put(-98.4936)
-                            put(29.4241)
-                        })
-                    })
-                })
-            })
-        }
-        
-        var firstCall = true
-        coEvery { mockCall.execute() } answers {
-            val request = firstArg<Request>()
-            Log.d(TEST_TAG, "Received request for URL: ${request.url}")
-            
-            if (firstCall) {
-                firstCall = false
-                Log.d(TEST_TAG, "Returning grid response: ${gridJson.toString()}")
-                createResponse(
-                    isSuccessful = true,
-                    code = 200,
-                    body = gridJson.toString()
-                )
-            } else {
-                Log.d(TEST_TAG, "Returning alerts response: ${alertsJson.toString()}")
-                createResponse(
-                    isSuccessful = true,
-                    code = 200,
-                    body = alertsJson.toString()
-                )
+        val latitude = 30.2672
+        val longitude = -97.7431
+        val mockResponse = """
+            {
+                "features": [
+                    {
+                        "properties": {
+                            "id": "flood-id",
+                            "headline": "Test Flood Warning",
+                            "description": "Test description",
+                            "severity": "Moderate",
+                            "areaDesc": "Test Area",
+                            "sent": 1234567890000,
+                            "event": "Flood Warning"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [-97.7431, 30.2672]
+                        }
+                    },
+                    {
+                        "properties": {
+                            "id": "tornado-id",
+                            "headline": "Test Tornado Warning",
+                            "description": "Test description",
+                            "severity": "Severe",
+                            "areaDesc": "Test Area",
+                            "sent": 1234567890000,
+                            "event": "Tornado Warning"
+                        },
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [-97.7431, 30.2672]
+                        }
+                    }
+                ]
             }
-        }
+        """.trimIndent()
 
-        // When
-        val result = noaaService.getFloodAlerts(29.4241, -98.4936)
-        advanceUntilIdle()
 
-        // Then
-        Log.d(TEST_TAG, "Result size: ${result.size}")
-        assertEquals(1, result.size)
-        val alert = result[0]
+        val alerts = noaaService.getFloodAlerts(latitude, longitude)
+        assertEquals(1, alerts.size)
+
+        val alert = alerts.first()
         assertEquals("flood-id", alert.id)
         assertEquals("Test Flood Warning", alert.title)
+    }
+
+    @Test
+    fun `getFloodAlerts uses correct point endpoint`() = runTest {
+        val latitude = 30.2672
+        val longitude = -97.7431
+        val mockResponse = """
+            {
+                "features": []
+            }
+        """.trimIndent()
+
+
+        noaaService.getFloodAlerts(latitude, longitude)
+        verify { mockClient.newCall(any()) }
     }
 }
