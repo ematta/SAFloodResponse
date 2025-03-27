@@ -79,7 +79,8 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                             style = MaterialTheme.typography.titleMedium
                         )
 
-                        fun loc(location: Location?) = "Current Location: ${location?.latitude}, ${location?.longitude}"
+                        fun loc(location: Location?) =
+                            "Current Location: ${location?.latitude}, ${location?.longitude}"
                         // Current Location Display
                         currentLocation?.let { location ->
                             Text(

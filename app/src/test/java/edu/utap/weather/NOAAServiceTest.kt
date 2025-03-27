@@ -1,5 +1,6 @@
 package edu.utap.weather
 
+import android.util.Log
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -22,6 +23,8 @@ import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+val TAG = "NOAAServiceTest"
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class NOAAServiceTest {
     private lateinit var noaaService: NOAAService
@@ -43,7 +46,7 @@ class NOAAServiceTest {
         code: Int,
         body: String
     ): Response {
-        println("Creating response with body: $body")
+        Log.d(TAG, "Creating response with body: $body")
         val request = Request.Builder()
             .url("https://api.weather.gov")
             .build()
@@ -90,14 +93,14 @@ class NOAAServiceTest {
         every { mockCall.execute() } answers {
             if (firstCall) {
                 firstCall = false
-                println("Returning grid response")
+                Log.d(TAG, "Returning grid response")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
                     body = gridJson.toString()
                 )
             } else {
-                println("Returning failed alerts response")
+                Log.d(TAG, "Returning failed alerts response")
                 createResponse(
                     isSuccessful = false,
                     code = 500,
@@ -148,17 +151,17 @@ class NOAAServiceTest {
         }
         
         var firstCall = true
-        every { mockCall.execute() } answers {
+        coEvery { mockCall.execute() } answers {
             if (firstCall) {
                 firstCall = false
-                println("Returning grid response")
+                Log.d(TAG, "Returning grid response")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
                     body = gridJson.toString()
                 )
             } else {
-                println("Returning alerts response")
+                Log.d(TAG, "Returning alerts response")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
@@ -240,17 +243,17 @@ class NOAAServiceTest {
         }
         
         var firstCall = true
-        every { mockCall.execute() } answers {
+        coEvery { mockCall.execute() } answers {
             if (firstCall) {
                 firstCall = false
-                println("Returning grid response")
+                Log.d(TAG, "Returning grid response")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
                     body = gridJson.toString()
                 )
             } else {
-                println("Returning alerts response")
+                Log.d(TAG, "Returning alerts response")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
