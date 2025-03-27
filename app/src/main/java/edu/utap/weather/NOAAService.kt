@@ -82,7 +82,7 @@ class NOAAService(
                     Log.d(TAG, "Processing alert $i - event: $event")
                     
                     // Only process flood-related alerts
-                    if (!event.contains("Flood", ignoreCase = true)) {
+                    if (!event.lowercase().contains("flood")) {
                         Log.d(TAG, "Skipping non-flood alert: $event")
                         continue
                     }
@@ -98,8 +98,8 @@ class NOAAService(
                             description = alertProperties.getString("description"),
                             severity = alertProperties.getString("severity"),
                             location = alertProperties.getString("areaDesc"),
-                            latitude = coordinates.getDouble(1),
-                            longitude = coordinates.getDouble(0),
+                            latitude = coordinates.getDouble(1),  // Latitude is second in GeoJSON coordinates
+                            longitude = coordinates.getDouble(0), // Longitude is first in GeoJSON coordinates
                             timestamp = alertProperties.getLong("sent")
                         )
                     )
