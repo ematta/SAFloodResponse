@@ -28,6 +28,7 @@ import edu.utap.auth.utils.NetworkMonitor
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
+import edu.utap.ui.screens.FloodMapTestScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
 import edu.utap.user.ProfileScreen
 
@@ -131,10 +132,13 @@ fun AuthenticatedApp(
 
     Scaffold(
         topBar = {
-            AppHeader()
+            AppHeader(
+                onTestScreenClick = {
+                    navController.navigate("flood_map_test")
+                }
+            )
         },
         snackbarHost = {
-            // Add network connectivity snackbar to show network status
             NetworkConnectivitySnackbar(networkMonitor = networkMonitor)
         }
     ) { paddingValues ->
@@ -169,6 +173,12 @@ fun AuthenticatedApp(
                     onNavigateBack = {
                         navController.popBackStack()
                     }
+                )
+            }
+
+            composable("flood_map_test") {
+                FloodMapTestScreen(
+                    navController = navController
                 )
             }
         }

@@ -12,7 +12,9 @@ import edu.utap.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppHeader() {
+fun AppHeader(
+    onTestScreenClick: () -> Unit = {}
+) {
     TopAppBar(
         title = {
             Row(
@@ -29,6 +31,16 @@ fun AppHeader() {
                     text = "SA Floods",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        actions = {
+            // Test screen button (temporary)
+            IconButton(onClick = onTestScreenClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_smiley_face),
+                    contentDescription = "Test Flood Map",
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
