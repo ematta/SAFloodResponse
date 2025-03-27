@@ -133,8 +133,13 @@ class FloodReportViewModelTest {
         val mockTask = mockk<Task<Location>>(relaxed = true)
         every { mockTask.isSuccessful } returns true
         every { mockTask.result } returns mockLocation
-        every { locationUtils.getLastKnownLocation() } returns mockTask
-        
+        // No need to mock getLastKnownLocation if using manual location
+        // every { locationUtils.getLastKnownLocation() } returns mockTask
+
+        // Enable manual location for the test
+        viewModel.setManualLocation(true)
+        viewModel.updateManualLocation(37.7749, -122.4194)
+
         // Mock repository
         coEvery { floodReportRepository.createReport(any()) } returns Result.success(
             FloodReport(
@@ -215,7 +220,8 @@ class FloodReportViewModelTest {
         
         // When
         viewModel.confirmReport(reportId)
-        
+        advanceUntilIdle() // Ensure coroutine completes
+
         // Then
         coVerify { floodReportRepository.updateReport(any()) }
     }
@@ -240,7 +246,8 @@ class FloodReportViewModelTest {
         
         // When
         viewModel.denyReport(reportId)
-        
+        advanceUntilIdle() // Ensure coroutine completes
+
         // Then
         coVerify { floodReportRepository.updateReport(any()) }
     }

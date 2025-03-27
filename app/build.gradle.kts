@@ -94,13 +94,14 @@ dependencies {
     
     // Mockk for testing (replacing Mockito)
     testImplementation(libs.mockk)
-    testImplementation(libs.mockk.android)
+    // testImplementation(libs.mockk.android) // Removed: Typically for instrumented tests
     testImplementation(libs.mockk.agent)
-    
+
     // Turbine for testing Flow emissions
     testImplementation(libs.turbine)
     
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(kotlin("test"))
+    // Force Gradle sync
 }

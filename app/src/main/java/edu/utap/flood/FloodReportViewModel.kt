@@ -116,6 +116,10 @@ class FloodReportViewModel(
 
             try {
                 val currentUser = authViewModel.getCurrentUser()
+                if (currentUser == null) {
+                    _reportState.value = ReportState.Error("User not logged in")
+                    return@launch
+                }
 
                 val location = if (_isManualLocation.value) {
                     Location("manual").apply {
@@ -128,7 +132,7 @@ class FloodReportViewModel(
 
                 val report = FloodReport(
                     reportId = UUID.randomUUID().toString(),
-                    userId = currentUser.toString(),
+                    userId = currentUser.userId, // Corrected: Use userId field
                     latitude = location.latitude,
                     longitude = location.longitude,
                     description = _description.value,

@@ -13,8 +13,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.ResponseBody
-import okhttp3.ResponseBody.Companion.toResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody // Import OkHttp extension
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Before
@@ -48,14 +47,14 @@ class NOAAServiceTest {
         val request = Request.Builder()
             .url("https://api.weather.gov")
             .build()
-        val mockBody = mockk<ResponseBody>()
-        every { mockBody.string() } returns body
+        // Use OkHttp's extension to create a real ResponseBody
+        val responseBody = body.toResponseBody(jsonMediaType)
         return Response.Builder()
             .request(request)
             .protocol(Protocol.HTTP_1_1)
             .code(if (isSuccessful) 200 else code)
             .message(if (isSuccessful) "OK" else "Error")
-            .body(mockBody)
+            .body(responseBody) // Use the real ResponseBody
             .build()
     }
 
@@ -81,7 +80,7 @@ class NOAAServiceTest {
         // Given
         val gridJson = JSONObject().apply {
             put("properties", JSONObject().apply {
-                put("gridId", "EWX")
+                put("gridId", "EWX") // This test assumes the old 2-step logic
                 put("gridX", 123)
                 put("gridY", 456)
             })
@@ -119,7 +118,7 @@ class NOAAServiceTest {
         // Given
         val gridJson = JSONObject().apply {
             put("properties", JSONObject().apply {
-                put("gridId", "EWX")
+                put("gridId", "EWX") // This test assumes the old 2-step logic
                 put("gridX", 123)
                 put("gridY", 456)
             })
@@ -191,7 +190,7 @@ class NOAAServiceTest {
         // Given
         val gridJson = JSONObject().apply {
             put("properties", JSONObject().apply {
-                put("gridId", "EWX")
+                put("gridId", "EWX") // This test assumes the old 2-step logic
                 put("gridX", 123)
                 put("gridY", 456)
             })
