@@ -4,6 +4,7 @@ import android.util.Log
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -20,7 +21,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
-import org.junit.After
 import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -43,18 +43,12 @@ class NOAAServiceTest {
         noaaService = NOAAService(mockClient, testDispatcher)
     }
 
-    @After
-    fun tearDown() {
-        // Clean up any remaining coroutines
-        advanceUntilIdle()
-    }
-
     private fun createResponse(
         isSuccessful: Boolean,
         code: Int,
         body: String
     ): Response {
-        Log.d(TAG, "Creating response with body: $body")
+        Log.d(TEST_TAG, "Creating response with body: $body")
         val request = Request.Builder()
             .url("https://api.weather.gov")
             .build()
@@ -101,14 +95,14 @@ class NOAAServiceTest {
         coEvery { mockCall.execute() } answers {
             if (firstCall) {
                 firstCall = false
-                Log.d(TAG, "Returning grid response")
+                Log.d(TEST_TAG, "Returning grid response: ${gridJson.toString()}")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
                     body = gridJson.toString()
                 )
             } else {
-                Log.d(TAG, "Returning failed alerts response")
+                Log.d(TEST_TAG, "Returning failed alerts response")
                 createResponse(
                     isSuccessful = false,
                     code = 500,
@@ -161,16 +155,19 @@ class NOAAServiceTest {
         
         var firstCall = true
         coEvery { mockCall.execute() } answers {
+            val request = firstArg<Request>()
+            Log.d(TEST_TAG, "Received request for URL: ${request.url}")
+            
             if (firstCall) {
                 firstCall = false
-                Log.d(TAG, "Returning grid response")
+                Log.d(TEST_TAG, "Returning grid response: ${gridJson.toString()}")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
                     body = gridJson.toString()
                 )
             } else {
-                Log.d(TAG, "Returning alerts response")
+                Log.d(TEST_TAG, "Returning alerts response: ${alertsJson.toString()}")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
@@ -184,6 +181,7 @@ class NOAAServiceTest {
         advanceUntilIdle()
 
         // Then
+        Log.d(TEST_TAG, "Result size: ${result.size}")
         assertEquals(1, result.size)
         val alert = result[0]
         assertEquals("test-id", alert.id)
@@ -252,16 +250,19 @@ class NOAAServiceTest {
         
         var firstCall = true
         coEvery { mockCall.execute() } answers {
+            val request = firstArg<Request>()
+            Log.d(TEST_TAG, "Received request for URL: ${request.url}")
+            
             if (firstCall) {
                 firstCall = false
-                Log.d(TAG, "Returning grid response")
+                Log.d(TEST_TAG, "Returning grid response: ${gridJson.toString()}")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
                     body = gridJson.toString()
                 )
             } else {
-                Log.d(TAG, "Returning alerts response")
+                Log.d(TEST_TAG, "Returning alerts response: ${alertsJson.toString()}")
                 createResponse(
                     isSuccessful = true,
                     code = 200,
@@ -275,6 +276,7 @@ class NOAAServiceTest {
         advanceUntilIdle()
 
         // Then
+        Log.d(TEST_TAG, "Result size: ${result.size}")
         assertEquals(1, result.size)
         val alert = result[0]
         assertEquals("flood-id", alert.id)

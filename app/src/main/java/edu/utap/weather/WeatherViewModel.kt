@@ -6,8 +6,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 
-class WeatherViewModel(private val noaaService: NOAAService = NOAAService()) : ViewModel() {
+class WeatherViewModel(
+    private val noaaService: NOAAService = NOAAService(OkHttpClient())
+) : ViewModel() {
 
     private val _floodAlerts = MutableStateFlow<List<FloodAlert>>(emptyList())
     val floodAlerts: StateFlow<List<FloodAlert>> = _floodAlerts.asStateFlow()
