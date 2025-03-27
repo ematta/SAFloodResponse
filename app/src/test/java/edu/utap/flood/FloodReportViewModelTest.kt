@@ -1,25 +1,37 @@
+@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+
 package edu.utap.flood
 
 import android.location.Location
+import com.google.android.gms.tasks.Task
 import edu.utap.auth.AuthViewModelInterface
 import edu.utap.auth.db.UserEntity
 import edu.utap.flood.model.FloodReport
 import edu.utap.flood.repository.FloodReportRepositoryInterface
 import edu.utap.flood.utils.LocationUtils
 import edu.utap.user.MainDispatcherRule
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import com.google.android.gms.tasks.Task
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class FloodReportViewModelTest {
     
     @get:Rule
@@ -93,8 +105,8 @@ class FloodReportViewModelTest {
         viewModel.updateManualLocation(latitude, longitude)
         
         // Then
-        assertEquals(latitude, viewModel.manualLatitude.value)
-        assertEquals(longitude, viewModel.manualLongitude.value)
+        assertEquals(latitude, viewModel.manualLatitude.value, 0.0001)
+        assertEquals(longitude, viewModel.manualLongitude.value, 0.0001)
     }
     
     @Test
