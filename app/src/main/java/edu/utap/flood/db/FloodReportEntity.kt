@@ -26,4 +26,4 @@ data class FloodReportEntity(
     val isManualLocation: Boolean = false,
     val confirmedCount: Int = 0,
     val deniedCount: Int = 0
-) 
+)

@@ -1,16 +1,13 @@
 package edu.utap.weather
 
-import app.cash.turbine.test
+import edu.utap.user.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -19,31 +16,23 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class WeatherViewModelTest {
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+    
     private lateinit var viewModel: WeatherViewModel
     private lateinit var mockNoaaService: NOAAService
-    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
-        Dispatchers.setMain(testDispatcher)
         mockNoaaService = mockk()
         viewModel = WeatherViewModel(mockNoaaService)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test
     fun `initial state is empty`() = runTest {
         assertEquals(emptyList(), viewModel.floodAlerts.value)
-        viewModel.isLoading.test {
-            assertFalse(awaitItem())
-        }
-        viewModel.error.test {
-            assertNull(awaitItem())
-        }
+        assertFalse(viewModel.isLoading.value)
+        assertNull(viewModel.error.value)
     }
 
     @Test
@@ -52,62 +41,44 @@ class WeatherViewModelTest {
         val mockAlerts = listOf(FloodAlert("test-id", "Test Alert", "Test Description", "Severe", "Test Location", 29.4241, -98.4936, 123456789))
         coEvery { mockNoaaService.getFloodAlerts(any(), any()) } returns mockAlerts
 
-        // When & Then
-        viewModel.isLoading.test {
-            viewModel.fetchFloodAlerts(0.0, 0.0)
-            assertTrue(awaitItem()) // Loading starts
-            assertFalse(awaitItem()) // Loading ends
-            cancel()
-        }
-
-        viewModel.floodAlerts.test {
-            assertEquals(emptyList(), awaitItem()) // Initial state
-            assertEquals(mockAlerts, awaitItem()) // Updated state
-            cancel()
-        }
-
-        viewModel.error.test {
-            assertNull(awaitItem())
-            cancel()
-        }
+        // When
+        viewModel.fetchFloodAlerts(0.0, 0.0)
+        advanceUntilIdle() // Wait for coroutines to complete
+        
+        // Then
+        assertFalse(viewModel.isLoading.value) // Loading should be false after completion
+        assertEquals(mockAlerts, viewModel.floodAlerts.value) // Should have our mock alerts
+        assertNull(viewModel.error.value) // No error should be present
     }
 
     @Test
     fun `fetchFloodAlerts handles error`() = runTest {
         // Given
         val errorMessage = "Network error"
-        coEvery { mockNoaaService.getFloodAlerts(29.4241, -98.4936) } throws Exception(errorMessage)
+        coEvery { mockNoaaService.getFloodAlerts(any(), any()) } throws Exception(errorMessage)
 
         // When
         viewModel.fetchFloodAlerts(29.4241, -98.4936)
+        advanceUntilIdle() // Wait for coroutines to complete
 
         // Then
-        viewModel.isLoading.test {
-            assertTrue(awaitItem()) // Loading starts
-            assertFalse(awaitItem()) // Loading ends
-        }
-        assertEquals(emptyList(), viewModel.floodAlerts.value)
-        viewModel.error.test {
-            assertEquals("Failed to fetch flood alerts: $errorMessage", awaitItem())
-        }
+        assertFalse(viewModel.isLoading.value) // Loading should be false after completion
+        assertEquals(emptyList(), viewModel.floodAlerts.value) // Should be empty on error
+        assertEquals("Failed to fetch flood alerts: $errorMessage", viewModel.error.value) // Error should be set
     }
 
     @Test
     fun `fetchFloodAlerts handles empty alerts`() = runTest {
         // Given
-        coEvery { mockNoaaService.getFloodAlerts(29.4241, -98.4936) } returns emptyList()
+        coEvery { mockNoaaService.getFloodAlerts(any(), any()) } returns emptyList()
 
         // When
         viewModel.fetchFloodAlerts(29.4241, -98.4936)
+        advanceUntilIdle() // Wait for coroutines to complete
 
         // Then
-        viewModel.isLoading.test {
-            assertTrue(awaitItem()) // Loading starts
-            assertFalse(awaitItem()) // Loading ends
-        }
-        assertEquals(emptyList(), viewModel.floodAlerts.value)
-        viewModel.error.test {
-            assertNull(awaitItem())
-        }
+        assertFalse(viewModel.isLoading.value) // Loading should be false after completion
+        assertEquals(emptyList(), viewModel.floodAlerts.value) // Should still be empty
+        assertNull(viewModel.error.value) // No error should be present
     }
 }

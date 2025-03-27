@@ -36,7 +36,8 @@ interface FloodReportDao {
      * @param radiusInMiles The radius in miles to search within
      * @return A list of flood reports within the specified radius
      */
-    @Query("""
+    @Query(
+        """
         SELECT * FROM flood_reports 
         WHERE (
             3959 * acos(
@@ -46,7 +47,8 @@ interface FloodReportDao {
             )
         ) <= :radiusInMiles
         ORDER BY created_at DESC
-    """)
+    """
+    )
     suspend fun getReportsInRadius(
         latitude: Double,
         longitude: Double,
@@ -76,4 +78,4 @@ interface FloodReportDao {
      */
     @Delete
     suspend fun deleteReport(report: FloodReportEntity)
-} 
+}

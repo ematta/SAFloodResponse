@@ -35,4 +35,4 @@ data class FloodReport(
     @get:PropertyName("denied_count")
     @set:PropertyName("denied_count")
     var deniedCount: Int = 0
-) 
+)

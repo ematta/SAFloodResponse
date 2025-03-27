@@ -22,7 +22,10 @@ import com.google.android.gms.tasks.Task
 class LocationUtils(private val context: Context) {
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
-    private val locationRequest: LocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000)
+    private val locationRequest: LocationRequest = LocationRequest.Builder(
+        Priority.PRIORITY_HIGH_ACCURACY,
+        10000
+    )
         .setMinUpdateIntervalMillis(5000)
         .build()
     private var locationCallback: LocationCallback? = null
@@ -32,16 +35,14 @@ class LocationUtils(private val context: Context) {
      *
      * @return true if all required permissions are granted, false otherwise
      */
-    fun hasLocationPermissions(): Boolean {
-        return ActivityCompat.checkSelfPermission(
+    fun hasLocationPermissions(): Boolean = ActivityCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED &&
+        ActivityCompat.checkSelfPermission(
             context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-    }
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
 
     /**
      * Gets the last known location.
@@ -49,9 +50,7 @@ class LocationUtils(private val context: Context) {
      * @return Task containing the last known location, or null if not available
      */
     @SuppressLint("MissingPermission")
-    fun getLastKnownLocation(): Task<Location> {
-        return fusedLocationClient.lastLocation
-    }
+    fun getLastKnownLocation(): Task<Location> = fusedLocationClient.lastLocation
 
     /**
      * Requests location updates and provides them through a callback.
@@ -101,4 +100,4 @@ class LocationUtils(private val context: Context) {
         return LocationServices.getSettingsClient(context)
             .checkLocationSettings(builder.build())
     }
-} 
+}

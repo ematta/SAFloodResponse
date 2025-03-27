@@ -1,5 +1,6 @@
 package edu.utap.flood.ui
 
+import android.location.Location
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,13 +30,10 @@ import edu.utap.flood.utils.LocationUtils
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FloodReportScreen(
-    viewModel: FloodReportViewModel,
-    onNavigateToMap: () -> Unit
-) {
+fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Unit) {
     val context = LocalContext.current
     val locationUtils = remember { LocationUtils(context) }
-    
+
     // Collect state
     val reportState by viewModel.reportState.collectAsState()
     val currentLocation by viewModel.currentLocation.collectAsState()
@@ -80,11 +78,12 @@ fun FloodReportScreen(
                             text = "Location",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        
+
+                        fun loc(location: Location?) = "Current Location: ${location?.latitude}, ${location?.longitude}"
                         // Current Location Display
                         currentLocation?.let { location ->
                             Text(
-                                text = "Current Location: ${location.latitude}, ${location.longitude}",
+                                text = loc(location),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -106,7 +105,7 @@ fun FloodReportScreen(
                         if (isManualLocation) {
                             OutlinedTextField(
                                 value = manualLatitude.toString(),
-                                onValueChange = { 
+                                onValueChange = {
                                     it.toDoubleOrNull()?.let { lat ->
                                         viewModel.updateManualLocation(lat, manualLongitude)
                                     }
@@ -116,7 +115,7 @@ fun FloodReportScreen(
                             )
                             OutlinedTextField(
                                 value = manualLongitude.toString(),
-                                onValueChange = { 
+                                onValueChange = {
                                     it.toDoubleOrNull()?.let { lon ->
                                         viewModel.updateManualLocation(manualLatitude, lon)
                                     }
@@ -226,11 +225,7 @@ fun FloodReportScreen(
  * @param onDeny Callback for when the report is denied
  */
 @Composable
-fun FloodReportItem(
-    report: FloodReport,
-    onConfirm: () -> Unit,
-    onDeny: () -> Unit
-) {
+fun FloodReportItem(report: FloodReport, onConfirm: () -> Unit, onDeny: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -248,7 +243,7 @@ fun FloodReportItem(
                 text = report.description,
                 style = MaterialTheme.typography.bodyMedium
             )
-            
+
             // Photo Grid
             LazyColumn {
                 items(report.photoUrls) { photoUrl ->
@@ -284,4 +279,4 @@ fun FloodReportItem(
             }
         }
     }
-} 
+}

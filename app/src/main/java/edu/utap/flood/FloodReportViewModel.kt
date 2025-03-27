@@ -7,10 +7,10 @@ import edu.utap.auth.AuthViewModelInterface
 import edu.utap.flood.model.FloodReport
 import edu.utap.flood.repository.FloodReportRepositoryInterface
 import edu.utap.flood.utils.LocationUtils
+import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.util.*
 
 /**
  * ViewModel responsible for managing flood report state and operations.
@@ -147,7 +147,8 @@ class FloodReportViewModel(
                         _isManualLocation.value = false
                     },
                     onFailure = { error ->
-                        _reportState.value = ReportState.Error(error.message ?: "Failed to submit report")
+                        _reportState.value =
+                            ReportState.Error(error.message ?: "Failed to submit report")
                     }
                 )
             } catch (e: Exception) {
@@ -173,7 +174,8 @@ class FloodReportViewModel(
                         floodReportRepository.updateReport(updatedReport)
                     },
                     onFailure = { error ->
-                        _reportState.value = ReportState.Error(error.message ?: "Failed to confirm report")
+                        _reportState.value =
+                            ReportState.Error(error.message ?: "Failed to confirm report")
                     }
                 )
             } catch (e: Exception) {
@@ -199,7 +201,8 @@ class FloodReportViewModel(
                         floodReportRepository.updateReport(updatedReport)
                     },
                     onFailure = { error ->
-                        _reportState.value = ReportState.Error(error.message ?: "Failed to deny report")
+                        _reportState.value =
+                            ReportState.Error(error.message ?: "Failed to deny report")
                     }
                 )
             } catch (e: Exception) {
@@ -217,4 +220,4 @@ sealed class ReportState {
     object Loading : ReportState()
     object Success : ReportState()
     data class Error(val message: String) : ReportState()
-} 
+}

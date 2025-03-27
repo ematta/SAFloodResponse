@@ -119,6 +119,7 @@ class FloodReportRepositoryTest {
     @Test
     fun testGetReportByIdRemoteSuccess() = runTest {
         val testReportId = "test_report_id"
+        coEvery { dao.getReportById(testReportId) } returns null
         val documentSnapshot: DocumentSnapshot = mockk(relaxed = true)
         val task: Task<DocumentSnapshot> = Tasks.forResult(documentSnapshot)
         every { documentRef.get() } returns task
@@ -187,4 +188,4 @@ class TestDispatcherRule : TestRule {
                 }
             }
         }
-} 
+}

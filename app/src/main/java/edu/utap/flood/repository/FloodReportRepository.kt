@@ -5,10 +5,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.flood.db.FloodReportDao
 import edu.utap.flood.db.FloodReportEntity
 import edu.utap.flood.model.FloodReport
+import java.util.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import java.util.*
 
 /**
  * Implementation of FloodReportRepositoryInterface that handles both Firestore
@@ -113,24 +113,18 @@ class FloodReportRepository(
         latitude: Double,
         longitude: Double,
         radiusInMiles: Double
-    ): Flow<List<FloodReport>> =
-        floodReportDao.getAllReports().map { entities ->
-            entities.filter { entity ->
-                calculateDistance(
-                    latitude,
-                    longitude,
-                    entity.latitude,
-                    entity.longitude
-                ) <= radiusInMiles
-            }.map { it.toModel() }
-        }
+    ): Flow<List<FloodReport>> = floodReportDao.getAllReports().map { entities ->
+        entities.filter { entity ->
+            calculateDistance(
+                latitude,
+                longitude,
+                entity.latitude,
+                entity.longitude
+            ) <= radiusInMiles
+        }.map { it.toModel() }
+    }
 
-    private fun calculateDistance(
-        lat1: Double,
-        lon1: Double,
-        lat2: Double,
-        lon2: Double
-    ): Double {
+    private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
         val r = 3959.0 // Earth's radius in miles
         val lat1Rad = Math.toRadians(lat1)
         val lat2Rad = Math.toRadians(lat2)
@@ -138,42 +132,40 @@ class FloodReportRepository(
         val deltaLon = Math.toRadians(lon2 - lon1)
 
         val a = kotlin.math.sin(deltaLat / 2) * kotlin.math.sin(deltaLat / 2) +
-                kotlin.math.cos(lat1Rad) * kotlin.math.cos(lat2Rad) *
-                kotlin.math.sin(deltaLon / 2) * kotlin.math.sin(deltaLon / 2)
+            kotlin.math.cos(lat1Rad) * kotlin.math.cos(lat2Rad) *
+            kotlin.math.sin(deltaLon / 2) * kotlin.math.sin(deltaLon / 2)
 
         val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(a), kotlin.math.sqrt(1 - a))
         return r * c
     }
 
-    private fun FloodReport.toEntity(): FloodReportEntity =
-        FloodReportEntity(
-            reportId = reportId,
-            userId = userId,
-            latitude = latitude,
-            longitude = longitude,
-            description = description,
-            photoUrls = photoUrls,
-            status = status,
-            createdAt = Date(createdAt.seconds * 1000),
-            updatedAt = Date(updatedAt.seconds * 1000),
-            isManualLocation = isManualLocation,
-            confirmedCount = confirmedCount,
-            deniedCount = deniedCount
-        )
+    private fun FloodReport.toEntity(): FloodReportEntity = FloodReportEntity(
+        reportId = reportId,
+        userId = userId,
+        latitude = latitude,
+        longitude = longitude,
+        description = description,
+        photoUrls = photoUrls,
+        status = status,
+        createdAt = Date(createdAt.seconds * 1000),
+        updatedAt = Date(updatedAt.seconds * 1000),
+        isManualLocation = isManualLocation,
+        confirmedCount = confirmedCount,
+        deniedCount = deniedCount
+    )
 
-    private fun FloodReportEntity.toModel(): FloodReport =
-        FloodReport(
-            reportId = reportId,
-            userId = userId,
-            latitude = latitude,
-            longitude = longitude,
-            description = description,
-            photoUrls = photoUrls,
-            status = status,
-            createdAt = Timestamp(createdAt),
-            updatedAt = Timestamp(updatedAt),
-            isManualLocation = isManualLocation,
-            confirmedCount = confirmedCount,
-            deniedCount = deniedCount
-        )
-} 
+    private fun FloodReportEntity.toModel(): FloodReport = FloodReport(
+        reportId = reportId,
+        userId = userId,
+        latitude = latitude,
+        longitude = longitude,
+        description = description,
+        photoUrls = photoUrls,
+        status = status,
+        createdAt = Timestamp(createdAt),
+        updatedAt = Timestamp(updatedAt),
+        isManualLocation = isManualLocation,
+        confirmedCount = confirmedCount,
+        deniedCount = deniedCount
+    )
+}

@@ -1,6 +1,5 @@
 package edu.utap.flood.repository
 
-import edu.utap.flood.db.FloodReportEntity
 import edu.utap.flood.model.FloodReport
 import kotlinx.coroutines.flow.Flow
 
@@ -78,4 +77,4 @@ interface FloodReportRepositoryInterface {
         longitude: Double,
         radiusInMiles: Double
     ): Flow<List<FloodReport>>
-} 
+}

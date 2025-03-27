@@ -8,16 +8,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class WeatherViewModel(private val noaaService: NOAAService = NOAAService()) : ViewModel() {
-    
+
     private val _floodAlerts = MutableStateFlow<List<FloodAlert>>(emptyList())
     val floodAlerts: StateFlow<List<FloodAlert>> = _floodAlerts.asStateFlow()
-    
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-    
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
-    
+
     fun fetchFloodAlerts(lat: Double, lon: Double) {
         viewModelScope.launch {
             _isLoading.value = true

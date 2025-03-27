@@ -38,7 +38,9 @@ class FloodReportViewModelTest {
     
     @Before
     fun setup() {
-        MockKAnnotations.init(this)
+        MockKAnnotations.init(this, relaxUnitFun = true)
+        // Explicitly mock the requestLocationUpdates method with any lambda parameter
+        every { locationUtils.requestLocationUpdates(any()) } just runs
         viewModel = FloodReportViewModel(floodReportRepository, authViewModel, locationUtils)
     }
     
@@ -104,7 +106,7 @@ class FloodReportViewModelTest {
             name = "Test User",
             role = "regular"
         )
-        val mockLocation = mockk<Location>()
+        val mockLocation = mockk<Location>(relaxed = true)
         val description = "Test flood"
         val photoUrls = listOf("https://example.com/photo.jpg")
         
@@ -116,10 +118,10 @@ class FloodReportViewModelTest {
         photoUrls.forEach { viewModel.addPhoto(it) }
         
         // Mock location
-        every { locationUtils.getLastKnownLocation() } returns mockk<Task<Location>> {
-            every { isSuccessful } returns true
-            every { result } returns mockLocation
-        }
+        val mockTask = mockk<Task<Location>>(relaxed = true)
+        every { mockTask.isSuccessful } returns true
+        every { mockTask.result } returns mockLocation
+        every { locationUtils.getLastKnownLocation() } returns mockTask
         
         // Mock repository
         coEvery { floodReportRepository.createReport(any()) } returns Result.success(
@@ -135,6 +137,7 @@ class FloodReportViewModelTest {
         
         // When
         viewModel.submitReport()
+        advanceUntilIdle() // Ensure all coroutines complete
         
         // Then
         assertEquals(ReportState.Success, viewModel.reportState.value)
@@ -155,7 +158,7 @@ class FloodReportViewModelTest {
             role = "regular"
         )
         val mockLocation = mockk<Location>()
-        val errorMessage = "Test error"
+        val errorMessage = "Location not available"
         
         every { authViewModel.getCurrentUser() } returns mockUser
         every { mockLocation.latitude } returns 37.7749
@@ -174,6 +177,7 @@ class FloodReportViewModelTest {
         
         // When
         viewModel.submitReport()
+        advanceUntilIdle() // Ensure all coroutines complete
         
         // Then
         assertEquals(errorMessage, (viewModel.reportState.value as ReportState.Error).message)
@@ -243,4 +247,4 @@ class TestDispatcherRule : TestRule {
                 }
             }
         }
-} 
+}
