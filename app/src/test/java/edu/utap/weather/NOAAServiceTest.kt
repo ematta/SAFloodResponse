@@ -8,22 +8,24 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.advanceUntilIdle
 import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.ResponseBody.Companion.toResponseBody // Import OkHttp extension
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Before
 import org.junit.Test
+import org.junit.After
 import java.io.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-val TAG = "NOAAServiceTest"
+val TEST_TAG = "NOAAServiceTest"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NOAAServiceTest {
@@ -41,6 +43,12 @@ class NOAAServiceTest {
         noaaService = NOAAService(mockClient, testDispatcher)
     }
 
+    @After
+    fun tearDown() {
+        // Clean up any remaining coroutines
+        advanceUntilIdle()
+    }
+
     private fun createResponse(
         isSuccessful: Boolean,
         code: Int,
@@ -50,14 +58,13 @@ class NOAAServiceTest {
         val request = Request.Builder()
             .url("https://api.weather.gov")
             .build()
-        // Use OkHttp's extension to create a real ResponseBody
         val responseBody = body.toResponseBody(jsonMediaType)
         return Response.Builder()
             .request(request)
             .protocol(Protocol.HTTP_1_1)
             .code(if (isSuccessful) 200 else code)
             .message(if (isSuccessful) "OK" else "Error")
-            .body(responseBody) // Use the real ResponseBody
+            .body(responseBody)
             .build()
     }
 
@@ -69,10 +76,11 @@ class NOAAServiceTest {
             code = 500,
             body = "{}"
         )
-        every { mockCall.execute() } returns response
+        coEvery { mockCall.execute() } returns response
 
         // When
         val result = noaaService.getFloodAlerts(29.4241, -98.4936)
+        advanceUntilIdle()
 
         // Then
         assertTrue(result.isEmpty())
@@ -83,14 +91,14 @@ class NOAAServiceTest {
         // Given
         val gridJson = JSONObject().apply {
             put("properties", JSONObject().apply {
-                put("gridId", "EWX") // This test assumes the old 2-step logic
+                put("gridId", "EWX")
                 put("gridX", 123)
                 put("gridY", 456)
             })
         }
         
         var firstCall = true
-        every { mockCall.execute() } answers {
+        coEvery { mockCall.execute() } answers {
             if (firstCall) {
                 firstCall = false
                 Log.d(TAG, "Returning grid response")
@@ -111,6 +119,7 @@ class NOAAServiceTest {
 
         // When
         val result = noaaService.getFloodAlerts(29.4241, -98.4936)
+        advanceUntilIdle()
 
         // Then
         assertTrue(result.isEmpty())
@@ -121,7 +130,7 @@ class NOAAServiceTest {
         // Given
         val gridJson = JSONObject().apply {
             put("properties", JSONObject().apply {
-                put("gridId", "EWX") // This test assumes the old 2-step logic
+                put("gridId", "EWX")
                 put("gridX", 123)
                 put("gridY", 456)
             })
@@ -142,8 +151,8 @@ class NOAAServiceTest {
                     put("geometry", JSONObject().apply {
                         put("type", "Point")
                         put("coordinates", JSONArray().apply {
-                            put(-98.4936) // longitude at index 0
-                            put(29.4241)  // latitude at index 1
+                            put(-98.4936)
+                            put(29.4241)
                         })
                     })
                 })
@@ -172,6 +181,7 @@ class NOAAServiceTest {
 
         // When
         val result = noaaService.getFloodAlerts(29.4241, -98.4936)
+        advanceUntilIdle()
 
         // Then
         assertEquals(1, result.size)
@@ -183,8 +193,6 @@ class NOAAServiceTest {
         assertEquals("Test Area", alert.location)
         assertEquals(29.4241, alert.latitude, "Latitude should match the test data")
         assertEquals(-98.4936, alert.longitude, "Longitude should match the test data")
-        // Make sure these assertions match the implementation
-        // In NOAAService.kt, latitude is from coordinates[1] and longitude is from coordinates[0]
         assertEquals(1234567890L, alert.timestamp)
     }
 
@@ -193,7 +201,7 @@ class NOAAServiceTest {
         // Given
         val gridJson = JSONObject().apply {
             put("properties", JSONObject().apply {
-                put("gridId", "EWX") // This test assumes the old 2-step logic
+                put("gridId", "EWX")
                 put("gridX", 123)
                 put("gridY", 456)
             })
@@ -215,8 +223,8 @@ class NOAAServiceTest {
                     put("geometry", JSONObject().apply {
                         put("type", "Point")
                         put("coordinates", JSONArray().apply {
-                            put(-98.4936) // longitude at index 0
-                            put(29.4241)  // latitude at index 1
+                            put(-98.4936)
+                            put(29.4241)
                         })
                     })
                 })
@@ -234,8 +242,8 @@ class NOAAServiceTest {
                     put("geometry", JSONObject().apply {
                         put("type", "Point")
                         put("coordinates", JSONArray().apply {
-                            put(-98.4936) // longitude at index 0
-                            put(29.4241)  // latitude at index 1
+                            put(-98.4936)
+                            put(29.4241)
                         })
                     })
                 })
@@ -264,6 +272,7 @@ class NOAAServiceTest {
 
         // When
         val result = noaaService.getFloodAlerts(29.4241, -98.4936)
+        advanceUntilIdle()
 
         // Then
         assertEquals(1, result.size)

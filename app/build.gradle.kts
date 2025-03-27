@@ -103,5 +103,4 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(kotlin("test"))
-    // Force Gradle sync
 }
