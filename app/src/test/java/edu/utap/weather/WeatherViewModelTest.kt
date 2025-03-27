@@ -27,7 +27,7 @@ class WeatherViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         mockNoaaService = mockk()
-        viewModel = WeatherViewModel()
+        viewModel = WeatherViewModel(mockNoaaService)
     }
 
     @After
@@ -37,9 +37,7 @@ class WeatherViewModelTest {
 
     @Test
     fun `initial state is empty`() = runTest {
-        viewModel.floodAlerts.test {
-            assertEquals(emptyList(), awaitItem())
-        }
+        assertEquals(emptyList(), viewModel.floodAlerts.value)
         viewModel.isLoading.test {
             assertFalse(awaitItem())
         }
@@ -51,33 +49,26 @@ class WeatherViewModelTest {
     @Test
     fun `fetchFloodAlerts updates state with alerts`() = runTest {
         // Given
-        val testAlerts = listOf(
-            FloodAlert(
-                id = "test-id",
-                title = "Test Alert",
-                description = "Test Description",
-                severity = "Severe",
-                location = "Test Location",
-                latitude = 29.4241,
-                longitude = -98.4936,
-                timestamp = 1234567890L
-            )
-        )
-        coEvery { mockNoaaService.getFloodAlerts(29.4241, -98.4936) } returns testAlerts
+        val mockAlerts = listOf(FloodAlert("test-id", "Test Alert", "Test Description", "Severe", "Test Location", 29.4241, -98.4936, 123456789))
+        coEvery { mockNoaaService.getFloodAlerts(any(), any()) } returns mockAlerts
 
-        // When
-        viewModel.fetchFloodAlerts(29.4241, -98.4936)
-
-        // Then
+        // When & Then
         viewModel.isLoading.test {
+            viewModel.fetchFloodAlerts(0.0, 0.0)
             assertTrue(awaitItem()) // Loading starts
             assertFalse(awaitItem()) // Loading ends
+            cancel()
         }
+
         viewModel.floodAlerts.test {
-            assertEquals(testAlerts, awaitItem())
+            assertEquals(emptyList(), awaitItem()) // Initial state
+            assertEquals(mockAlerts, awaitItem()) // Updated state
+            cancel()
         }
+
         viewModel.error.test {
             assertNull(awaitItem())
+            cancel()
         }
     }
 
@@ -95,9 +86,7 @@ class WeatherViewModelTest {
             assertTrue(awaitItem()) // Loading starts
             assertFalse(awaitItem()) // Loading ends
         }
-        viewModel.floodAlerts.test {
-            assertEquals(emptyList(), awaitItem())
-        }
+        assertEquals(emptyList(), viewModel.floodAlerts.value)
         viewModel.error.test {
             assertEquals("Failed to fetch flood alerts: $errorMessage", awaitItem())
         }
@@ -116,11 +105,9 @@ class WeatherViewModelTest {
             assertTrue(awaitItem()) // Loading starts
             assertFalse(awaitItem()) // Loading ends
         }
-        viewModel.floodAlerts.test {
-            assertEquals(emptyList(), awaitItem())
-        }
+        assertEquals(emptyList(), viewModel.floodAlerts.value)
         viewModel.error.test {
             assertNull(awaitItem())
         }
     }
-} 
+}

@@ -1,5 +1,6 @@
 package edu.utap.auth
 
+import edu.utap.auth.db.UserEntity
 import edu.utap.auth.utils.RoleUtils
 import kotlinx.coroutines.flow.StateFlow
 
@@ -18,4 +19,5 @@ interface AuthViewModelInterface {
     fun login(email: String, password: String)
     fun logout()
     fun resetPassword(email: String)
+    fun getCurrentUser(): UserEntity?
 }

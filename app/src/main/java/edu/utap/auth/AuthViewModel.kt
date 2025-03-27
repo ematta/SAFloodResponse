@@ -249,6 +249,8 @@ open class AuthViewModel(
         }
     }
 
+    override fun getCurrentUser() = _currentUser.value
+
     /**
      * Updates the role of a user.
      *
