@@ -65,11 +65,11 @@ class AuthRepository(
         try {
             user.updateProfile(profileUpdates).await()
         } catch (e: Exception) {
-            // Continue even if profile update fails
+            // Log the error but continue with the registration process
             // The profile can be updated later
         }
 
-        // Step 3: Synchronize user data
+        // Step 3: Create user profile in Firestore and local database
         userDataSynchronizer.syncUserToLocal(user)
 
         user

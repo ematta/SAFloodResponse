@@ -82,7 +82,7 @@ class NOAAService(
                     Log.d(TAG, "Processing alert $i - event: $event")
                     
                     // Only process flood-related alerts
-                    if (!event.lowercase().contains("flood")) {
+                    if (!event.contains("Flood", ignoreCase = true)) {
                         Log.d(TAG, "Skipping non-flood alert: $event")
                         continue
                     }
@@ -91,6 +91,11 @@ class NOAAService(
                     val geometry = feature.getJSONObject("geometry")
                     val coordinates = geometry.getJSONArray("coordinates")
                     
+                    // Extract coordinates from the geometry
+                    // GeoJSON format is [longitude, latitude]
+                    val alertLongitude = coordinates.getDouble(0)
+                    val alertLatitude = coordinates.getDouble(1)
+                    
                     alerts.add(
                         FloodAlert(
                             id = alertProperties.getString("id"),
@@ -98,8 +103,8 @@ class NOAAService(
                             description = alertProperties.getString("description"),
                             severity = alertProperties.getString("severity"),
                             location = alertProperties.getString("areaDesc"),
-                            latitude = coordinates.getDouble(1),  // Latitude is second in GeoJSON coordinates
-                            longitude = coordinates.getDouble(0), // Longitude is first in GeoJSON coordinates
+                            latitude = alertLatitude,
+                            longitude = alertLongitude,
                             timestamp = alertProperties.getLong("sent")
                         )
                     )

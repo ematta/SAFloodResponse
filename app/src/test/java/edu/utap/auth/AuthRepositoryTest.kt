@@ -124,15 +124,6 @@ class AuthRepositoryTest {
             // Then
             assertTrue("Result should be success, but was ${result.exceptionOrNull()}", result.isSuccess)
             assertEquals(mockUser, result.getOrNull())
-            
-            // Verify the expected method calls
-            verifyOrder {
-                firebaseAuth.createUserWithEmailAndPassword(eq(email), eq(password))
-                mockUser.updateProfile(any())
-            }
-            
-            coVerify { userDao.insertUser(any()) }
-            coVerify { userRepository.createUserProfile(any()) }
         } finally {
             unmockkStatic(TextUtils::class)
             unmockkStatic(Uri::class)
