@@ -40,8 +40,8 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
     val selectedPhotos by viewModel.selectedPhotos.collectAsState()
     val description by viewModel.description.collectAsState()
     val isManualLocation by viewModel.isManualLocation.collectAsState()
-    val manualLatitude by viewModel.manualLatitude.collectAsState()
-    val manualLongitude by viewModel.manualLongitude.collectAsState()
+    val latitude by viewModel.latitude.collectAsState()
+    val longitude by viewModel.longitude.collectAsState()
 
     Scaffold(
         topBar = {
@@ -102,29 +102,26 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                             )
                         }
 
-                        // Manual Location Input
-                        if (isManualLocation) {
-                            OutlinedTextField(
-                                value = manualLatitude.toString(),
-                                onValueChange = {
-                                    it.toDoubleOrNull()?.let { lat ->
-                                        viewModel.updateManualLocation(lat, manualLongitude)
-                                    }
-                                },
-                                label = { Text("Latitude") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            OutlinedTextField(
-                                value = manualLongitude.toString(),
-                                onValueChange = {
-                                    it.toDoubleOrNull()?.let { lon ->
-                                        viewModel.updateManualLocation(manualLatitude, lon)
-                                    }
-                                },
-                                label = { Text("Longitude") },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                        OutlinedTextField(
+                            value = latitude.toString(),
+                            onValueChange = {
+                                it.toDoubleOrNull()?.let { lat ->
+                                    viewModel.updateLatitude(lat)
+                                } ?: viewModel.updateLatitude(0.0) // Default to 0.0 if input is invalid
+                            },
+                            label = { Text("Latitude") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = longitude.toString(),
+                            onValueChange = {
+                                it.toDoubleOrNull()?.let { lon ->
+                                    viewModel.updateLongitude(lon)
+                                } ?: viewModel.updateLongitude(0.0) // Default to 0.0 if input is invalid
+                            },
+                            label = { Text("Longitude") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package edu.utap.ui.screens.flood
+package edu.utap.flood
 
 import android.location.Location
 import com.google.android.gms.maps.model.LatLng

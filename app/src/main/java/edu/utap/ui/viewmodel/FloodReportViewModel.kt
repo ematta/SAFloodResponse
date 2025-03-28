@@ -56,11 +56,11 @@ class FloodReportViewModel(
     private val _isManualLocation = MutableStateFlow(false)
     val isManualLocation: StateFlow<Boolean> = _isManualLocation
 
-    private val _manualLatitude = MutableStateFlow(0.0)
-    val manualLatitude: StateFlow<Double> = _manualLatitude
+    private val _latitude = MutableStateFlow(0.0)
+    val latitude: StateFlow<Double> = _latitude
 
-    private val _manualLongitude = MutableStateFlow(0.0)
-    val manualLongitude: StateFlow<Double> = _manualLongitude
+    private val _longitude = MutableStateFlow(0.0)
+    val longitude: StateFlow<Double> = _longitude
 
     init {
         // Request location updates
@@ -142,14 +142,21 @@ class FloodReportViewModel(
     }
 
     /**
-     * Updates the manual location coordinates.
+     * Updates the latitude coordinate.
      *
-     * @param latitude The latitude coordinate
-     * @param longitude The longitude coordinate
+     * @param lat The latitude coordinate
      */
-    fun updateManualLocation(latitude: Double, longitude: Double) {
-        _manualLatitude.value = latitude
-        _manualLongitude.value = longitude
+    fun updateLatitude(lat: Double) {
+        _latitude.value = lat
+    }
+
+    /**
+     * Updates the longitude coordinate.
+     *
+     * @param lon The longitude coordinate
+     */
+    fun updateLongitude(lon: Double) {
+        _longitude.value = lon
     }
 
     /**
@@ -171,8 +178,8 @@ class FloodReportViewModel(
 
                 val location = if (_isManualLocation.value) {
                     Location("manual").apply {
-                        latitude = _manualLatitude.value
-                        longitude = _manualLongitude.value
+                        latitude = _latitude.value
+                        longitude = _longitude.value
                     }
                 } else {
                     _currentLocation.value ?: throw Exception("Location not available")

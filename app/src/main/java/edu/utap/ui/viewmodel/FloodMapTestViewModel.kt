@@ -2,7 +2,7 @@ package edu.utap.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
-import edu.utap.ui.screens.flood.FloodReport
+import edu.utap.flood.FloodReport
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

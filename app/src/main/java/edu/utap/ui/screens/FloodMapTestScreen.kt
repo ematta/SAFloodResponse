@@ -14,8 +14,8 @@ import com.google.maps.android.compose.*
 import kotlin.random.Random
 import androidx.compose.ui.graphics.Color
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import edu.utap.ui.screens.flood.FloodReport
-import edu.utap.ui.screens.flood.FloodSeverity
+import edu.utap.flood.FloodReport
+import edu.utap.flood.FloodSeverity
 import edu.utap.ui.viewmodel.FloodMapTestViewModel
 
 @Composable

@@ -2,6 +2,7 @@ package edu.utap.auth
 
 import androidx.lifecycle.ViewModel
 import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.db.UserEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -19,21 +20,39 @@ class MockAuthViewModel(
         email: String,
         password: String,
         name: String,
-        role: String
+        role: String,
+        function: (Boolean, String?) -> Unit
     ) {
         _authState.value = AuthState.Loading.Registration
         _authState.value = registerBehavior(email, password, name)
+        function(true, null)
     }
 
-    override fun login(email: String, password: String, function: (ERROR) -> Unit) {
+    override fun login(
+        email: String,
+        password: String,
+        function: (Boolean, String?) -> Unit
+    ) {
         _authState.value = AuthState.Loading.Login
         _authState.value = AuthState.Idle.Unauthenticated
+        function(true, null)
     }
-    
+
     override fun logout() {
         _authState.value = AuthState.Idle.Unauthenticated
     }
-    
+
+    override fun resetPassword(
+        email: String,
+        callback: (Boolean, String?) -> Unit
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getCurrentUser(): UserEntity? {
+        TODO("Not yet implemented")
+    }
+
     override fun resetPassword(email: String) {
         _authState.value = AuthState.Loading.PasswordReset
         _authState.value = AuthState.Idle.PasswordResetSent
