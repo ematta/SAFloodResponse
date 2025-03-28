@@ -1,7 +1,7 @@
 package edu.utap
 
 import android.app.Application
-import edu.utap.auth.utils.ApplicationContextProvider
+import edu.utap.utils.ApplicationContextProvider
 
 /**
  * Application class for the Flood Response app

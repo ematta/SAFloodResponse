@@ -1,5 +1,6 @@
 package edu.utap.auth.utils
 
+import edu.utap.utils.ValidationUtils
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

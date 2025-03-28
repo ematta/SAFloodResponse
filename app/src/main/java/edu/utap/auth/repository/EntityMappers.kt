@@ -1,8 +1,8 @@
 package edu.utap.auth.repository
 
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.auth.db.UserEntity
-import edu.utap.auth.utils.RoleUtils
+import edu.utap.db.UserEntity
+import edu.utap.utils.RoleUtils
 
 /**
  * Extension function to create a UserEntity from a FirebaseUser

@@ -3,7 +3,7 @@ package edu.utap.auth.di
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import edu.utap.auth.AuthViewModel
+import edu.utap.auth.model.AuthViewModel
 
 /**
  * Factory for creating ViewModels with dependencies.

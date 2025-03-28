@@ -1,12 +1,12 @@
 package edu.utap.auth.repository
 
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.auth.db.UserEntity
+import edu.utap.db.UserEntity
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepositoryInterface {
     // Remote authentication methods
-    suspend fun registerUser(email: String, password: String, name: String): Result<FirebaseUser>
+    suspend fun registerUser(email: String, password: String, name: String, role: String): Result<FirebaseUser>
     suspend fun loginUser(email: String, password: String): Result<FirebaseUser>
     suspend fun getCurrentUser(): FirebaseUser?
     suspend fun logout()

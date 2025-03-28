@@ -2,7 +2,7 @@ package edu.utap.auth.repository
 
 import android.net.Uri
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.auth.db.UserEntity
+import edu.utap.db.UserEntity
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import io.mockk.every

@@ -15,7 +15,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import edu.utap.location.LocationPermissionHandler
-import edu.utap.weather.WeatherViewModel
+import edu.utap.ui.viewmodel.WeatherViewModel
 
 @Composable
 fun DashboardScreen(

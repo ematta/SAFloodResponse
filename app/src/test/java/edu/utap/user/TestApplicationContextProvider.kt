@@ -1,7 +1,7 @@
 package edu.utap.user
 
 import android.content.Context
-import edu.utap.auth.utils.ApplicationContextProvider
+import edu.utap.utils.ApplicationContextProvider
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject

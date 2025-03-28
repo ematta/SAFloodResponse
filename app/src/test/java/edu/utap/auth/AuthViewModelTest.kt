@@ -5,13 +5,15 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseUser
+import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.repository.AuthRepositoryInterface
-import edu.utap.auth.utils.NetworkUtils
-import edu.utap.auth.utils.NetworkUtilsInterface
-import edu.utap.auth.utils.ApplicationContextProvider
+import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsInterface
+import edu.utap.utils.ApplicationContextProvider
+import edu.utap.db.UserEntity
+import edu.utap.utils.NetworkUtilsImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -85,7 +87,7 @@ class AuthViewModelTest {
         coEvery { mockAuthRepository.getCurrentUser() } returns null
         
         // Mock UserEntity for getLocalUserById calls
-        val mockUserEntity = mockk<edu.utap.auth.db.UserEntity>(relaxed = true)
+        val mockUserEntity = mockk<UserEntity>(relaxed = true)
         coEvery { mockAuthRepository.getLocalUserById(any()) } returns Result.success(mockUserEntity)
         
         authViewModel = AuthViewModel(mockAuthRepository, mockNetworkUtils)
@@ -98,7 +100,7 @@ class AuthViewModelTest {
         FirebaseApp.clearInstancesForTest()
         Dispatchers.resetMain()
         // Restore default implementations
-        NetworkUtils.setImplementation(edu.utap.auth.utils.NetworkUtilsImpl())
+        NetworkUtils.setImplementation(NetworkUtilsImpl())
         unmockkObject(ApplicationContextProvider)
     }
 
@@ -117,7 +119,13 @@ class AuthViewModelTest {
     fun `login success sets Authenticated state`() = runTest {
         coEvery { mockAuthRepository.loginUser(testEmail, testPassword) } returns Result.success(mockFirebaseUser)
 
-        authViewModel.login(testEmail, testPassword)
+        authViewModel.login(testEmail, testPassword) { success, message ->
+            if (success) {
+                onLoginSuccess()
+            } else {
+                errorMessage = message ?: "Login failed"
+            }
+        }
         testDispatcher.scheduler.advanceUntilIdle()
         testDispatcher.scheduler.advanceUntilIdle() // Ensure coroutine completion
         
@@ -130,7 +138,13 @@ class AuthViewModelTest {
         val errorMessage = AuthState.Error.Authentication("Invalid credentials")
         coEvery { mockAuthRepository.loginUser(testEmail, testPassword) } returns Result.failure(Exception(errorMessage.message))
 
-        authViewModel.login(testEmail, testPassword)
+        authViewModel.login(testEmail, testPassword) { success, message ->
+            if (success) {
+                onLoginSuccess()
+            } else {
+                errorMessage = message ?: "Login failed"
+            }
+        }
         testDispatcher.scheduler.advanceUntilIdle()
         testDispatcher.scheduler.advanceUntilIdle() // Ensure coroutine completion
         
@@ -141,7 +155,7 @@ class AuthViewModelTest {
 
     @Test
     fun `register success sets Authenticated state`() = runTest {
-        coEvery { mockAuthRepository.registerUser(testEmail, testPassword, testName) } returns Result.success(mockFirebaseUser)
+        coEvery { mockAuthRepository.registerUser(testEmail, testPassword, testName, role) } returns Result.success(mockFirebaseUser)
 
         authViewModel.register(testEmail, testPassword, testName)
         testDispatcher.scheduler.advanceUntilIdle()
@@ -154,7 +168,7 @@ class AuthViewModelTest {
     @Test
     fun `register failure sets Error state`() = runTest {
         val errorMessage = AuthState.Error.Validation("Registration failed")
-        coEvery { mockAuthRepository.registerUser(testEmail, testPassword, testName) } returns Result.failure(Exception(errorMessage.message))
+        coEvery { mockAuthRepository.registerUser(testEmail, testPassword, testName, role) } returns Result.failure(Exception(errorMessage.message))
 
         authViewModel.register(testEmail, testPassword, testName)
         testDispatcher.scheduler.advanceUntilIdle()

@@ -1,7 +1,7 @@
 package edu.utap.auth
 
-import edu.utap.auth.utils.ApplicationContextProvider
-import edu.utap.auth.utils.NetworkUtilsInterface
+import edu.utap.utils.ApplicationContextProvider
+import edu.utap.utils.NetworkUtilsInterface
 
 /**
  * Handles network-related operations for authentication.

@@ -30,8 +30,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.auth.utils.RoleUtils
-import edu.utap.auth.utils.ValidationUtils
+import edu.utap.auth.model.AuthViewModel
+import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.utils.RoleUtils
+import edu.utap.utils.ValidationUtils
 
 @Composable
 fun RegisterScreen(

@@ -3,15 +3,15 @@ package edu.utap.auth
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
-import edu.utap.auth.db.UserDao
-import edu.utap.auth.db.UserEntity
+import edu.utap.db.UserDao
+import edu.utap.db.UserEntity
 import edu.utap.auth.repository.AuthRepositoryInterface
 import edu.utap.auth.repository.toUserEntity
 import edu.utap.auth.repository.updateFromFirebaseUser
-import edu.utap.auth.utils.FirebaseErrorMapper
-import edu.utap.user.FirebaseUserRepository
+import edu.utap.utils.FirebaseErrorMapper
+import edu.utap.user.repository.FirebaseUserRepository
 import edu.utap.user.UserProfile
-import edu.utap.user.UserRepository
+import edu.utap.user.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 
@@ -51,7 +51,8 @@ class AuthRepository(
     override suspend fun registerUser(
         email: String,
         password: String,
-        name: String
+        name: String,
+        role: String
     ): Result<FirebaseUser> = executeFirebaseAuthOperation {
         // Step 1: Create Firebase Authentication account
         val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()

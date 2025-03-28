@@ -1,12 +1,12 @@
 package edu.utap.auth
 
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.auth.db.UserEntity
+import edu.utap.db.UserEntity
 import edu.utap.auth.repository.AuthRepositoryInterface
-import edu.utap.auth.utils.FirebaseErrorMapper
-import edu.utap.user.FirebaseUserRepository
+import edu.utap.utils.FirebaseErrorMapper
+import edu.utap.user.repository.FirebaseUserRepository
 import edu.utap.user.UserProfile
-import edu.utap.user.UserRepository
+import edu.utap.user.repository.UserRepository
 
 /**
  * Handles synchronization of user data between Firebase and local storage.

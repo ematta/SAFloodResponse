@@ -1,5 +1,6 @@
 package edu.utap.weather
 
+import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.user.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.mockk

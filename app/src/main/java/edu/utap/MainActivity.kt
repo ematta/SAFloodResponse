@@ -12,25 +12,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import edu.utap.auth.AuthViewModel
+import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.ForgotPasswordScreen
 import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
 import edu.utap.auth.di.ViewModelFactory
-import edu.utap.auth.utils.NetworkConnectivitySnackbar
-import edu.utap.auth.utils.NetworkMonitor
+import edu.utap.utils.NetworkConnectivitySnackbar
+import edu.utap.utils.NetworkMonitor
+import edu.utap.flood.di.FloodViewModelFactory
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
 import edu.utap.ui.screens.FloodMapTestScreen
+import edu.utap.ui.screens.flood.FloodReportFormScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
-import edu.utap.user.ProfileScreen
+import edu.utap.ui.screens.ProfileScreen
 
 /**
  * Main activity for the Flood Response application.
@@ -131,6 +136,7 @@ object AuthenticatedRoutes {
     const val DISCUSSIONS = "discussions"
     const val EMERGENCY = "emergency"
     const val PROFILE = "profile"
+    const val FLOOD_REPORT = "flood_report"
 }
 
 /**
@@ -179,9 +185,13 @@ fun AuthenticatedApp(
             }
 
             composable(AuthenticatedRoutes.EMERGENCY) {
-                // TODO: Implement emergency screen
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Text("Emergency Screen")
+                    Button(
+                        onClick = { navController.navigate(AuthenticatedRoutes.FLOOD_REPORT) },
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Text("Report Flood")
+                    }
                 }
             }
 
@@ -196,6 +206,17 @@ fun AuthenticatedApp(
             composable("flood_map_test") {
                 FloodMapTestScreen(
                     navController = navController
+                )
+            }
+            
+            composable(AuthenticatedRoutes.FLOOD_REPORT) {
+                FloodReportFormScreen(
+                    viewModel = viewModel(
+                        factory = FloodViewModelFactory(context = LocalContext.current)
+                    ),
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }

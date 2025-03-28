@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import edu.utap.auth.model.AuthViewModelInterface
 
 @Composable
 fun ForgotPasswordScreen(viewModel: AuthViewModelInterface, onNavigateToLogin: () -> Unit) {
@@ -29,7 +30,8 @@ fun ForgotPasswordScreen(viewModel: AuthViewModelInterface, onNavigateToLogin: (
     var emailError by remember { mutableStateOf<String?>(null) }
 
     val isEmailValid = remember(email) {
-        email.trim().isNotEmpty() &&
+        email = email.trim()
+        email.isNotEmpty() &&
             android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
     }
 
@@ -44,7 +46,7 @@ fun ForgotPasswordScreen(viewModel: AuthViewModelInterface, onNavigateToLogin: (
         }
 
         if (isValid) {
-            viewModel.resetPassword(email.trim())
+            viewModel.resetPassword(email)
         }
 
         isValid

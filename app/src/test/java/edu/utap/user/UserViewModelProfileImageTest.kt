@@ -3,8 +3,11 @@ package edu.utap.user
 import android.content.Context
 import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import edu.utap.auth.utils.NetworkUtils
-import edu.utap.auth.utils.NetworkUtilsInterface
+import edu.utap.ui.viewmodel.UserViewModel
+import edu.utap.user.repository.UserRepository
+import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsImpl
+import edu.utap.utils.NetworkUtilsInterface
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -75,7 +78,7 @@ class UserViewModelProfileImageTest {
     @After
     fun tearDown() {
         // Restore default implementation
-        NetworkUtils.setImplementation(edu.utap.auth.utils.NetworkUtilsImpl())
+        NetworkUtils.setImplementation(NetworkUtilsImpl())
         
         // Reset ApplicationContextProvider mock
         TestApplicationContextProvider.resetMock()

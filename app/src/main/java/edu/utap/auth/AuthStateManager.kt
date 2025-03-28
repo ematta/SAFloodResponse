@@ -1,6 +1,6 @@
 package edu.utap.auth
 
-import edu.utap.auth.db.UserEntity
+import edu.utap.db.UserEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

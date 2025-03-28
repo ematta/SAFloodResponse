@@ -4,12 +4,13 @@ package edu.utap.flood
 
 import android.location.Location
 import com.google.android.gms.tasks.Task
-import edu.utap.auth.AuthViewModelInterface
-import edu.utap.auth.db.UserEntity
+import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.db.UserEntity
 import edu.utap.flood.model.FloodReport
 import edu.utap.flood.repository.FloodReportRepositoryInterface
-import edu.utap.flood.utils.LocationUtils
-import edu.utap.user.MainDispatcherRule
+import edu.utap.utils.LocationUtils
+import edu.utap.ui.viewmodel.FloodReportViewModel
+import edu.utap.ui.viewmodel.ReportState
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -18,9 +19,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain

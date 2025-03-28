@@ -28,7 +28,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.auth.utils.ValidationUtils
+import edu.utap.auth.model.AuthViewModel
+import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.utils.ValidationUtils
 
 @Composable
 fun LoginScreen(
@@ -171,7 +173,13 @@ fun LoginScreen(
                     }
                 } else {
                     // Proceed with login if validation passes
-                    authViewModel.login(email, password)
+                    authViewModel.login(email, password) { success, message ->
+                        if (success) {
+                            onLoginSuccess()
+                        } else {
+                            errorMessage = message ?: "Login failed"
+                        }
+                    }
                 }
             },
             modifier = Modifier

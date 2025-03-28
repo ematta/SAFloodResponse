@@ -2,8 +2,8 @@ package edu.utap.flood.repository
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.flood.db.FloodReportDao
-import edu.utap.flood.db.FloodReportEntity
+import edu.utap.db.FloodReportDao
+import edu.utap.db.FloodReportEntity
 import edu.utap.flood.model.FloodReport
 import java.util.*
 import kotlinx.coroutines.flow.Flow

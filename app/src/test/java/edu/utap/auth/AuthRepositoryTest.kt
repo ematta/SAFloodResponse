@@ -7,12 +7,11 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.UserProfileChangeRequest
-import edu.utap.auth.db.UserDao
-import edu.utap.auth.db.UserEntity
+import edu.utap.db.UserDao
+import edu.utap.db.UserEntity
 import edu.utap.user.MainDispatcherRule
 import edu.utap.user.UserProfile
-import edu.utap.user.UserRepository
+import edu.utap.user.repository.UserRepository
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -119,7 +118,7 @@ class AuthRepositoryTest {
         
         try {
             // When
-            val result = authRepository.registerUser(email, password, name)
+            val result = authRepository.registerUser(email, password, name, role)
             
             // Then
             assertTrue("Result should be success, but was ${result.exceptionOrNull()}", result.isSuccess)
@@ -148,7 +147,7 @@ class AuthRepositoryTest {
         
         try {
             // When
-            val result = authRepository.registerUser(email, password, name)
+            val result = authRepository.registerUser(email, password, name, role)
             
             // Then
             assertTrue(result.isFailure)
