@@ -2,6 +2,7 @@ package edu.utap.utils
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
@@ -173,6 +174,28 @@ class LocationUtils(private val context: Context) {
             context,
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
+
+    /**
+     * Requests location permissions at runtime if not already granted.
+     *
+     * @param activity The activity from which to request permissions.
+     */
+    fun requestLocationPermissions(activity: Activity) {
+        if (!hasLocationPermissions()) {
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
+        }
+    }
+
+    companion object {
+        const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+    }
 
     /**
      * Gets the last known location.

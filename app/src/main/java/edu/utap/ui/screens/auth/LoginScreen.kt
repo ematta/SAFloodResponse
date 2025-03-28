@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.model.AuthViewModel
@@ -34,12 +35,25 @@ import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.utils.ValidationUtils
 
 @Composable
+/**
+ * LoginScreen is a composable function that displays the login screen for the application.
+ * It allows users to enter their email and password to log in.
+ *
+ * @param authViewModel The ViewModel responsible for authentication logic.
+ * @param onNavigateToRegister Callback to navigate to the registration screen.
+ * @param onNavigateToForgotPassword Callback to navigate to the forgot password screen.
+ * @param onLoginSuccess Callback to be invoked when login is successful.
+ */
 fun LoginScreen(
     authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),
     onNavigateToRegister: () -> Unit,
     onNavigateToForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
+    requireNotNull(onNavigateToRegister) { "onNavigateToRegister cannot be null" }
+    requireNotNull(onNavigateToForgotPassword) { "onNavigateToForgotPassword cannot be null" }
+    requireNotNull(onLoginSuccess) { "onLoginSuccess cannot be null" }
+
     val authState by authViewModel.authState.collectAsState()
 
     var email by remember { mutableStateOf("") }
@@ -145,6 +159,32 @@ fun LoginScreen(
             } else {
                 Text("Login")
             }
+        }
+
+        // Bypass button
+        Button(
+            onClick = {
+                // Validate inputs
+                val isEmailValid = ValidationUtils.isValidEmail("test@user.com")
+                val isPasswordValid = ValidationUtils.isValidPassword("password123")
+                // If all inputs are valid, attempt login
+                if (isEmailValid && isPasswordValid) {
+                    authViewModel.login("test@user.com", "password123") { success, message ->
+                        if (success) {
+                            onLoginSuccess()
+                        } else {
+                            errorMessage = message ?: "Login failed"
+                        }
+                    }
+                }
+            },
+            enabled = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp) // Add padding to separate it from other elements
+                .testTag("bypassButton")
+        ) {
+            Text("Bypass")
         }
 
         // Error message
