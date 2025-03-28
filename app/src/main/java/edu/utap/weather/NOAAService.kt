@@ -1,5 +1,6 @@
 package edu.utap.weather
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,94 +21,112 @@ data class FloodAlert(
 )
 
 class NOAAService(
-    private val client: OkHttpClient = OkHttpClient(),
+    private val client: OkHttpClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    private val baseUrl = "https://api.weather.gov"
-    
-    suspend fun getFloodAlerts(lat: Double, lon: Double): List<FloodAlert> = withContext(dispatcher) {
+    companion object {
+        private const val TAG = "NOAAService"
+        private const val BASE_URL = "https://api.weather.gov"
+    }
+
+    private suspend fun makeRequest(url: String): JSONObject = withContext(dispatcher) {
+        val request = Request.Builder()
+            .url(url)
+            .header("User-Agent", "SAFloodResponse/1.0")
+            .header("Accept", "application/geo+json")
+            .build()
+
         try {
-            // First, get the grid endpoint for the coordinates
-            val gridRequest = createGridRequest(lat, lon)
-            val gridResponse = client.newCall(gridRequest).execute()
-            if (!gridResponse.isSuccessful) {
-                System.err.println("Grid request failed: ${gridResponse.code}")
-                throw IOException("Failed to get grid endpoint: ${gridResponse.code}")
-            }
-
-            val gridResponseBody = gridResponse.body?.string() ?: throw IOException("Empty grid response body")
-            System.out.println("Grid response: $gridResponseBody")
-            val gridJson = JSONObject(gridResponseBody)
-            val properties = gridJson.getJSONObject("properties")
-            val gridId = properties.getString("gridId")
-            System.out.println("Grid ID: $gridId")
-
-            // Now get the alerts for this grid
-            val alertsRequest = createAlertsRequest(gridId)
-            val alertsResponse = client.newCall(alertsRequest).execute()
-            if (!alertsResponse.isSuccessful) {
-                System.err.println("Alerts request failed: ${alertsResponse.code}")
-                throw IOException("Failed to get alerts: ${alertsResponse.code}")
-            }
-
-            val alertsResponseBody = alertsResponse.body?.string() ?: throw IOException("Empty alerts response body")
-            System.out.println("Alerts response: $alertsResponseBody")
-            val alertsJson = JSONObject(alertsResponseBody)
+            Log.d(TAG, "Making request to $url")
+            val response = client.newCall(request).execute()
+            val body = response.body?.string() ?: throw IOException("Empty response body")
+            Log.d(TAG, "Response body: $body")
             
-            if (!alertsJson.has("features")) {
-                System.out.println("No features in alerts response")
-                return@withContext emptyList()
-            }
-            
-            val features = alertsJson.getJSONArray("features")
-            System.out.println("Found ${features.length()} features")
-            val floodAlerts = mutableListOf<FloodAlert>()
-
-            for (i in 0 until features.length()) {
-                val feature = features.getJSONObject(i)
-                val properties = feature.getJSONObject("properties")
-                val event = properties.getString("event")
-                System.out.println("Processing event: $event")
-                
-                // Only include flood-related alerts
-                if (event.contains("Flood", ignoreCase = true)) {
-                    System.out.println("Found flood alert: $event")
-                    val geometry = feature.getJSONObject("geometry")
-                    val coordinates = geometry.getJSONArray("coordinates")
-                    
-                    floodAlerts.add(FloodAlert(
-                        id = properties.getString("id"),
-                        title = properties.getString("headline"),
-                        description = properties.getString("description"),
-                        severity = properties.getString("severity"),
-                        location = properties.getString("areaDesc"),
-                        latitude = coordinates.getDouble(1),
-                        longitude = coordinates.getDouble(0),
-                        timestamp = properties.getLong("sent")
-                    ))
-                }
+            if (!response.isSuccessful) {
+                Log.e(TAG, "Request failed with code ${response.code}")
+                throw IOException("Request failed with code ${response.code}")
             }
 
-            System.out.println("Returning ${floodAlerts.size} flood alerts")
-            floodAlerts
+            JSONObject(body)
         } catch (e: Exception) {
-            System.err.println("Error in getFloodAlerts: ${e.message}")
-            e.printStackTrace()
-            emptyList()
+            Log.e(TAG, "Error making request to $url", e)
+            throw e
         }
     }
 
-    private fun createGridRequest(lat: Double, lon: Double): Request {
-        return Request.Builder()
-            .url("$baseUrl/points/$lat,$lon")
-            .header("User-Agent", "SAFloodResponse/1.0")
-            .build()
-    }
+    suspend fun getFloodAlerts(latitude: Double, longitude: Double): List<FloodAlert> {
+        try {
+            Log.d(TAG, "Getting flood alerts for lat: $latitude, lon: $longitude")
+            
+            // Get alerts for the point
+            val alertsUrl = "$BASE_URL/alerts?point=$latitude,$longitude"
+            Log.d(TAG, "Fetching alerts from URL: $alertsUrl")
+            val alertsResponse = makeRequest(alertsUrl)
+            Log.d(TAG, "Full alerts response: $alertsResponse")
+            val features = alertsResponse.getJSONArray("features")
+            Log.d(TAG, "Got ${features.length()} total alerts from response")
+            
+            val alerts = mutableListOf<FloodAlert>()
+            for (i in 0 until features.length()) {
+                try {
+                    val feature = features.getJSONObject(i)
+                    Log.d(TAG, "Processing feature: $feature")
+                    val alertProperties = feature.getJSONObject("properties")
+                    Log.d(TAG, "Alert properties: $alertProperties")
+                    val event = alertProperties.getString("event")
+                    Log.d(TAG, "Processing alert $i - event: $event")
+                    
+                    // Only process flood-related alerts
+                    if (!event.contains("Flood", ignoreCase = true)) {
+                        Log.d(TAG, "Skipping non-flood alert: $event")
+                        continue
+                    }
 
-    private fun createAlertsRequest(gridId: String): Request {
-        return Request.Builder()
-            .url("$baseUrl/alerts/active/zone/$gridId")
-            .header("User-Agent", "SAFloodResponse/1.0")
-            .build()
+                    Log.d(TAG, "Found flood alert: $event")
+                    
+                    // Default to the input coordinates if geometry is not available
+                    var alertLatitude = latitude
+                    var alertLongitude = longitude
+                    
+                    try {
+                        val geometry = feature.getJSONObject("geometry")
+                        Log.d(TAG, "Geometry: $geometry")
+                        if (geometry.getString("type").contains("Point", ignoreCase = true)){
+                            val coordinates = geometry.getJSONArray("coordinates")
+                            Log.d(TAG, "Coordinates: $coordinates")
+                            // GeoJSON format is [longitude, latitude]
+                            alertLongitude = coordinates.getDouble(0)
+                            alertLatitude = coordinates.getDouble(1)
+                            Log.d(TAG, "Extracted coordinates: lat=$alertLatitude, lon=$alertLongitude")
+                        }
+                    } catch (e: Exception) {
+                        Log.d(TAG, "Could not parse geometry, using input coordinates", e)
+                    }
+                    
+                    val alert = FloodAlert(
+                        id = alertProperties.getString("id"),
+                        title = alertProperties.getString("headline"),
+                        description = alertProperties.getString("description"),
+                        severity = alertProperties.getString("severity"),
+                        location = alertProperties.getString("areaDesc"),
+                        latitude = alertLatitude,
+                        longitude = alertLongitude,
+                        timestamp = alertProperties.getLong("sent")
+                    )
+                    Log.d(TAG, "Created flood alert: $alert")
+                    alerts.add(alert)
+                    Log.d(TAG, "Added flood alert to list, current count: ${alerts.size}")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error processing feature $i", e)
+                    e.printStackTrace()
+                }
+            }
+            
+            Log.d(TAG, "Returning ${alerts.size} flood alerts")
+            return alerts
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting flood alerts", e)
+            return emptyList()
+        }
     }
 }

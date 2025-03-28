@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.utap.auth.db.UserEntity
 import edu.utap.auth.repository.AuthRepositoryInterface
-import edu.utap.auth.utils.ApplicationContextProvider
 import edu.utap.auth.utils.FirebaseErrorMapper
 import edu.utap.auth.utils.NetworkUtilsInterface
 import edu.utap.auth.utils.NetworkUtilsProvider
@@ -34,16 +33,17 @@ open class AuthViewModel(
 ) : ViewModel(),
     AuthViewModelInterface {
 
-    // StateFlow to expose authentication state to UI components
-    private val _authState = MutableStateFlow<AuthState>(AuthState.Idle.Initial)
-    override val authState: StateFlow<AuthState> = _authState
+    private val stateManager = AuthStateManager()
+    private val networkHandler = NetworkOperationHandler(networkUtils)
 
-    // StateFlow to expose the current user entity
-    private val _currentUser = MutableStateFlow<UserEntity?>(null)
-    val currentUser: StateFlow<UserEntity?> = _currentUser
+    override val authState: StateFlow<AuthState> = stateManager.authState
+    val currentUser: StateFlow<UserEntity?> = stateManager.currentUser
+
+    override fun getCurrentUser(): UserEntity? {
+        return stateManager.currentUser.value
+    }
 
     init {
-        // Check authentication state when ViewModel is created
         checkAuthState()
     }
 
@@ -58,18 +58,13 @@ open class AuthViewModel(
         viewModelScope.launch {
             val firebaseUser = authRepository.getCurrentUser()
             if (firebaseUser != null) {
-                // User is authenticated
-                _authState.value = AuthState.Idle.Authenticated(firebaseUser)
-
-                // Fetch and update the current user entity
+                stateManager.updateState(AuthState.Idle.Authenticated(firebaseUser))
                 val userResult = authRepository.getLocalUserById(firebaseUser.uid)
                 userResult.onSuccess { userEntity ->
-                    _currentUser.value = userEntity
+                    stateManager.updateCurrentUser(userEntity)
                 }
             } else {
-                // User is not authenticated
-                _authState.value = AuthState.Idle.Unauthenticated
-                _currentUser.value = null
+                stateManager.resetState()
             }
         }
     }
@@ -92,43 +87,36 @@ open class AuthViewModel(
      * @param role User's role (defaults to regular user)
      */
     override fun register(email: String, password: String, name: String, role: String) {
-        // Update state to indicate loading
-        _authState.value = AuthState.Loading.Registration
-
-        // Check for network connectivity before attempting registration
-        // This prevents unnecessary API calls and provides immediate feedback
-        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
-            _authState.value =
-                AuthState.Error.Network(
-                    "No internet connection. Please check your network settings and try again."
-                )
-            return
-        }
+        stateManager.updateState(AuthState.Loading.Registration)
 
         viewModelScope.launch {
-            val result = authRepository.registerUser(email, password, name)
-            result.fold(
-                onSuccess = { user ->
-                    // Registration successful, update state to authenticated
-                    _authState.value = AuthState.Idle.Authenticated(user)
-
-                    // Fetch and update the current user entity
-                    val userResult = authRepository.getLocalUserById(user.uid)
-                    userResult.onSuccess { userEntity ->
-                        // Update user role if needed
-                        if (userEntity.role != role) {
-                            val updatedUser = userEntity.copy(role = role)
-                            authRepository.updateLocalUser(updatedUser)
-                            _currentUser.value = updatedUser
-                        } else {
-                            _currentUser.value = userEntity
+            networkHandler.executeWithNetworkCheck {
+                authRepository.registerUser(email, password, name)
+            }.fold(
+                onSuccess = { result ->
+                    result.fold(
+                        onSuccess = { user ->
+                            stateManager.updateState(AuthState.Idle.Authenticated(user))
+                            val userResult = authRepository.getLocalUserById(user.uid)
+                            userResult.onSuccess { userEntity ->
+                                if (userEntity.role != role) {
+                                    val updatedUser = userEntity.copy(role = role)
+                                    authRepository.updateLocalUser(updatedUser)
+                                    stateManager.updateCurrentUser(updatedUser)
+                                } else {
+                                    stateManager.updateCurrentUser(userEntity)
+                                }
+                            }
+                        },
+                        onFailure = { error ->
+                            val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
+                            stateManager.updateState(AuthState.Error.Validation(errorMessage))
                         }
-                    }
+                    )
                 },
                 onFailure = { error ->
-                    // Registration failed, map error to user-friendly message
                     val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
-                    _authState.value = AuthState.Error.Validation(errorMessage)
+                    stateManager.updateState(AuthState.Error.Validation(errorMessage))
                 }
             )
         }
@@ -150,37 +138,30 @@ open class AuthViewModel(
      * @param password User's password
      */
     override fun login(email: String, password: String) {
-        // Update state to indicate loading
-        _authState.value = AuthState.Loading.Login
-
-        // Check for network connectivity before attempting login
-        // This prevents unnecessary API calls and provides immediate feedback
-        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
-            _authState.value =
-                AuthState.Error.Network(
-                    "No internet connection. Please check your network settings and try again."
-                )
-            return
-        }
+        stateManager.updateState(AuthState.Loading.Login)
 
         viewModelScope.launch {
-            val result = authRepository.loginUser(email, password)
-            result.fold(
-                onSuccess = { user ->
-                    // Login successful, update state to authenticated
-                    _authState.value = AuthState.Idle.Authenticated(user)
-
-                    // Fetch and update the current user entity
-                    val userResult = authRepository.getLocalUserById(user.uid)
-                    userResult.onSuccess { userEntity ->
-                        // No need to check type as userEntity is already of correct type
-                        _currentUser.value = userEntity
-                    }
+            networkHandler.executeWithNetworkCheck {
+                authRepository.loginUser(email, password)
+            }.fold(
+                onSuccess = { result ->
+                    result.fold(
+                        onSuccess = { user ->
+                            stateManager.updateState(AuthState.Idle.Authenticated(user))
+                            val userResult = authRepository.getLocalUserById(user.uid)
+                            userResult.onSuccess { userEntity ->
+                                stateManager.updateCurrentUser(userEntity)
+                            }
+                        },
+                        onFailure = { error ->
+                            val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
+                            stateManager.updateState(AuthState.Error.Authentication(errorMessage))
+                        }
+                    )
                 },
                 onFailure = { error ->
-                    // Login failed, map error to user-friendly message
                     val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
-                    _authState.value = AuthState.Error.Authentication(errorMessage)
+                    stateManager.updateState(AuthState.Error.Authentication(errorMessage))
                 }
             )
         }
@@ -197,11 +178,8 @@ open class AuthViewModel(
      */
     override fun logout() {
         viewModelScope.launch {
-            // Sign out the user through the repository
             authRepository.logout()
-            // Update state to unauthenticated
-            _authState.value = AuthState.Idle.Unauthenticated
-            _currentUser.value = null
+            stateManager.resetState()
         }
     }
 
@@ -220,30 +198,26 @@ open class AuthViewModel(
      * @param email The email address to send the password reset link to
      */
     override fun resetPassword(email: String) {
-        // Update state to indicate loading
-        _authState.value = AuthState.Loading.PasswordReset
-
-        // Check for network connectivity before attempting password reset
-        // This prevents unnecessary API calls and provides immediate feedback
-        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
-            _authState.value =
-                AuthState.Error.Network(
-                    "No internet connection. Please check your network settings and try again."
-                )
-            return
-        }
+        stateManager.updateState(AuthState.Loading.PasswordReset)
 
         viewModelScope.launch {
-            val result = authRepository.resetPassword(email)
-            result.fold(
-                onSuccess = {
-                    // Password reset email sent successfully
-                    _authState.value = AuthState.Idle.PasswordResetSent
+            networkHandler.executeWithNetworkCheck {
+                authRepository.resetPassword(email)
+            }.fold(
+                onSuccess = { result ->
+                    result.fold(
+                        onSuccess = {
+                            stateManager.updateState(AuthState.Idle.PasswordResetSent)
+                        },
+                        onFailure = { error ->
+                            val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
+                            stateManager.updateState(AuthState.Error.Authentication(errorMessage))
+                        }
+                    )
                 },
                 onFailure = { error ->
-                    // Password reset failed, map error to user-friendly message
                     val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
-                    _authState.value = AuthState.Error.Authentication(errorMessage)
+                    stateManager.updateState(AuthState.Error.Network(errorMessage))
                 }
             )
         }
@@ -272,8 +246,8 @@ open class AuthViewModel(
                     result = authRepository.updateLocalUser(updatedUser)
 
                     // If this is the current user, update the currentUser flow
-                    if (userId == _currentUser.value?.userId) {
-                        _currentUser.value = updatedUser
+                    if (userId == stateManager.currentUser.value?.userId) {
+                        stateManager.updateCurrentUser(updatedUser)
                     }
                 } else {
                     // Role already set to requested value
@@ -294,7 +268,7 @@ open class AuthViewModel(
      * @return true if the user has the required permission, false otherwise
      */
     fun hasPermission(requiredRole: String): Boolean {
-        val user = _currentUser.value ?: return false
+        val user = stateManager.currentUser.value ?: return false
         return RoleUtils.hasPermission(user.role, requiredRole)
     }
 

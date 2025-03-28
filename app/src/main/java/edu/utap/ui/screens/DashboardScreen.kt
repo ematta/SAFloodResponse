@@ -58,7 +58,7 @@ fun DashboardScreen(
                 Marker(
                     state = MarkerState(position = LatLng(alert.latitude, alert.longitude)),
                     title =
-                        alert.title,
+                    alert.title,
                     snippet = alert.description,
                     icon = BitmapDescriptorFactory.defaultMarker(
                         when (alert.severity.lowercase()) {
@@ -144,7 +144,9 @@ fun DashboardScreen(
 
         // Floating Action Button for refreshing alerts
         FloatingActionButton(
-            onClick = { weatherViewModel.fetchFloodAlerts(sanAntonio.latitude, sanAntonio.longitude) },
+            onClick = {
+                weatherViewModel.fetchFloodAlerts(sanAntonio.latitude, sanAntonio.longitude)
+            },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)

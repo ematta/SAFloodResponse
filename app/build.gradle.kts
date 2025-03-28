@@ -71,9 +71,11 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     
-    // Google Maps
+    // Google Maps and Location
     implementation(libs.play.services.maps)
     implementation(libs.maps.compose)
+    implementation("com.google.android.gms:play-services-location:21.2.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
 
     // OkHttp for NOAA API
     implementation(libs.okhttp)
@@ -92,9 +94,9 @@ dependencies {
     
     // Mockk for testing (replacing Mockito)
     testImplementation(libs.mockk)
-    testImplementation(libs.mockk.android)
+    // testImplementation(libs.mockk.android) // Removed: Typically for instrumented tests
     testImplementation(libs.mockk.agent)
-    
+
     // Turbine for testing Flow emissions
     testImplementation(libs.turbine)
     

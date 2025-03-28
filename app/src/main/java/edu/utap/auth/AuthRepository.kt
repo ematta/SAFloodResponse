@@ -29,6 +29,8 @@ class AuthRepository(
     private val userRepository: UserRepository = FirebaseUserRepository()
 ) : AuthRepositoryInterface {
 
+    private val userDataSynchronizer = UserDataSynchronizer(this, userRepository)
+
     /**
      * Registers a new user with Firebase Authentication and creates associated profiles.
      *
@@ -50,54 +52,28 @@ class AuthRepository(
         email: String,
         password: String,
         name: String
-    ): Result<FirebaseUser> = executeFirebaseAuthOperation(
-        authOperation = {
-            // Step 1: Create Firebase Authentication account
-            val authResult = firebaseAuth.createUserWithEmailAndPassword(
-                email,
-                password
-            ).await()
-            val user = authResult.user ?: throw Exception("Registration failed")
+    ): Result<FirebaseUser> = executeFirebaseAuthOperation {
+        // Step 1: Create Firebase Authentication account
+        val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+        val user = authResult.user ?: throw Exception("Registration failed")
 
-            // Step 2: Update the display name in Firebase Auth
-            val profileUpdates = UserProfileChangeRequest.Builder()
-                .setDisplayName(name)
-                .build()
+        // Step 2: Update the display name in Firebase Auth
+        val profileUpdates = UserProfileChangeRequest.Builder()
+            .setDisplayName(name)
+            .build()
 
-            try {
-                user.updateProfile(profileUpdates).await()
-            } catch (e: Exception) {
-                // Continue even if profile update fails
-                // The profile can be updated later
-            }
-
-            // Step 3: Create user in local Room database
-            val userEntity = UserEntity(
-                userId = user.uid,
-                name = name,
-                email = email,
-                profilePic = user.photoUrl?.toString(),
-                role = "regular"
-            )
-            createLocalUser(userEntity)
-
-            // Step 4: Create user profile in Firestore
-            val userProfile = UserProfile(
-                uid = user.uid,
-                displayName = name,
-                email = email
-            )
-            val profileResult: Result<UserProfile> = userRepository.createUserProfile(
-                userProfile
-            )
-            if (profileResult.isFailure) {
-                throw profileResult.exceptionOrNull()
-                    ?: Exception("Failed to create Firestore profile")
-            }
-
-            user
+        try {
+            user.updateProfile(profileUpdates).await()
+        } catch (e: Exception) {
+            // Log the error but continue with the registration process
+            // The profile can be updated later
         }
-    )
+
+        // Step 3: Create user profile in Firestore and local database
+        userDataSynchronizer.syncUserToLocal(user)
+
+        user
+    }
 
     /**
      * Authenticates a user with Firebase and synchronizes their data locally.
@@ -114,19 +90,12 @@ class AuthRepository(
      * @return Result containing the Firebase user if successful, or an error message
      */
     override suspend fun loginUser(email: String, password: String): Result<FirebaseUser> =
-        executeFirebaseAuthOperation(
-            authOperation = {
-                // Authenticate with Firebase
-                val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-                val user = authResult.user ?: throw Exception("Login failed")
-
-                // Sync user data from Firebase to local database
-                // This ensures we have the latest user data locally
-                syncUserToLocal(user)
-
-                user
-            }
-        )
+        executeFirebaseAuthOperation {
+            val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+            val user = authResult.user ?: throw Exception("Login failed")
+            userDataSynchronizer.syncUserToLocal(user)
+            user
+        }
 
     override suspend fun getCurrentUser(): FirebaseUser? = firebaseAuth.currentUser
 
@@ -148,17 +117,9 @@ class AuthRepository(
      * @return Result indicating success or failure with a user-friendly error message
      */
     override suspend fun resetPassword(email: String): Result<Unit> = try {
-        try {
-            // Send password reset email through Firebase
-            firebaseAuth.sendPasswordResetEmail(email).await()
-        } catch (e: Exception) {
-            // Log the error but don't fail the operation
-            // This makes testing easier and allows the app to gracefully handle transient errors
-            throw e
-        }
+        firebaseAuth.sendPasswordResetEmail(email).await()
         Result.success(Unit)
     } catch (e: Exception) {
-        // Map Firebase-specific errors to user-friendly messages
         Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
     }
 
@@ -176,26 +137,9 @@ class AuthRepository(
      * @return Result containing the created UserEntity if successful, or an error message
      */
     override suspend fun createLocalUser(user: UserEntity): Result<UserEntity> = try {
-        // Insert user into local Room database
         userDao.insertUser(user)
-
-        // Check if a Firestore profile already exists for this user
-        val profileResult = userRepository.getUserProfile(user.userId)
-        if (profileResult.isFailure) {
-            // Create the Firestore profile if it doesn't exist
-            // This ensures consistency between local and remote data
-            val firestoreProfile = UserProfile(
-                uid = user.userId,
-                displayName = user.name,
-                email = user.email,
-                photoUrl = user.profilePic ?: ""
-            )
-            userRepository.createUserProfile(firestoreProfile)
-        }
-
         Result.success(user)
     } catch (e: Exception) {
-        // Map database or network errors to user-friendly messages
         Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
     }
 
@@ -227,21 +171,9 @@ class AuthRepository(
      * @return Result containing the updated UserEntity if successful, or an error message
      */
     override suspend fun updateLocalUser(user: UserEntity): Result<UserEntity> = try {
-        // Update user in local Room database
         userDao.updateUser(user)
-
-        // Update the Firestore profile as well to maintain consistency
-        val firestoreProfile = UserProfile(
-            uid = user.userId,
-            displayName = user.name,
-            email = user.email,
-            photoUrl = user.profilePic ?: ""
-        )
-        userRepository.updateUserProfile(firestoreProfile)
-
         Result.success(user)
     } catch (e: Exception) {
-        // Return the raw exception since this is primarily used internally
         Result.failure(e)
     }
 
@@ -340,10 +272,8 @@ class AuthRepository(
     private suspend fun <T> executeFirebaseAuthOperation(
         authOperation: suspend () -> T
     ): Result<T> = try {
-        val result = authOperation()
-        Result.success(result)
+        Result.success(authOperation())
     } catch (e: Exception) {
-        // Map Firebase-specific errors to user-friendly messages
         Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
     }
 }

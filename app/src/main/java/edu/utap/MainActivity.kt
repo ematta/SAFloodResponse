@@ -32,6 +32,10 @@ import edu.utap.ui.screens.FloodMapTestScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
 import edu.utap.user.ProfileScreen
 
+/**
+ * Main activity for the Flood Response application.
+ * Handles authentication flow and main navigation.
+ */
 class MainActivity : ComponentActivity() {
     private lateinit var locationPermissionHandler: LocationPermissionHandler
     private lateinit var networkMonitor: NetworkMonitor
@@ -40,7 +44,6 @@ class MainActivity : ComponentActivity() {
         ViewModelFactory(applicationContext)
     }
 
-    // TODO: Remove this in production builds
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,6 +123,20 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Navigation routes for the authenticated part of the app
+ */
+object AuthenticatedRoutes {
+    const val DASHBOARD = "dashboard"
+    const val DISCUSSIONS = "discussions"
+    const val EMERGENCY = "emergency"
+    const val PROFILE = "profile"
+}
+
+/**
+ * Main composable for the authenticated part of the app.
+ * Handles navigation between different screens.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthenticatedApp(
@@ -128,7 +145,7 @@ fun AuthenticatedApp(
 ) {
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStackEntry?.destination?.route ?: "dashboard"
+    val currentRoute = currentBackStackEntry?.destination?.route ?: AuthenticatedRoutes.DASHBOARD
 
     Scaffold(
         topBar = {
@@ -144,31 +161,31 @@ fun AuthenticatedApp(
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = "dashboard",
+            startDestination = AuthenticatedRoutes.DASHBOARD,
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable("dashboard") {
+            composable(AuthenticatedRoutes.DASHBOARD) {
                 DashboardScreen(
                     navController = navController,
                     locationPermissionHandler = locationPermissionHandler
                 )
             }
 
-            composable("discussions") {
-                // TODO: Add discussions screen
+            composable(AuthenticatedRoutes.DISCUSSIONS) {
+                // TODO: Implement discussions screen
                 Box(modifier = Modifier.fillMaxSize()) {
                     Text("Discussions Screen")
                 }
             }
 
-            composable("emergency") {
-                // TODO: Add emergency screen
+            composable(AuthenticatedRoutes.EMERGENCY) {
+                // TODO: Implement emergency screen
                 Box(modifier = Modifier.fillMaxSize()) {
                     Text("Emergency Screen")
                 }
             }
 
-            composable("profile") {
+            composable(AuthenticatedRoutes.PROFILE) {
                 ProfileScreen(
                     onNavigateBack = {
                         navController.popBackStack()
