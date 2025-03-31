@@ -21,12 +21,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.firestore.FirebaseFirestore
+import edu.utap.auth.AuthState
 import edu.utap.auth.ForgotPasswordScreen
 import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
 import edu.utap.auth.di.ViewModelFactory
 import edu.utap.auth.model.AuthViewModel
+import edu.utap.db.AppDatabase
 import edu.utap.flood.di.FloodViewModelFactory
+import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
@@ -34,8 +38,10 @@ import edu.utap.ui.screens.FloodMapTestScreen
 import edu.utap.ui.screens.ProfileScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
+import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.NetworkConnectivitySnackbar
 import edu.utap.utils.NetworkMonitor
+import kotlin.getValue
 
 /**
  * Main activity for the Flood Response application.
@@ -69,7 +75,7 @@ class MainActivity : ComponentActivity() {
             // Observe authentication state
             LaunchedEffect(Unit) {
                 authViewModel.authState.collect { state ->
-                    isAuthenticated = state is edu.utap.auth.AuthState.Idle.Authenticated
+                    isAuthenticated = state is AuthState.Idle.Authenticated
                 }
             }
 
@@ -153,6 +159,15 @@ fun AuthenticatedApp(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route ?: AuthenticatedRoutes.DASHBOARD
 
+    val applicationContext = LocalContext.current.applicationContext
+    val floodReportDao = AppDatabase.getDatabase(applicationContext).floodReportDao()
+    val firestore = FirebaseFirestore.getInstance()
+
+    val floodReportRepository = FloodReportRepository(
+        floodReportDao = floodReportDao,
+        firestore = firestore
+    )
+
     Scaffold(
         topBar = {
             AppHeader(
@@ -171,9 +186,13 @@ fun AuthenticatedApp(
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(AuthenticatedRoutes.DASHBOARD) {
+                val weatherViewModel = WeatherViewModel()
                 DashboardScreen(
                     navController = navController,
-                    locationPermissionHandler = locationPermissionHandler
+                    locationPermissionHandler = locationPermissionHandler,
+                    weatherViewModel = weatherViewModel,
+                    floodReportRepository = floodReportRepository,
+                    modifier = Modifier
                 )
             }
 

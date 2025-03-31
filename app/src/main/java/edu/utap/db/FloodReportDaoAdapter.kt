@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 class FloodReportDaoAdapter(private val authFloodReportDao: FloodReportDao) : FloodReportDao {
     override fun getAllReports(): Flow<List<FloodReportEntity>> {
-        TODO("Not yet implemented")
+        return authFloodReportDao.getAllReports()
     }
 
     override suspend fun getReportById(reportId: String): FloodReportEntity? =

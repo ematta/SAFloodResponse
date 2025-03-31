@@ -7,6 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -15,7 +18,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import edu.utap.location.LocationPermissionHandler
-import edu.utap.ui.viewmodel.FloodReportViewModel
+import edu.utap.flood.repository.FloodReportRepositoryInterface
+import edu.utap.ui.components.FloodReportItem
 import edu.utap.ui.viewmodel.WeatherViewModel
 
 @Composable
@@ -23,7 +27,7 @@ fun DashboardScreen(
     navController: NavController,
     locationPermissionHandler: LocationPermissionHandler,
     weatherViewModel: WeatherViewModel = viewModel(),
-    floodReportViewModel: FloodReportViewModel = viewModel(),
+    floodReportRepository: FloodReportRepositoryInterface,
     modifier: Modifier = Modifier
 ) {
     var isLocationPermissionGranted by remember { mutableStateOf(false) }
@@ -32,7 +36,26 @@ fun DashboardScreen(
     val weatherError by weatherViewModel.error.collectAsState()
     
     // Flood reports state
-    val floodReports by floodReportViewModel.observeAllReports().collectAsState(initial = emptyList())
+    val floodReports by floodReportRepository.observeAllReports().collectAsState(initial = emptyList())
+    var isFloodReportsLoading by remember { mutableStateOf(false) }
+    var floodReportsError by remember { mutableStateOf<String?>(null) }
+
+    // Load flood reports on first composition
+    LaunchedEffect(Unit) {
+        isFloodReportsLoading = true
+        try {
+            val sanAntonio = LatLng(29.4241, -98.4936)
+            floodReportRepository.getReportsInRadius(
+                sanAntonio.latitude,
+                sanAntonio.longitude,
+                50.0 // 50 mile radius
+            )
+            isFloodReportsLoading = false
+        } catch (e: Exception) {
+            isFloodReportsLoading = false
+            floodReportsError = e.message ?: "Failed to load flood reports"
+        }
+    }
 
     LaunchedEffect(Unit) {
         locationPermissionHandler.checkAndRequestLocationPermission(
@@ -80,21 +103,25 @@ fun DashboardScreen(
 
         // Show loading indicator
         if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(48.dp)
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(48.dp))
+            }
         }
 
         // Show error message if any
         weatherError?.let { errorMessage ->
-            Snackbar(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(16.dp)
+            Box(
+                contentAlignment = Alignment.TopCenter,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(errorMessage)
+                Snackbar(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(errorMessage)
+                }
             }
         }
 
@@ -116,10 +143,43 @@ fun DashboardScreen(
             }
         }
 
-                // Flood Reports List - takes 40% of screen
-                LazyColumn(modifier = Modifier.weight(0.4f)) {
-                    items(floodReports) { report ->
-                        FloodReportItem(report = report)
+            // Flood Reports List - takes 40% of screen
+            Box(modifier = Modifier.weight(0.4f)) {
+                    when {
+                        isFloodReportsLoading -> {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                        floodReportsError != null -> {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text(
+                                    text = floodReportsError!!,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                        floodReports.isEmpty() -> {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text(text = "No flood reports found")
+                            }
+                        }
+                        else -> {
+                            LazyColumn {
+                                items(floodReports) { report ->
+                                    FloodReportItem(report = report)
+                                }
+                            }
+                        }
                     }
                 }
             }
