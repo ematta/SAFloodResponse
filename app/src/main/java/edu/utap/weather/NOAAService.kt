@@ -2,6 +2,10 @@ package edu.utap.weather
 
 import android.util.Log
 import java.io.IOException
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.time.ZoneOffset
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,20 +40,43 @@ class NOAAService(
             .header("Accept", "application/geo+json")
             .build()
 
+        // Log request details
+        val requestHeaders = request.headers.joinToString("\n\t") { "${it.first}: ${it.second}" }
+        Log.d("NOAAService_makeRequest",
+            """
+            |Making request to $url
+            |Thread: ${Thread.currentThread().name}
+            |Headers:
+            |\t$requestHeaders
+            """.trimMargin())
+
         try {
-            Log.d(TAG, "Making request to $url")
             val response = client.newCall(request).execute()
+            
+            // Log response details
+            val responseHeaders = response.headers.joinToString("\n\t") { "${it.first}: ${it.second}" }
+            Log.d("NOAAService_makeRequest",
+                """
+                |Received response for $url
+                |Status: ${response.code} ${response.message}
+                |Headers:
+                |\t$responseHeaders
+                """.trimMargin())
+
             val body = response.body?.string() ?: throw IOException("Empty response body")
-            Log.d(TAG, "Response body: $body")
+            Log.v("NOAAService_makeRequest", "Response body: $body")
 
             if (!response.isSuccessful) {
-                Log.e(TAG, "Request failed with code ${response.code}")
-                throw IOException("Request failed with code ${response.code}")
+                val error = IOException("Request failed with code ${response.code}")
+                Log.e("NOAAService_makeRequest",
+                    "Request failed: ${error.message}\n${Log.getStackTraceString(error)}")
+                throw error
             }
 
             JSONObject(body)
         } catch (e: Exception) {
-            Log.e(TAG, "Error making request to $url", e)
+            Log.e("NOAAService_makeRequest",
+                "Error making request to $url: ${e.message}\n${Log.getStackTraceString(e)}")
             throw e
         }
     }
@@ -114,7 +141,7 @@ class NOAAService(
                         location = alertProperties.getString("areaDesc"),
                         latitude = alertLatitude,
                         longitude = alertLongitude,
-                        timestamp = alertProperties.getLong("sent")
+                        timestamp = parseTimestamp(alertProperties.getString("sent"))
                     )
                     Log.d(TAG, "Created flood alert: $alert")
                     alerts.add(alert)
@@ -131,5 +158,10 @@ class NOAAService(
             Log.e(TAG, "Error getting flood alerts", e)
             return emptyList()
         }
+    }
+
+    private fun parseTimestamp(timestamp: String): Long {
+        val zonedDateTime = ZonedDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME)
+        return zonedDateTime.toInstant().toEpochMilli()
     }
 }

@@ -1,5 +1,6 @@
 package edu.utap.auth
 
+import android.util.Log
 import edu.utap.utils.ApplicationContextProvider
 import edu.utap.utils.NetworkUtilsInterface
 
@@ -12,14 +13,22 @@ class NetworkOperationHandler(private val networkUtils: NetworkUtilsInterface) {
      * Checks if network is available and returns an error state if not.
      * @return AuthState.Error.Network if network is not available, null otherwise
      */
-    fun checkNetworkAvailability(): AuthState.Error.Network? =
-        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
-            AuthState.Error.Network(
+    fun checkNetworkAvailability(): AuthState.Error.Network? {
+        val isAvailable = networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())
+        Log.d("NetworkOperationHandler_checkNetworkAvailability",
+            "Network available: $isAvailable [Thread: ${Thread.currentThread().name}]")
+        
+        return if (!isAvailable) {
+            val error = AuthState.Error.Network(
                 "No internet connection. Please check your network settings and try again."
             )
+            Log.e("NetworkOperationHandler_checkNetworkAvailability",
+                "Network unavailable: ${error.message}")
+            error
         } else {
             null
         }
+    }
 
     /**
      * Executes a network operation with network availability check.
@@ -27,13 +36,23 @@ class NetworkOperationHandler(private val networkUtils: NetworkUtilsInterface) {
      * @return Result of the operation or network error state
      */
     suspend fun <T> executeWithNetworkCheck(operation: suspend () -> T): Result<T> {
+        Log.d("NetworkOperationHandler_executeWithNetworkCheck",
+            "Starting network operation [Thread: ${Thread.currentThread().name}]")
+            
         val networkError = checkNetworkAvailability()
         return if (networkError != null) {
+            Log.e("NetworkOperationHandler_executeWithNetworkCheck",
+                "Network operation aborted: ${networkError.message}")
             Result.failure(Exception(networkError.message))
         } else {
             try {
-                Result.success(operation())
+                val result = operation()
+                Log.d("NetworkOperationHandler_executeWithNetworkCheck",
+                    "Network operation completed successfully")
+                Result.success(result)
             } catch (e: Exception) {
+                Log.e("NetworkOperationHandler_executeWithNetworkCheck",
+                    "Network operation failed: ${e.message}\n${Log.getStackTraceString(e)}")
                 Result.failure(e)
             }
         }

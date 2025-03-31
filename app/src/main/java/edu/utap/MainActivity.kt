@@ -2,6 +2,8 @@ package edu.utap
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -57,16 +59,22 @@ class MainActivity : ComponentActivity() {
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.i("MainActivity_onCreate",
+            "Creating activity [Thread: ${Thread.currentThread().name}]")
         super.onCreate(savedInstanceState)
 
         // Initialize location permission handler first
         locationPermissionHandler = LocationPermissionHandler(this)
         lifecycle.addObserver(locationPermissionHandler)
+        Log.d("MainActivity_onCreate", "Initialized location permission handler")
 
         // Initialize network monitor
         networkMonitor = NetworkMonitor(applicationContext)
+        Log.d("MainActivity_onCreate", "Initialized network monitor")
 
         enableEdgeToEdge()
+        Log.d("MainActivity_onCreate", "Enabled edge-to-edge mode")
+
         setContent {
             var showRegisterScreen by rememberSaveable { mutableStateOf(false) }
             var showForgotPasswordScreen by rememberSaveable { mutableStateOf(false) }
@@ -75,7 +83,12 @@ class MainActivity : ComponentActivity() {
             // Observe authentication state
             LaunchedEffect(Unit) {
                 authViewModel.authState.collect { state ->
-                    isAuthenticated = state is AuthState.Idle.Authenticated
+                    val newAuthState = state is AuthState.Idle.Authenticated
+                    if (newAuthState != isAuthenticated) {
+                        Log.i("MainActivity_authState",
+                            "Authentication state changed to: $newAuthState [Thread: ${Thread.currentThread().name}]")
+                    }
+                    isAuthenticated = newAuthState
                 }
             }
 
@@ -117,20 +130,45 @@ class MainActivity : ComponentActivity() {
             } else {
                 SAFloodResponseTheme {
                     Scaffold(
-                        topBar = {
-                            AppHeader()
+                        topBar = { AppHeader() },
+                        content = { padding: PaddingValues ->
+                            LoginScreen(
+                                authViewModel = authViewModel,
+                                onNavigateToRegister = { showRegisterScreen = true },
+                                onNavigateToForgotPassword = { showForgotPasswordScreen = true },
+                                onLoginSuccess = { isAuthenticated = true }
+                            )
                         }
-                    ) {
-                        LoginScreen(
-                            authViewModel = authViewModel,
-                            onNavigateToRegister = { showRegisterScreen = true },
-                            onNavigateToForgotPassword = { showForgotPasswordScreen = true },
-                            onLoginSuccess = { isAuthenticated = true }
-                        )
-                    }
+                    
+                    )
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.i("MainActivity_onStart", "Starting activity [Thread: ${Thread.currentThread().name}]")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("MainActivity_onResume", "Resuming activity [Thread: ${Thread.currentThread().name}]")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i("MainActivity_onPause", "Pausing activity [Thread: ${Thread.currentThread().name}]")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.i("MainActivity_onStop", "Stopping activity [Thread: ${Thread.currentThread().name}]")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.i("MainActivity_onDestroy", "Destroying activity [Thread: ${Thread.currentThread().name}]")
     }
 }
 
@@ -239,21 +277,5 @@ fun AuthenticatedApp(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SAFloodResponseTheme {
-        Greeting("Android")
     }
 }
