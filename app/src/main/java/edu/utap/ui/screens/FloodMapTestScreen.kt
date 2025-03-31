@@ -5,18 +5,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.maps.android.compose.*
-import kotlin.random.Random
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.*
 import edu.utap.flood.FloodReport
 import edu.utap.flood.FloodSeverity
 import edu.utap.ui.viewmodel.FloodMapTestViewModel
+import kotlin.random.Random
 
 @Composable
 fun FloodMapTestScreen(
@@ -25,16 +25,16 @@ fun FloodMapTestScreen(
     viewModel: FloodMapTestViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    
+
     // Initial camera position centered on San Antonio, TX
     val sanAntonioPosition = LatLng(29.4241, -98.4936)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(sanAntonioPosition, 10f)
     }
-    
+
     // Track if map properties should be shown
     var showMapProperties by remember { mutableStateOf(false) }
-    
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -46,7 +46,7 @@ fun FloodMapTestScreen(
             text = "Flood Map Test Screen",
             style = MaterialTheme.typography.headlineMedium
         )
-        
+
         // Google Maps component
         Box(
             modifier = Modifier
@@ -74,7 +74,7 @@ fun FloodMapTestScreen(
                         snippet = report.description,
                         iconTint = getColorForSeverity(report.severity)
                     )
-                    
+
                     // Show circle overlay to represent the flood area
                     Circle(
                         center = report.location,
@@ -85,7 +85,7 @@ fun FloodMapTestScreen(
                     )
                 }
             }
-            
+
             // Display flood report count
             if (state.floodReports.isNotEmpty()) {
                 Card(
@@ -104,7 +104,7 @@ fun FloodMapTestScreen(
                 }
             }
         }
-        
+
         // Test controls
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -120,24 +120,25 @@ fun FloodMapTestScreen(
             ) {
                 Text("Generate Fake Flood Report")
             }
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
-                    onClick = { 
+                    onClick = {
                         if (state.floodReports.isNotEmpty()) {
                             // Focus camera on latest flood report
                             val latest = state.floodReports.last()
-                            cameraPositionState.position = CameraPosition.fromLatLngZoom(latest.location, 14f)
+                            cameraPositionState.position =
+                                CameraPosition.fromLatLngZoom(latest.location, 14f)
                         }
                     },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Focus Latest")
                 }
-                
+
                 Button(
                     onClick = { viewModel.clearSimulation() },
                     modifier = Modifier.weight(1f),
@@ -176,42 +177,38 @@ private fun MapMarker(
     )
 }
 
-private fun getColorForSeverity(severity: FloodSeverity): Color {
-    return when (severity) {
-        FloodSeverity.LOW -> Color.Green
-        FloodSeverity.MEDIUM -> Color.Cyan
-        FloodSeverity.HIGH -> Color.Yellow
-        FloodSeverity.EXTREME -> Color.Red
-    }
+private fun getColorForSeverity(severity: FloodSeverity): Color = when (severity) {
+    FloodSeverity.LOW -> Color.Green
+    FloodSeverity.MEDIUM -> Color.Cyan
+    FloodSeverity.HIGH -> Color.Yellow
+    FloodSeverity.EXTREME -> Color.Red
 }
 
-private fun Long.toComposeColor(): Color {
-    return Color(
-        alpha = (this shr 24 and 0xff) / 255f,
-        red = (this shr 16 and 0xff) / 255f,
-        green = (this shr 8 and 0xff) / 255f,
-        blue = (this and 0xff) / 255f
-    )
-}
+private fun Long.toComposeColor(): Color = Color(
+    alpha = (this shr 24 and 0xff) / 255f,
+    red = (this shr 16 and 0xff) / 255f,
+    green = (this shr 8 and 0xff) / 255f,
+    blue = (this and 0xff) / 255f
+)
 
 private fun generateFakeFloodReport(viewModel: FloodMapTestViewModel) {
     // Generate a random location in San Antonio, TX area
     val sanAntonioLat = 29.4241
     val sanAntonioLng = -98.4936
-    
+
     // Random offset within ~5km
     val latOffset = (Random.nextDouble() - 0.5) * 0.05
     val lngOffset = (Random.nextDouble() - 0.5) * 0.05
-    
+
     val randomLocation = LatLng(
         sanAntonioLat + latOffset,
         sanAntonioLng + lngOffset
     )
-    
+
     // Random severity
     val severities = FloodSeverity.values()
     val randomSeverity = severities[Random.nextInt(severities.size)]
-    
+
     // Generate a description
     val descriptions = listOf(
         "Street flooding reported",
@@ -221,13 +218,13 @@ private fun generateFakeFloodReport(viewModel: FloodMapTestViewModel) {
         "Creek overflowing"
     )
     val randomDescription = descriptions[Random.nextInt(descriptions.size)]
-    
+
     // Create and add the flood report
     val report = FloodReport(
         location = randomLocation,
         severity = randomSeverity,
         description = randomDescription
     )
-    
+
     viewModel.addFloodReport(report)
-} 
+}

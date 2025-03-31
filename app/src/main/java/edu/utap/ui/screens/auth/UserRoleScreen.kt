@@ -67,9 +67,9 @@ fun UserRoleScreen(authViewModel: AuthViewModel = viewModel(), onNavigateBack: (
                     "You don't have permission to access this screen.",
                     style = MaterialTheme.typography.bodyLarge
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Button(onClick = onNavigateBack) {
                     Text("Go Back")
                 }
@@ -82,7 +82,7 @@ fun UserRoleScreen(authViewModel: AuthViewModel = viewModel(), onNavigateBack: (
 private fun UserRoleItem(user: UserEntity, authViewModel: AuthViewModel) {
     var expanded by remember { mutableStateOf(false) }
     var selectedRole by remember { mutableStateOf(user.role) }
-    
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,16 +93,16 @@ private fun UserRoleItem(user: UserEntity, authViewModel: AuthViewModel) {
                 text = user.name ?: "No Name",
                 style = MaterialTheme.typography.titleMedium
             )
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             Text(
                 text = user.email ?: "No Email",
                 style = MaterialTheme.typography.bodyMedium
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -112,12 +112,12 @@ private fun UserRoleItem(user: UserEntity, authViewModel: AuthViewModel) {
                     text = "Role: ${selectedRole ?: "None"}",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                
+
                 Box {
                     Button(onClick = { expanded = true }) {
                         Text("Change Role")
                     }
-                    
+
                     DropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
@@ -130,7 +130,7 @@ private fun UserRoleItem(user: UserEntity, authViewModel: AuthViewModel) {
                                 expanded = false
                             }
                         )
-                        
+
                         DropdownMenuItem(
                             text = { Text(RoleUtils.ROLE_ADMIN) },
                             onClick = {

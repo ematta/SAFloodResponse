@@ -25,6 +25,8 @@ import kotlinx.coroutines.tasks.await
 
 @ExperimentalCoroutinesApi
 class AuthRepositoryTest {
+
+    private val role = "regular"
     
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()

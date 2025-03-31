@@ -37,27 +37,24 @@ import edu.utap.ui.viewmodel.FloodReportViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FloodReportFormScreen(
-    viewModel: FloodReportViewModel,
-    onNavigateBack: () -> Unit
-) {
+fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () -> Unit) {
     // Collect state from ViewModel
     val email by viewModel.email.collectAsState()
     val phoneNumber by viewModel.phoneNumber.collectAsState()
     val selectedPhotos by viewModel.selectedPhotos.collectAsState()
     val isFloodSeverityHigh by viewModel.isFloodSeverityHigh.collectAsState()
     val canAccessOffice by viewModel.canAccessOffice.collectAsState()
-    
+
     // Local UI state
     var selectedImage by remember { mutableStateOf<String?>(null) }
-    
+
     // Set selected image from photos if available
     LaunchedEffect(selectedPhotos) {
         if (selectedPhotos.isNotEmpty() && selectedImage == null) {
             selectedImage = selectedPhotos.first()
         }
     }
-    
+
     Scaffold(
         topBar = {
             Surface(
@@ -76,7 +73,7 @@ fun FloodReportFormScreen(
                             tint = Color.White
                         )
                     }
-                    
+
                     Text(
                         text = "Report",
                         modifier = Modifier
@@ -120,16 +117,16 @@ fun FloodReportFormScreen(
                         modifier = Modifier.size(24.dp)
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.width(16.dp))
-                
+
                 Column {
                     Text(
                         text = "Emergency",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    
+
                     Text(
                         text = "Flood report",
                         fontSize = 20.sp,
@@ -137,9 +134,9 @@ fun FloodReportFormScreen(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Email Input
             OutlinedTextField(
                 value = email,
@@ -152,7 +149,7 @@ fun FloodReportFormScreen(
                     focusedBorderColor = Color(0xFF8C9EFF)
                 )
             )
-            
+
             // Phone Number Input
             OutlinedTextField(
                 value = phoneNumber,
@@ -165,16 +162,16 @@ fun FloodReportFormScreen(
                     focusedBorderColor = Color(0xFF8C9EFF)
                 )
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Your Recent Photos Section
             Text(
                 text = "Your recent",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
-            
+
             // Photo Upload Box
             if (selectedImage != null) {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -199,9 +196,9 @@ fun FloodReportFormScreen(
                                     .clip(RoundedCornerShape(8.dp)),
                                 contentScale = ContentScale.Crop
                             )
-                            
+
                             Spacer(modifier = Modifier.width(16.dp))
-                            
+
                             Column(
                                 modifier = Modifier.weight(1f)
                             ) {
@@ -210,14 +207,14 @@ fun FloodReportFormScreen(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium
                                 )
-                                
+
                                 Text(
                                     text = "2 MB",
                                     fontSize = 14.sp,
                                     color = Color.Gray
                                 )
                             }
-                            
+
                             // Close button
                             IconButton(
                                 onClick = { selectedImage = null }
@@ -253,16 +250,16 @@ fun FloodReportFormScreen(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Flood Severity Question
             Text(
                 text = "Is the flood severity high?*",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -281,7 +278,7 @@ fun FloodReportFormScreen(
                     )
                     Text(text = "Aff")
                 }
-                
+
                 // No option
                 Row(
                     modifier = Modifier.weight(1f),
@@ -297,16 +294,16 @@ fun FloodReportFormScreen(
                     Text(text = "Ne")
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Office Access Question
             Text(
                 text = "Can you access the office today?*",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -325,7 +322,7 @@ fun FloodReportFormScreen(
                     )
                     Text(text = "Aff")
                 }
-                
+
                 // No option
                 Row(
                     modifier = Modifier.weight(1f),
@@ -341,9 +338,9 @@ fun FloodReportFormScreen(
                     Text(text = "Ne")
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             // Submit Button
             Button(
                 onClick = {
@@ -359,8 +356,10 @@ fun FloodReportFormScreen(
                     containerColor = Color(0xFF8C9EFF)
                 ),
                 // Disable button if required fields are not filled
-                enabled = email.isNotEmpty() && phoneNumber.isNotEmpty() && 
-                          isFloodSeverityHigh != null && canAccessOffice != null
+                enabled = email.isNotEmpty() &&
+                    phoneNumber.isNotEmpty() &&
+                    isFloodSeverityHigh != null &&
+                    canAccessOffice != null
             ) {
                 Text(
                     text = "Submit now",

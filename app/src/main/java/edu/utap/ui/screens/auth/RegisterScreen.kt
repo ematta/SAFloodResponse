@@ -169,7 +169,10 @@ fun RegisterScreen(
 
                 // If all inputs are valid, attempt registration
                 if (isNameValid && isEmailValid && isPasswordValid && doPasswordsMatch) {
-                    authViewModel.register(name, email, password, RoleUtils.ROLE_REGULAR) { success, message ->
+                    authViewModel.register(name, email, password, RoleUtils.ROLE_REGULAR) {
+                            success,
+                            message
+                        ->
                         if (success) {
                             onRegisterSuccess()
                         } else {
@@ -351,7 +354,10 @@ fun AdminRegisterScreen(
 
                 // If all inputs are valid, attempt registration with ADMIN role
                 if (isNameValid && isEmailValid && isPasswordValid && doPasswordsMatch) {
-                    authViewModel.register(name, email, password, RoleUtils.ROLE_ADMIN) { success, message ->
+                    authViewModel.register(name, email, password, RoleUtils.ROLE_ADMIN) {
+                            success,
+                            message
+                        ->
                         if (success) {
                             onRegisterSuccess()
                         } else {

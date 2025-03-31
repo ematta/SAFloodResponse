@@ -1,12 +1,12 @@
 package edu.utap.auth
 
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.db.UserEntity
 import edu.utap.auth.repository.AuthRepositoryInterface
-import edu.utap.utils.FirebaseErrorMapper
-import edu.utap.user.repository.FirebaseUserRepository
+import edu.utap.db.UserEntity
 import edu.utap.user.UserProfile
+import edu.utap.user.repository.FirebaseUserRepository
 import edu.utap.user.repository.UserRepository
+import edu.utap.utils.FirebaseErrorMapper
 
 /**
  * Handles synchronization of user data between Firebase and local storage.
@@ -21,28 +21,26 @@ class UserDataSynchronizer(
      * @param firebaseUser The Firebase user to synchronize
      * @return Result containing the synchronized UserEntity
      */
-    suspend fun syncUserToLocal(firebaseUser: FirebaseUser): Result<UserEntity> {
-        return try {
-            // Get or create local user entity
-            val localUserResult = authRepository.getLocalUserById(firebaseUser.uid)
-            val userEntity = when {
-                localUserResult.isSuccess -> localUserResult.getOrNull()
-                else -> createNewUserEntity(firebaseUser)
-            } ?: throw Exception("Failed to create or retrieve user entity")
+    suspend fun syncUserToLocal(firebaseUser: FirebaseUser): Result<UserEntity> = try {
+        // Get or create local user entity
+        val localUserResult = authRepository.getLocalUserById(firebaseUser.uid)
+        val userEntity = when {
+            localUserResult.isSuccess -> localUserResult.getOrNull()
+            else -> createNewUserEntity(firebaseUser)
+        } ?: throw Exception("Failed to create or retrieve user entity")
 
-            // Update Firestore profile
-            val firestoreProfile = UserProfile(
-                uid = userEntity.userId,
-                displayName = userEntity.name,
-                email = userEntity.email,
-                photoUrl = userEntity.profilePic ?: ""
-            )
-            userRepository.updateUserProfile(firestoreProfile)
+        // Update Firestore profile
+        val firestoreProfile = UserProfile(
+            uid = userEntity.userId,
+            displayName = userEntity.name,
+            email = userEntity.email,
+            photoUrl = userEntity.profilePic ?: ""
+        )
+        userRepository.updateUserProfile(firestoreProfile)
 
-            Result.success(userEntity)
-        } catch (e: Exception) {
-            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
-        }
+        Result.success(userEntity)
+    } catch (e: Exception) {
+        Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
     }
 
     /**
@@ -68,26 +66,24 @@ class UserDataSynchronizer(
      * @param newRole The new role to set
      * @return Result containing the updated UserEntity
      */
-    suspend fun updateUserRole(userId: String, newRole: String): Result<UserEntity> {
-        return try {
-            val userResult = authRepository.getLocalUserById(userId)
-            val userEntity = userResult.getOrNull() ?: throw Exception("User not found")
-            
-            val updatedUser = userEntity.copy(role = newRole)
-            authRepository.updateLocalUser(updatedUser)
+    suspend fun updateUserRole(userId: String, newRole: String): Result<UserEntity> = try {
+        val userResult = authRepository.getLocalUserById(userId)
+        val userEntity = userResult.getOrNull() ?: throw Exception("User not found")
 
-            // Update Firestore profile
-            val firestoreProfile = UserProfile(
-                uid = updatedUser.userId,
-                displayName = updatedUser.name,
-                email = updatedUser.email,
-                photoUrl = updatedUser.profilePic ?: ""
-            )
-            userRepository.updateUserProfile(firestoreProfile)
+        val updatedUser = userEntity.copy(role = newRole)
+        authRepository.updateLocalUser(updatedUser)
 
-            Result.success(updatedUser)
-        } catch (e: Exception) {
-            Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
-        }
+        // Update Firestore profile
+        val firestoreProfile = UserProfile(
+            uid = updatedUser.userId,
+            displayName = updatedUser.name,
+            email = updatedUser.email,
+            photoUrl = updatedUser.profilePic ?: ""
+        )
+        userRepository.updateUserProfile(firestoreProfile)
+
+        Result.success(updatedUser)
+    } catch (e: Exception) {
+        Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
     }
-} 
+}

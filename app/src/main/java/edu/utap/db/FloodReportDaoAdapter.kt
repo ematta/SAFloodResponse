@@ -7,21 +7,18 @@ class FloodReportDaoAdapter(private val authFloodReportDao: FloodReportDao) : Fl
         TODO("Not yet implemented")
     }
 
-    override suspend fun getReportById(reportId: String): FloodReportEntity? {
-        return authFloodReportDao.getReportById(reportId)
-    }
+    override suspend fun getReportById(reportId: String): FloodReportEntity? =
+        authFloodReportDao.getReportById(reportId)
 
     override suspend fun getReportsInRadius(
         latitude: Double,
         longitude: Double,
         radiusInMiles: Double
-    ): List<FloodReportEntity> {
-       return authFloodReportDao.getReportsInRadius(
-            latitude = latitude,
-            longitude = longitude,
-            radiusInMiles = radiusInMiles
-        )
-    }
+    ): List<FloodReportEntity> = authFloodReportDao.getReportsInRadius(
+        latitude = latitude,
+        longitude = longitude,
+        radiusInMiles = radiusInMiles
+    )
 
     override suspend fun insertReport(report: FloodReportEntity) {
         authFloodReportDao.insertReport(report)

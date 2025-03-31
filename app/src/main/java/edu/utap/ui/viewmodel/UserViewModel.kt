@@ -5,14 +5,14 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.utap.user.FirebaseStorageUtilInterface
-import edu.utap.user.repository.FirebaseUserRepository
-import edu.utap.utils.StorageUtilProvider
 import edu.utap.user.UserProfile
 import edu.utap.user.UserProfileState
+import edu.utap.user.repository.FirebaseUserRepository
 import edu.utap.user.repository.UserRepository
 import edu.utap.utils.ApplicationContextProvider
 import edu.utap.utils.NetworkUtilsInterface
 import edu.utap.utils.NetworkUtilsProvider
+import edu.utap.utils.StorageUtilProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -341,7 +341,10 @@ class UserViewModel(
         viewModelScope.launch {
             // Step 1: Upload the image to Firebase Storage
             val uploadResult = storageUtil.uploadProfileImage(
-                context = uploadContext, imageUri = imageUri, userId = uid)
+                context = uploadContext,
+                imageUri = imageUri,
+                userId = uid
+            )
             uploadResult.fold(
                 onSuccess = { downloadUrl ->
                     // Step 2: Update the photo URL in the user profile

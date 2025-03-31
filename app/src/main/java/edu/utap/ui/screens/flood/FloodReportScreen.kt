@@ -13,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import edu.utap.flood.model.FloodReport
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.ReportState
-import edu.utap.flood.model.FloodReport
 import edu.utap.utils.LocationUtils
 
 /**
@@ -107,7 +107,7 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                             onValueChange = {
                                 it.toDoubleOrNull()?.let { lat ->
                                     viewModel.updateLatitude(lat)
-                                } ?: viewModel.updateLatitude(0.0) // Default to 0.0 if input is invalid
+                                } ?: viewModel.updateLatitude(0.0)
                             },
                             label = { Text("Latitude") },
                             modifier = Modifier.fillMaxWidth()
@@ -117,7 +117,7 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                             onValueChange = {
                                 it.toDoubleOrNull()?.let { lon ->
                                     viewModel.updateLongitude(lon)
-                                } ?: viewModel.updateLongitude(0.0) // Default to 0.0 if input is invalid
+                                } ?: viewModel.updateLongitude(0.0)
                             },
                             label = { Text("Longitude") },
                             modifier = Modifier.fillMaxWidth()

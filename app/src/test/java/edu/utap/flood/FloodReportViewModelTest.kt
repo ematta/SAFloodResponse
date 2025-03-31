@@ -92,21 +92,21 @@ class FloodReportViewModelTest {
         // Then
         assertEquals(enabled, viewModel.isManualLocation.value)
     }
-    
+
     @Test
     fun testUpdateManualLocation() = runTest {
         // Given
         val latitude = 37.7749
         val longitude = -122.4194
-        
+
         // When
         viewModel.updateManualLocation(latitude, longitude)
-        
+
         // Then
-        assertEquals(latitude, viewModel.manualLatitude.value, 0.0001)
-        assertEquals(longitude, viewModel.manualLongitude.value, 0.0001)
+        assertEquals(latitude, viewModel.latitude.value, 0.0001)
+        assertEquals(longitude, viewModel.longitude.value, 0.0001)
     }
-    
+
     @Test
     fun testSubmitReportSuccess() = runTest {
         // Given

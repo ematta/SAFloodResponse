@@ -42,4 +42,4 @@ class AuthStateManager {
         _authState.value = AuthState.Idle.Unauthenticated
         _currentUser.value = null
     }
-} 
+}

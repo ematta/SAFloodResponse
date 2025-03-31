@@ -3,8 +3,8 @@ package edu.utap.auth.di
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import edu.utap.auth.AuthRepository
-import edu.utap.db.AppDatabase
 import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.db.AppDatabase
 
 /**
  * A simple dependency provider for the AuthRepository

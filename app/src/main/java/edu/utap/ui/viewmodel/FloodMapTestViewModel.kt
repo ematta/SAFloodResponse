@@ -3,11 +3,11 @@ package edu.utap.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import edu.utap.flood.FloodReport
+import kotlin.math.min
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlin.math.min
 
 data class FloodMapTestState(
     val floodReports: List<FloodReport> = emptyList(),
@@ -22,15 +22,16 @@ data class FloodMapTestState(
 )
 
 enum class TerrainType {
-    FLAT, HILLY, URBAN, RIVER;
+    FLAT,
+    HILLY,
+    URBAN,
+    RIVER;
 
-    fun toSpreadMultiplier(): Float {
-        return when (this) {
-            FLAT -> 1.0f
-            HILLY -> 0.7f
-            URBAN -> 0.5f
-            RIVER -> 1.5f
-        }
+    fun toSpreadMultiplier(): Float = when (this) {
+        FLAT -> 1.0f
+        HILLY -> 0.7f
+        URBAN -> 0.5f
+        RIVER -> 1.5f
     }
 }
 
@@ -49,14 +50,15 @@ class FloodMapTestViewModel : ViewModel() {
     fun addFloodReport(report: FloodReport) {
         val updatedReport = report.copy(
             waterLevel = report.severity.toWaterLevel(),
-            spreadRate = report.severity.toSpreadRate() * _state.value.terrainType.toSpreadMultiplier(),
+            spreadRate =
+            report.severity.toSpreadRate() * _state.value.terrainType.toSpreadMultiplier(),
             geometryPoints = generateGeometryPoints(report.location, report.radius)
         )
-        
+
         // Check for overlaps with existing reports
         val reports = _state.value.floodReports.toMutableList()
         var mergedReport = updatedReport
-        
+
         for (i in reports.indices) {
             if (mergedReport.overlapsWith(reports[i])) {
                 mergedReport = mergedReport.mergeWith(reports[i])
@@ -91,7 +93,7 @@ class FloodMapTestViewModel : ViewModel() {
     }
 
     fun setTerrainType(type: TerrainType) {
-        _state.update { 
+        _state.update {
             it.copy(
                 terrainType = type,
                 floodReports = it.floodReports.map { report ->
@@ -158,7 +160,9 @@ class FloodMapTestViewModel : ViewModel() {
         for (i in 0 until numPoints) {
             val angle = (2 * Math.PI * i) / numPoints
             val lat = center.latitude + (radiusInDegrees * Math.sin(angle))
-            val lng = center.longitude + (radiusInDegrees * Math.cos(angle) / Math.cos(Math.toRadians(center.latitude)))
+            val lng =
+                center.longitude +
+                    (radiusInDegrees * Math.cos(angle) / Math.cos(Math.toRadians(center.latitude)))
             points.add(LatLng(lat, lng))
         }
 
@@ -166,4 +170,4 @@ class FloodMapTestViewModel : ViewModel() {
         points.add(points[0])
         return points
     }
-} 
+}

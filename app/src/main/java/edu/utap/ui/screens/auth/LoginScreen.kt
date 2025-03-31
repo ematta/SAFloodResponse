@@ -27,14 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.utils.ValidationUtils
 
-@Composable
 /**
  * LoginScreen is a composable function that displays the login screen for the application.
  * It allows users to enter their email and password to log in.
@@ -44,6 +42,7 @@ import edu.utap.utils.ValidationUtils
  * @param onNavigateToForgotPassword Callback to navigate to the forgot password screen.
  * @param onLoginSuccess Callback to be invoked when login is successful.
  */
+@Composable
 fun LoginScreen(
     authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),
     onNavigateToRegister: () -> Unit,
@@ -67,7 +66,8 @@ fun LoginScreen(
     // Check if user is already authenticated
     if (
         authState is edu.utap.auth.AuthState.Idle.Authenticated &&
-        authViewModel.getCurrentUser() != null) {
+        authViewModel.getCurrentUser() != null
+    ) {
         onLoginSuccess()
         return
     }

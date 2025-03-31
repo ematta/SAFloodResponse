@@ -21,21 +21,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.ForgotPasswordScreen
 import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
 import edu.utap.auth.di.ViewModelFactory
-import edu.utap.utils.NetworkConnectivitySnackbar
-import edu.utap.utils.NetworkMonitor
+import edu.utap.auth.model.AuthViewModel
 import edu.utap.flood.di.FloodViewModelFactory
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
 import edu.utap.ui.screens.FloodMapTestScreen
+import edu.utap.ui.screens.ProfileScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
-import edu.utap.ui.screens.ProfileScreen
+import edu.utap.utils.NetworkConnectivitySnackbar
+import edu.utap.utils.NetworkMonitor
 
 /**
  * Main activity for the Flood Response application.
@@ -208,7 +208,7 @@ fun AuthenticatedApp(
                     navController = navController
                 )
             }
-            
+
             composable(AuthenticatedRoutes.FLOOD_REPORT) {
                 FloodReportFormScreen(
                     viewModel = viewModel(

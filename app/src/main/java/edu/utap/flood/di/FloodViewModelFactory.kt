@@ -3,13 +3,13 @@ package edu.utap.flood.di
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.di.AuthModule
-import edu.utap.ui.viewmodel.FloodReportViewModel
-import edu.utap.flood.repository.FloodReportRepository
-import edu.utap.utils.LocationUtils
+import edu.utap.auth.model.AuthViewModel
 import edu.utap.db.AppDatabase
 import edu.utap.db.FloodReportDaoAdapter
+import edu.utap.flood.repository.FloodReportRepository
+import edu.utap.ui.viewmodel.FloodReportViewModel
+import edu.utap.utils.LocationUtils
 
 /**
  * Factory for creating FloodReportViewModel with dependencies.
@@ -24,16 +24,16 @@ class FloodViewModelFactory(private val context: Context) : ViewModelProvider.Fa
             val authViewModel = AuthModule.provideAuthRepository(context).let { repo ->
                 AuthViewModel(repo)
             }
-            
+
             // Create the FloodReportRepository
             // Convert the auth.db.FloodReportDao to flood.db.FloodReportDao using an adapter
-            val authFloodReportDao =  AppDatabase.getDatabase(context).floodReportDao()
+            val authFloodReportDao = AppDatabase.getDatabase(context).floodReportDao()
             val floodReportDao = FloodReportDaoAdapter(authFloodReportDao)
             val floodReportRepository = FloodReportRepository(floodReportDao = floodReportDao)
-            
+
             // Create the LocationUtils
             val locationUtils = LocationUtils(context)
-            
+
             // Create the FloodReportViewModel with all required dependencies
             FloodReportViewModel(
                 floodReportRepository = floodReportRepository,

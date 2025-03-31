@@ -26,7 +26,7 @@ import androidx.room.TypeConverters
     exportSchema = false // Don't export the schema for version control
 )
 @TypeConverters(Converters::class) // Register type converters for custom data types
-abstract class AppDatabase() : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
 
     // Abstract methods that return DAOs for database operations
     abstract fun userDao(): UserDao

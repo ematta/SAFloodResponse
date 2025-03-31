@@ -12,9 +12,7 @@ import edu.utap.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppHeader(
-    onTestScreenClick: () -> Unit = {}
-) {
+fun AppHeader(onTestScreenClick: () -> Unit = {}) {
     TopAppBar(
         title = {
             Row(

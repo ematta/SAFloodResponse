@@ -30,6 +30,8 @@ import io.mockk.impl.annotations.MockK
 @ExperimentalCoroutinesApi
 class AuthViewModelTest {
 
+    private val role = "regular"
+
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
@@ -119,13 +121,7 @@ class AuthViewModelTest {
     fun `login success sets Authenticated state`() = runTest {
         coEvery { mockAuthRepository.loginUser(testEmail, testPassword) } returns Result.success(mockFirebaseUser)
 
-        authViewModel.login(testEmail, testPassword) { success, message ->
-            if (success) {
-                onLoginSuccess()
-            } else {
-                errorMessage = message ?: "Login failed"
-            }
-        }
+        authViewModel.login(testEmail, testPassword) { success, message -> {}}
         testDispatcher.scheduler.advanceUntilIdle()
         testDispatcher.scheduler.advanceUntilIdle() // Ensure coroutine completion
         
@@ -135,22 +131,21 @@ class AuthViewModelTest {
 
     @Test
     fun `login failure sets Error state`() = runTest {
-        val errorMessage = AuthState.Error.Authentication("Invalid credentials")
-        coEvery { mockAuthRepository.loginUser(testEmail, testPassword) } returns Result.failure(Exception(errorMessage.message))
+        val errorMessage = "Invalid credentials"
+        coEvery { mockAuthRepository.loginUser(testEmail, testPassword) } returns Result.failure(Exception(errorMessage))
 
         authViewModel.login(testEmail, testPassword) { success, message ->
             if (success) {
-                onLoginSuccess()
-            } else {
-                errorMessage = message ?: "Login failed"
+                throw Exception("Login succeeded unexpectedly")
             }
         }
         testDispatcher.scheduler.advanceUntilIdle()
         testDispatcher.scheduler.advanceUntilIdle() // Ensure coroutine completion
-        
+
         val finalState = authViewModel.authState.value
+
         assertTrue(finalState is AuthState.Error)
-        assertEquals(errorMessage, (finalState as AuthState.Error))
+        assertEquals(errorMessage, (finalState as AuthState.Error.Authentication).message)
     }
 
     @Test
@@ -213,7 +208,7 @@ class AuthViewModelTest {
         assertTrue(finalState is AuthState.Error)
         assertEquals(errorMessage, (finalState as AuthState.Error))
     }
-    
+
     @Test
     fun `resetPassword with no network sets Error state`() = runTest {
         every { mockNetworkUtils.isNetworkAvailable(any()) } returns false

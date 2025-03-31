@@ -1,13 +1,13 @@
 package edu.utap.weather
 
 import android.util.Log
+import java.io.IOException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
-import java.io.IOException
 
 data class FloodAlert(
     val id: String,
@@ -41,7 +41,7 @@ class NOAAService(
             val response = client.newCall(request).execute()
             val body = response.body?.string() ?: throw IOException("Empty response body")
             Log.d(TAG, "Response body: $body")
-            
+
             if (!response.isSuccessful) {
                 Log.e(TAG, "Request failed with code ${response.code}")
                 throw IOException("Request failed with code ${response.code}")
@@ -57,7 +57,7 @@ class NOAAService(
     suspend fun getFloodAlerts(latitude: Double, longitude: Double): List<FloodAlert> {
         try {
             Log.d(TAG, "Getting flood alerts for lat: $latitude, lon: $longitude")
-            
+
             // Get alerts for the point
             val alertsUrl = "$BASE_URL/alerts?point=$latitude,$longitude"
             Log.d(TAG, "Fetching alerts from URL: $alertsUrl")
@@ -65,7 +65,7 @@ class NOAAService(
             Log.d(TAG, "Full alerts response: $alertsResponse")
             val features = alertsResponse.getJSONArray("features")
             Log.d(TAG, "Got ${features.length()} total alerts from response")
-            
+
             val alerts = mutableListOf<FloodAlert>()
             for (i in 0 until features.length()) {
                 try {
@@ -75,7 +75,7 @@ class NOAAService(
                     Log.d(TAG, "Alert properties: $alertProperties")
                     val event = alertProperties.getString("event")
                     Log.d(TAG, "Processing alert $i - event: $event")
-                    
+
                     // Only process flood-related alerts
                     if (!event.contains("Flood", ignoreCase = true)) {
                         Log.d(TAG, "Skipping non-flood alert: $event")
@@ -83,26 +83,29 @@ class NOAAService(
                     }
 
                     Log.d(TAG, "Found flood alert: $event")
-                    
+
                     // Default to the input coordinates if geometry is not available
                     var alertLatitude = latitude
                     var alertLongitude = longitude
-                    
+
                     try {
                         val geometry = feature.getJSONObject("geometry")
                         Log.d(TAG, "Geometry: $geometry")
-                        if (geometry.getString("type").contains("Point", ignoreCase = true)){
+                        if (geometry.getString("type").contains("Point", ignoreCase = true)) {
                             val coordinates = geometry.getJSONArray("coordinates")
                             Log.d(TAG, "Coordinates: $coordinates")
                             // GeoJSON format is [longitude, latitude]
                             alertLongitude = coordinates.getDouble(0)
                             alertLatitude = coordinates.getDouble(1)
-                            Log.d(TAG, "Extracted coordinates: lat=$alertLatitude, lon=$alertLongitude")
+                            Log.d(
+                                TAG,
+                                "Extracted coordinates: lat=$alertLatitude, lon=$alertLongitude"
+                            )
                         }
                     } catch (e: Exception) {
                         Log.d(TAG, "Could not parse geometry, using input coordinates", e)
                     }
-                    
+
                     val alert = FloodAlert(
                         id = alertProperties.getString("id"),
                         title = alertProperties.getString("headline"),
@@ -121,7 +124,7 @@ class NOAAService(
                     e.printStackTrace()
                 }
             }
-            
+
             Log.d(TAG, "Returning ${alerts.size} flood alerts")
             return alerts
         } catch (e: Exception) {

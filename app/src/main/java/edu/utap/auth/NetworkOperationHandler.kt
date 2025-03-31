@@ -7,20 +7,19 @@ import edu.utap.utils.NetworkUtilsInterface
  * Handles network-related operations for authentication.
  * This class provides methods to check network connectivity and handle network-dependent operations.
  */
-class NetworkOperationHandler(
-    private val networkUtils: NetworkUtilsInterface
-) {
+class NetworkOperationHandler(private val networkUtils: NetworkUtilsInterface) {
     /**
      * Checks if network is available and returns an error state if not.
      * @return AuthState.Error.Network if network is not available, null otherwise
      */
-    fun checkNetworkAvailability(): AuthState.Error.Network? {
-        return if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
+    fun checkNetworkAvailability(): AuthState.Error.Network? =
+        if (!networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())) {
             AuthState.Error.Network(
                 "No internet connection. Please check your network settings and try again."
             )
-        } else null
-    }
+        } else {
+            null
+        }
 
     /**
      * Executes a network operation with network availability check.
@@ -39,4 +38,4 @@ class NetworkOperationHandler(
             }
         }
     }
-} 
+}

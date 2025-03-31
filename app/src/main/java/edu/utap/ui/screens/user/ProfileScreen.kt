@@ -80,7 +80,10 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
         onResult = { success ->
             if (success) {
                 userViewModel.uploadProfileImage(
-                    uploadContext = context, imageUri = photoUri, uid = currentUser!!.uid)
+                    uploadContext = context,
+                    imageUri = photoUri,
+                    uid = currentUser!!.uid
+                )
             }
         }
     )
@@ -90,7 +93,10 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
         onResult = { uri: Uri? ->
             uri?.let { it ->
                 userViewModel.uploadProfileImage(
-                    uploadContext = context, imageUri = it, uid = currentUser!!.uid)
+                    uploadContext = context,
+                    imageUri = it,
+                    uid = currentUser!!.uid
+                )
             }
         }
     )
@@ -172,7 +178,9 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+                                    .background(
+                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                                    )
                                     .padding(4.dp),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
@@ -182,7 +190,7 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
                                 ) {
                                     Icon(Icons.TwoTone.PlayArrow, "Take photo")
                                 }
-                                
+
                                 IconButton(
                                     onClick = { galleryLauncher.launch("image/*") },
                                     modifier = Modifier.size(36.dp)
@@ -202,7 +210,7 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
                         onValueChange = { displayName = it },
                         isEditing = isEditing
                     )
-                    
+
                     ProfileField(
                         label = "Email",
                         value = email,
@@ -210,7 +218,7 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
                         isEditing = false, // Email should not be editable
                         keyboardType = KeyboardType.Email
                     )
-                    
+
                     ProfileField(
                         label = "Phone",
                         value = phoneNumber,
@@ -218,7 +226,7 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
                         isEditing = isEditing,
                         keyboardType = KeyboardType.Phone
                     )
-                    
+
                     ProfileField(
                         label = "Address",
                         value = address,
@@ -286,7 +294,7 @@ private fun ProfileField(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         if (isEditing) {
             OutlinedTextField(
                 value = value,
@@ -300,7 +308,7 @@ private fun ProfileField(
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
-            
+
             Divider()
         }
     }

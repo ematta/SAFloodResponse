@@ -50,7 +50,7 @@ class Converters {
      */
     @TypeConverter
     fun toBoolean(value: Int): Boolean = value == 1
-    
+
     /**
      * Converts a List of Strings to a JSON string for SQLite storage.
      *
@@ -58,9 +58,7 @@ class Converters {
      * @return A JSON string representation of the list
      */
     @TypeConverter
-    fun fromStringList(list: List<String>?): String? {
-        return list?.joinToString(",") ?: null
-    }
+    fun fromStringList(list: List<String>?): String? = list?.joinToString(",") ?: null
 
     /**
      * Converts a JSON string from SQLite to a List of Strings.
@@ -69,7 +67,6 @@ class Converters {
      * @return A List<String> parsed from the JSON string
      */
     @TypeConverter
-    fun toStringList(value: String?): List<String>? {
-        return value?.split(",")?.filter { it.isNotEmpty() } ?: null
-    }
+    fun toStringList(value: String?): List<String>? =
+        value?.split(",")?.filter { it.isNotEmpty() } ?: null
 }

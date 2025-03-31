@@ -40,16 +40,16 @@ class FloodReportViewModel(
 
     private val _description = MutableStateFlow("")
     val description: StateFlow<String> = _description
-    
+
     private val _email = MutableStateFlow("")
     val email: StateFlow<String> = _email
-    
+
     private val _phoneNumber = MutableStateFlow("")
     val phoneNumber: StateFlow<String> = _phoneNumber
-    
+
     private val _isFloodSeverityHigh = MutableStateFlow<Boolean?>(null)
     val isFloodSeverityHigh: StateFlow<Boolean?> = _isFloodSeverityHigh
-    
+
     private val _canAccessOffice = MutableStateFlow<Boolean?>(null)
     val canAccessOffice: StateFlow<Boolean?> = _canAccessOffice
 
@@ -77,7 +77,7 @@ class FloodReportViewModel(
     fun updateDescription(newDescription: String) {
         _description.value = newDescription
     }
-    
+
     /**
      * Updates the email address for the flood report.
      *
@@ -86,7 +86,7 @@ class FloodReportViewModel(
     fun updateEmail(newEmail: String) {
         _email.value = newEmail
     }
-    
+
     /**
      * Updates the phone number for the flood report.
      *
@@ -95,7 +95,7 @@ class FloodReportViewModel(
     fun updatePhoneNumber(newPhoneNumber: String) {
         _phoneNumber.value = newPhoneNumber
     }
-    
+
     /**
      * Updates whether the flood severity is high.
      *
@@ -104,7 +104,7 @@ class FloodReportViewModel(
     fun updateFloodSeverity(isHigh: Boolean) {
         _isFloodSeverityHigh.value = isHigh
     }
-    
+
     /**
      * Updates whether the user can access the office.
      *
@@ -142,7 +142,7 @@ class FloodReportViewModel(
     }
 
     /**
-     * Updates the latitude coordinate.
+     * Updates the latitude coordinate for manual location.
      *
      * @param lat The latitude coordinate
      */
@@ -151,11 +151,22 @@ class FloodReportViewModel(
     }
 
     /**
-     * Updates the longitude coordinate.
+     * Updates the longitude coordinate for manual location.
      *
      * @param lon The longitude coordinate
      */
     fun updateLongitude(lon: Double) {
+        _longitude.value = lon
+    }
+
+    /**
+     * Updates both latitude and longitude coordinates for manual location.
+     *
+     * @param lat The latitude coordinate
+     * @param lon The longitude coordinate
+     */
+    fun updateManualLocation(lat: Double, lon: Double) {
+        _latitude.value = lat
         _longitude.value = lon
     }
 

@@ -18,7 +18,11 @@ interface AuthViewModelInterface {
         role: String = RoleUtils.ROLE_REGULAR,
         function: (boolean: Boolean, message: String?) -> Unit = { _, _ -> }
     )
-    fun login(email: String, password: String, function: (boolean: Boolean, message: String?) -> Unit)
+    fun login(
+        email: String,
+        password: String,
+        function: (boolean: Boolean, message: String?) -> Unit
+    )
     fun logout()
     fun resetPassword(email: String, callback: (Boolean, String?) -> Unit)
     fun getCurrentUser(): UserEntity?

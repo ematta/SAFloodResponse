@@ -5,15 +5,14 @@ import androidx.lifecycle.viewModelScope
 import edu.utap.auth.AuthState
 import edu.utap.auth.AuthStateManager
 import edu.utap.auth.NetworkOperationHandler
-import edu.utap.db.UserEntity
 import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.db.UserEntity
 import edu.utap.utils.FirebaseErrorMapper
 import edu.utap.utils.NetworkUtilsInterface
 import edu.utap.utils.NetworkUtilsProvider
 import edu.utap.utils.RoleUtils
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 /**
  * ViewModel responsible for managing authentication state and operations.
@@ -43,9 +42,7 @@ open class AuthViewModel(
 
     val currentUser: StateFlow<UserEntity?> = stateManager.currentUser
 
-    override fun getCurrentUser(): UserEntity? {
-        return stateManager.currentUser.value
-    }
+    override fun getCurrentUser(): UserEntity? = stateManager.currentUser.value
 
     init {
         checkAuthState()
@@ -159,6 +156,7 @@ open class AuthViewModel(
                     result.fold(
                         onSuccess = { user ->
                             stateManager.updateState(AuthState.Idle.Authenticated(user))
+                            function(true, null)
                             val userResult = authRepository.getLocalUserById(user.uid)
                             userResult.onSuccess { userEntity ->
                                 stateManager.updateCurrentUser(userEntity)
@@ -166,12 +164,14 @@ open class AuthViewModel(
                         },
                         onFailure = { error ->
                             val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
+                            function(false, errorMessage)
                             stateManager.updateState(AuthState.Error.Authentication(errorMessage))
                         }
                     )
                 },
                 onFailure = { error ->
                     val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
+                    function(false, errorMessage)
                     stateManager.updateState(AuthState.Error.Authentication(errorMessage))
                 }
             )
@@ -194,10 +194,7 @@ open class AuthViewModel(
         }
     }
 
-    override fun resetPassword(
-        email: String,
-        callback: (Boolean, String?) -> Unit
-    ) {
+    override fun resetPassword(email: String, callback: (Boolean, String?) -> Unit) {
         TODO("Not yet implemented")
     }
 

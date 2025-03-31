@@ -4,8 +4,8 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.*
-import edu.utap.flood.db.FloodReportDao
-import edu.utap.flood.db.FloodReportEntity
+import edu.utap.db.FloodReportDao
+import edu.utap.db.FloodReportEntity
 import edu.utap.flood.model.FloodReport
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi

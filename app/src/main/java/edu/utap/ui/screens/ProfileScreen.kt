@@ -148,7 +148,8 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
                                             userViewModel.uploadProfileImage(
                                                 uploadContext = context,
                                                 imageUri = uri,
-                                                uid = uid)
+                                                uid = uid
+                                            )
                                         }
                                     }
                                 )
