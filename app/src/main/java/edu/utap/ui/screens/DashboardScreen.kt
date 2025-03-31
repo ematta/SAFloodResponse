@@ -15,6 +15,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import edu.utap.location.LocationPermissionHandler
+import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.WeatherViewModel
 
 @Composable
@@ -22,12 +23,16 @@ fun DashboardScreen(
     navController: NavController,
     locationPermissionHandler: LocationPermissionHandler,
     weatherViewModel: WeatherViewModel = viewModel(),
+    floodReportViewModel: FloodReportViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     var isLocationPermissionGranted by remember { mutableStateOf(false) }
     val floodAlerts by weatherViewModel.floodAlerts.collectAsState()
     val isLoading by weatherViewModel.isLoading.collectAsState()
-    val error by weatherViewModel.error.collectAsState()
+    val weatherError by weatherViewModel.error.collectAsState()
+    
+    // Flood reports state
+    val floodReports by floodReportViewModel.observeAllReports().collectAsState(initial = emptyList())
 
     LaunchedEffect(Unit) {
         locationPermissionHandler.checkAndRequestLocationPermission(
@@ -47,9 +52,10 @@ fun DashboardScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Google Map
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Google Map - takes 60% of screen
+            GoogleMap(
+                modifier = Modifier.weight(0.6f),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(isMyLocationEnabled = isLocationPermissionGranted)
         ) {
@@ -82,7 +88,7 @@ fun DashboardScreen(
         }
 
         // Show error message if any
-        error?.let { errorMessage ->
+        weatherError?.let { errorMessage ->
             Snackbar(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -110,11 +116,19 @@ fun DashboardScreen(
             }
         }
 
-        // Bottom Navigation
-        NavigationBar(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
+                // Flood Reports List - takes 40% of screen
+                LazyColumn(modifier = Modifier.weight(0.4f)) {
+                    items(floodReports) { report ->
+                        FloodReportItem(report = report)
+                    }
+                }
+            }
+
+            // Bottom Navigation
+            NavigationBar(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
         ) {
             NavigationBarItem(
                 icon = { Icon(Icons.Default.Home, contentDescription = "Home") },

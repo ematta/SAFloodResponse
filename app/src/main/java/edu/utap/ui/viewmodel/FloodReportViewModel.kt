@@ -1,16 +1,21 @@
 package edu.utap.ui.viewmodel
 
 import android.location.Location
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Timestamp
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.flood.model.FloodReport
 import edu.utap.flood.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationUtils
-import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.util.*
 
 /**
  * ViewModel responsible for managing flood report state and operations.
@@ -62,7 +67,24 @@ class FloodReportViewModel(
     private val _longitude = MutableStateFlow(0.0)
     val longitude: StateFlow<Double> = _longitude
 
+    // State for flood reports list
+    private val _allReports = MutableStateFlow<List<FloodReport>>(emptyList())
+    val allReports: StateFlow<List<FloodReport>> = _allReports
+
+    private val _reportsLoading = MutableStateFlow(false)
+    val reportsLoading: StateFlow<Boolean> = _reportsLoading
+
+    private val _reportsError = MutableStateFlow<String?>(null)
+    val reportsError: StateFlow<String?> = _reportsError
+
     init {
+        // Initialize location updates
+        locationUtils.requestLocationUpdates { location ->
+            _currentLocation.value = location
+        }
+
+        // Fetch all flood reports on initialization
+        fetchAllReports()
         // Request location updates
         locationUtils.requestLocationUpdates { location ->
             _currentLocation.value = location
@@ -157,6 +179,27 @@ class FloodReportViewModel(
      */
     fun updateLongitude(lon: Double) {
         _longitude.value = lon
+    }
+
+    /**
+     * Fetches all flood reports from the repository.
+     */
+    fun fetchAllReports() {
+        viewModelScope.launch {
+            _reportsLoading.value = true
+            _reportsError.value = null
+            
+            try {
+                floodReportRepository.observeAllReports()
+                    .collect { reports ->
+                        _allReports.value = reports
+                        _reportsLoading.value = false
+                    }
+            } catch (e: Exception) {
+                _reportsError.value = e.message ?: "Failed to load flood reports"
+                _reportsLoading.value = false
+            }
+        }
     }
 
     /**
