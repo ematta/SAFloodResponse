@@ -34,5 +34,12 @@ data class FloodReport(
     var confirmedCount: Int = 0,
     @get:PropertyName("denied_count")
     @set:PropertyName("denied_count")
-    var deniedCount: Int = 0
+    var deniedCount: Int = 0,
+    val severity: String = "medium", // low, medium, high
+    @get:PropertyName("water_depth_inches")
+    @set:PropertyName("water_depth_inches")
+    var waterDepthInches: Double = 0.0,
+    @get:PropertyName("is_road_closed")
+    @set:PropertyName("is_road_closed")
+    var isRoadClosed: Boolean = false
 )

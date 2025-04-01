@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import edu.utap.auth.di.AuthModule
 import edu.utap.auth.model.AuthViewModel
+import com.google.firebase.firestore.FirebaseFirestore
+import edu.utap.flood.repository.FirestoreFloodReportRepository
 import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.utils.LocationUtils
@@ -23,9 +25,10 @@ class FloodViewModelFactory(private val context: Context) : ViewModelProvider.Fa
                 AuthViewModel(repo)
             }
 
-            // Create the FloodReportRepository
-            // Convert the auth.db.FloodReportDao to flood.db.FloodReportDao using an adapter
-            val floodReportRepository = FloodReportRepository()
+            // Create the FirestoreFloodReportRepository
+            val firestore = FirebaseFirestore.getInstance()
+            val floodReportRepository = FirestoreFloodReportRepository(firestore)
+            println("FirestoreFloodReportRepository initialized with Firestore instance")
             // Create the LocationUtils
             val locationUtils = LocationUtils(context)
 

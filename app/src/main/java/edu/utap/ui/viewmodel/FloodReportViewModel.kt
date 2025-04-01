@@ -52,8 +52,14 @@ class FloodReportViewModel(
     private val _phoneNumber = MutableStateFlow("")
     val phoneNumber: StateFlow<String> = _phoneNumber
 
-    private val _isFloodSeverityHigh = MutableStateFlow<Boolean?>(null)
-    val isFloodSeverityHigh: StateFlow<Boolean?> = _isFloodSeverityHigh
+    private val _severity = MutableStateFlow("medium")
+    val severity: StateFlow<String> = _severity
+
+    private val _waterDepth = MutableStateFlow(0.0)
+    val waterDepth: StateFlow<Double> = _waterDepth
+
+    private val _isRoadClosed = MutableStateFlow<Boolean?>(null)
+    val isRoadClosed: StateFlow<Boolean?> = _isRoadClosed
 
     private val _canAccessOffice = MutableStateFlow<Boolean?>(null)
     val canAccessOffice: StateFlow<Boolean?> = _canAccessOffice
@@ -123,8 +129,16 @@ class FloodReportViewModel(
      *
      * @param isHigh Whether the flood severity is high
      */
-    fun updateFloodSeverity(isHigh: Boolean) {
-        _isFloodSeverityHigh.value = isHigh
+    fun updateSeverity(newSeverity: String) {
+        _severity.value = newSeverity
+    }
+
+    fun updateWaterDepth(newDepth: Double) {
+        _waterDepth.value = newDepth
+    }
+
+    fun updateRoadClosed(isClosed: Boolean) {
+        _isRoadClosed.value = isClosed
     }
 
     /**
@@ -241,13 +255,16 @@ class FloodReportViewModel(
 
                 val report = FloodReport(
                     reportId = UUID.randomUUID().toString(),
-                    userId = currentUser.userId, // Corrected: Use userId field
+                    userId = currentUser.userId,
                     latitude = location.latitude,
                     longitude = location.longitude,
                     description = _description.value,
                     photoUrls = _selectedPhotos.value,
                     status = "pending",
-                    isManualLocation = _isManualLocation.value
+                    isManualLocation = _isManualLocation.value,
+                    severity = _severity.value,
+                    waterDepthInches = _waterDepth.value,
+                    isRoadClosed = _isRoadClosed.value ?: false
                 )
 
                 val result = floodReportRepository.createReport(report)

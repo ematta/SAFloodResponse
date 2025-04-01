@@ -33,6 +33,7 @@ import edu.utap.auth.model.AuthViewModel
 import edu.utap.flood.di.FloodViewModelFactory
 import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.location.LocationPermissionHandler
+import edu.utap.ui.components.AppBottomNavigation
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
 import edu.utap.ui.screens.FloodMapTestScreen
@@ -236,6 +237,9 @@ fun AuthenticatedApp(
                 }
             )
         },
+        bottomBar = {
+            AppBottomNavigation(navController = navController, currentRoute = currentRoute)
+        },
         snackbarHost = {
             NetworkConnectivitySnackbar(networkMonitor = networkMonitor)
         }
@@ -263,16 +267,6 @@ fun AuthenticatedApp(
                 }
             }
 
-            composable(AuthenticatedRoutes.EMERGENCY) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Button(
-                        onClick = { navController.navigate(AuthenticatedRoutes.FLOOD_REPORT) },
-                        modifier = Modifier.align(Alignment.Center)
-                    ) {
-                        Text("Report Flood")
-                    }
-                }
-            }
 
             composable(AuthenticatedRoutes.PROFILE) {
                 ProfileScreen(

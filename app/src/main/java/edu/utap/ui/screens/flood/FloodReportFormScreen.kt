@@ -22,6 +22,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import coil.compose.AsyncImage
 import edu.utap.R
 import edu.utap.ui.viewmodel.FloodReportViewModel
@@ -42,7 +44,9 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
     val email by viewModel.email.collectAsState()
     val phoneNumber by viewModel.phoneNumber.collectAsState()
     val selectedPhotos by viewModel.selectedPhotos.collectAsState()
-    val isFloodSeverityHigh by viewModel.isFloodSeverityHigh.collectAsState()
+    val severity by viewModel.severity.collectAsState()
+    val waterDepth by viewModel.waterDepth.collectAsState()
+    val isRoadClosed by viewModel.isRoadClosed.collectAsState()
     val canAccessOffice by viewModel.canAccessOffice.collectAsState()
 
     // Local UI state
@@ -255,7 +259,78 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
 
             // Flood Severity Question
             Text(
-                text = "Is the flood severity high?*",
+                text = "Flood Severity Level*",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Low option
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = severity == "low",
+                        onClick = { viewModel.updateSeverity("low") },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = Color(0xFF8C9EFF)
+                        )
+                    )
+                    Text(text = "Low")
+                }
+
+                // Medium option
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = severity == "medium",
+                        onClick = { viewModel.updateSeverity("medium") },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = Color(0xFF8C9EFF)
+                        )
+                    )
+                    Text(text = "Medium")
+                }
+
+                // High option
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = severity == "high",
+                        onClick = { viewModel.updateSeverity("high") },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = Color(0xFF8C9EFF)
+                        )
+                    )
+                    Text(text = "High")
+                }
+            }
+
+            // Water Depth Input
+            OutlinedTextField(
+                value = waterDepth.toString(),
+                onValueChange = { text -> viewModel.updateWaterDepth(text.toDoubleOrNull() ?: 0.0) },
+                label = { Text("Water Depth (inches)*") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color.LightGray,
+                    focusedBorderColor = Color(0xFF8C9EFF)
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+            // Road Closure Question
+            Text(
+                text = "Is the road closed due to flooding?*",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -270,13 +345,13 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
-                        selected = isFloodSeverityHigh == true,
-                        onClick = { viewModel.updateFloodSeverity(true) },
+                        selected = isRoadClosed == true,
+                        onClick = { viewModel.updateRoadClosed(true) },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF8C9EFF)
                         )
                     )
-                    Text(text = "Aff")
+                    Text(text = "Yes")
                 }
 
                 // No option
@@ -285,13 +360,13 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
-                        selected = isFloodSeverityHigh == false,
-                        onClick = { viewModel.updateFloodSeverity(false) },
+                        selected = isRoadClosed == false,
+                        onClick = { viewModel.updateRoadClosed(false) },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF8C9EFF)
                         )
                     )
-                    Text(text = "Ne")
+                    Text(text = "No")
                 }
             }
 
@@ -358,8 +433,10 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                 // Disable button if required fields are not filled
                 enabled = email.isNotEmpty() &&
                     phoneNumber.isNotEmpty() &&
-                    isFloodSeverityHigh != null &&
-                    canAccessOffice != null
+                    severity.isNotEmpty() &&
+                    waterDepth > 0 &&
+                    canAccessOffice != null &&
+                    isRoadClosed != null
             ) {
                 Text(
                     text = "Submit now",

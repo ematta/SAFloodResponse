@@ -3,7 +3,9 @@ package edu.utap.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
+import edu.utap.AuthenticatedRoutes
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
@@ -14,13 +16,11 @@ import androidx.navigation.NavController
 fun AppBottomNavigation(navController: NavController, currentRoute: String) {
     NavigationBar {
         NavigationBarItem(
-            selected = currentRoute == "home",
+            selected = currentRoute == AuthenticatedRoutes.DASHBOARD,
             onClick = {
-                if (currentRoute != "home") {
-                    navController.navigate("home") {
-                        popUpTo("home") {
-                            inclusive = true
-                        }
+                if (currentRoute != AuthenticatedRoutes.DASHBOARD) {
+                    navController.navigate(AuthenticatedRoutes.DASHBOARD) {
+                        popUpTo(AuthenticatedRoutes.DASHBOARD)
                     }
                 }
             },
@@ -29,13 +29,24 @@ fun AppBottomNavigation(navController: NavController, currentRoute: String) {
         )
 
         NavigationBarItem(
-            selected = currentRoute == "profile",
+            selected = currentRoute == AuthenticatedRoutes.FLOOD_REPORT,
             onClick = {
-                if (currentRoute != "profile") {
-                    navController.navigate("profile") {
-                        popUpTo("profile") {
-                            inclusive = true
-                        }
+                if (currentRoute != AuthenticatedRoutes.FLOOD_REPORT) {
+                    navController.navigate(AuthenticatedRoutes.FLOOD_REPORT) {
+                        popUpTo(AuthenticatedRoutes.FLOOD_REPORT)
+                    }
+                }
+            },
+            icon = { Icon(Icons.Filled.Warning, contentDescription = "Report") },
+            label = { Text("Report") }
+        )
+
+        NavigationBarItem(
+            selected = currentRoute == AuthenticatedRoutes.PROFILE,
+            onClick = {
+                if (currentRoute != AuthenticatedRoutes.PROFILE) {
+                    navController.navigate(AuthenticatedRoutes.PROFILE) {
+                        popUpTo(AuthenticatedRoutes.PROFILE)
                     }
                 }
             },

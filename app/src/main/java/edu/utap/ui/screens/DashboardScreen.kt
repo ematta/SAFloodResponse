@@ -1,5 +1,6 @@
 package edu.utap.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -19,8 +20,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.flood.repository.FloodReportRepositoryInterface
+import edu.utap.flood.model.FloodReport
 import edu.utap.ui.components.FloodReportItem
 import edu.utap.ui.viewmodel.WeatherViewModel
+
+private const val TAG = "DashboardScreen"
 
 @Composable
 fun DashboardScreen(
@@ -37,11 +41,25 @@ fun DashboardScreen(
     
     // Flood reports state
     val sanAntonio = LatLng(29.4241, -98.4936) // San Antonio coordinates
-    val floodReports by floodReportRepository.getReportsInRadius(
-        sanAntonio.latitude,
-        sanAntonio.longitude,
-        50.0 // 50 mile radius
-    ).collectAsState(initial = emptyList())
+    Log.d(TAG, "Fetching reports for location: $sanAntonio with 50 mile radius")
+    val floodReports by remember {
+        floodReportRepository.getReportsInRadius(
+            sanAntonio.latitude,
+            sanAntonio.longitude,
+            50.0 // 50 mile radius
+        ).also { flow ->
+            Log.d(TAG, "Flow created for reports")
+        }
+    }.collectAsState(initial = emptyList<FloodReport>().also {
+        Log.d(TAG, "Initial empty state set for reports")
+    }).also { state ->
+        LaunchedEffect(state.value) {
+            Log.d(TAG, "Reports updated: ${state.value.size} reports")
+            state.value.forEach {
+                Log.d(TAG, "Report: ${it.reportId} at (${it.latitude}, ${it.longitude})")
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         locationPermissionHandler.checkAndRequestLocationPermission(

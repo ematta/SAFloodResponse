@@ -238,6 +238,18 @@ fun FloodReportItem(report: FloodReport, onConfirm: () -> Unit, onDeny: () -> Un
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
+                text = "Severity: ${report.severity.replaceFirstChar { it.uppercase() }}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Water Depth: ${report.waterDepthInches} inches",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Road Status: ${if (report.isRoadClosed) "Closed" else "Open"}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
                 text = report.description,
                 style = MaterialTheme.typography.bodyMedium
             )
