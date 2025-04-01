@@ -38,7 +38,7 @@ open class AuthViewModel(
     private val stateManager = AuthStateManager()
     private val networkHandler = NetworkOperationHandler(networkUtils)
 
-    override val authState: StateFlow<AuthState> = stateManager.authState
+    override var authState: StateFlow<AuthState> = stateManager.authState
 
     val currentUser: StateFlow<UserEntity?> = stateManager.currentUser
 
@@ -189,13 +189,14 @@ open class AuthViewModel(
      */
     override fun logout() {
         viewModelScope.launch {
-            authRepository.logout()
-            stateManager.resetState()
+            try {
+                authRepository.logout()
+                stateManager.resetState()
+            } catch (e: Exception) {
+                val errorMessage = FirebaseErrorMapper.getErrorMessage(e)
+                stateManager.updateState(AuthState.Error.Authentication(errorMessage))
+            }
         }
-    }
-
-    override fun resetPassword(email: String, callback: (Boolean, String?) -> Unit) {
-        TODO("Not yet implemented")
     }
 
     /**
@@ -212,7 +213,7 @@ open class AuthViewModel(
      *
      * @param email The email address to send the password reset link to
      */
-    override fun resetPassword(email: String) {
+    override fun resetPassword(email: String, callback: (Boolean, String?) -> Unit) {
         stateManager.updateState(AuthState.Loading.PasswordReset)
 
         viewModelScope.launch {
@@ -223,16 +224,19 @@ open class AuthViewModel(
                     result.fold(
                         onSuccess = {
                             stateManager.updateState(AuthState.Idle.PasswordResetSent)
+                            callback(true, null)
                         },
                         onFailure = { error ->
                             val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
                             stateManager.updateState(AuthState.Error.Authentication(errorMessage))
+                            callback(false, errorMessage)
                         }
                     )
                 },
                 onFailure = { error ->
                     val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
                     stateManager.updateState(AuthState.Error.Network(errorMessage))
+                    callback(false, errorMessage)
                 }
             )
         }
@@ -298,4 +302,12 @@ open class AuthViewModel(
      * @return Flow of all users in the system
      */
     fun observeAllUsers() = authRepository.observeLocalUsers()
+
+    override fun restoreAuthState() {
+        checkAuthState()
+    }
+
+    override fun updateAuthState(sent: AuthState) {
+        authState = sent as StateFlow<AuthState>
+    }
 }

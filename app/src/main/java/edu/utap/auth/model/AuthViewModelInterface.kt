@@ -26,5 +26,6 @@ interface AuthViewModelInterface {
     fun logout()
     fun resetPassword(email: String, callback: (Boolean, String?) -> Unit)
     fun getCurrentUser(): UserEntity?
-    fun resetPassword(string: kotlin.String)
+    fun restoreAuthState()
+    fun updateAuthState(sent: AuthState)
 }

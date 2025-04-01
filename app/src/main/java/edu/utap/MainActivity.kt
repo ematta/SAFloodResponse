@@ -63,6 +63,9 @@ class MainActivity : ComponentActivity() {
             "Creating activity [Thread: ${Thread.currentThread().name}]")
         super.onCreate(savedInstanceState)
 
+        // Restore auth state
+        authViewModel.restoreAuthState()
+
         // Initialize location permission handler first
         locationPermissionHandler = LocationPermissionHandler(this)
         lifecycle.addObserver(locationPermissionHandler)
@@ -169,6 +172,11 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.i("MainActivity_onDestroy", "Destroying activity [Thread: ${Thread.currentThread().name}]")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // No need to explicitly save state - ViewModel handles it
     }
 }
 

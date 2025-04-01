@@ -46,7 +46,13 @@ fun ForgotPasswordScreen(viewModel: AuthViewModelInterface, onNavigateToLogin: (
         }
 
         if (isValid) {
-            viewModel.resetPassword(email)
+            viewModel.resetPassword(email, { success, message ->
+                if (success) {
+                    viewModel.updateAuthState(AuthState.Idle.PasswordResetSent)
+                } else {
+                    viewModel.updateAuthState(AuthState.Error.Generic(message ?: "Unknown error"))
+                }
+            })
         }
 
         isValid
