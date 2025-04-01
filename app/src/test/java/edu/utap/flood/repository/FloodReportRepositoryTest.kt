@@ -4,14 +4,9 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.*
-import edu.utap.db.FloodReportDao
-import edu.utap.db.FloodReportEntity
 import edu.utap.flood.model.FloodReport
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.*
 import org.junit.Assert.*
 import org.junit.Before
@@ -27,21 +22,19 @@ class FloodReportRepositoryTest {
 
     private lateinit var repository: FloodReportRepository
     private lateinit var firestore: FirebaseFirestore
-    private lateinit var dao: FloodReportDao
     private lateinit var collectionRef: CollectionReference
     private lateinit var documentRef: DocumentReference
 
     @Before
     fun setup() {
         firestore = mockk(relaxed = true)
-        dao = mockk(relaxed = true)
         collectionRef = mockk(relaxed = true)
         documentRef = mockk(relaxed = true)
 
         every { firestore.collection(any()) } returns collectionRef
         every { collectionRef.document(any()) } returns documentRef
 
-        repository = FloodReportRepository(firestore, dao)
+        repository = FloodReportRepository(firestore)
     }
 
     private fun createTestReport(): FloodReport {
@@ -61,24 +54,6 @@ class FloodReportRepositoryTest {
         )
     }
 
-    private fun createTestEntity(): FloodReportEntity {
-        val now = Date()
-        return FloodReportEntity(
-            reportId = "test_report_id",
-            userId = "test_user_id",
-            latitude = 30.2672,
-            longitude = -97.7431,
-            description = "Test flood report",
-            photoUrls = listOf("test_photo.jpg"),
-            status = "pending",
-            createdAt = now,
-            updatedAt = now,
-            isManualLocation = false,
-            confirmedCount = 0,
-            deniedCount = 0
-        )
-    }
-
     @Test
     fun testCreateReportSuccess() = runTest {
         val report = createTestReport()
@@ -88,7 +63,6 @@ class FloodReportRepositoryTest {
         val result = repository.createReport(report)
 
         assertTrue(result.isSuccess)
-        coVerify { dao.insertReport(any()) }
         verify { documentRef.set(any()) }
     }
 
@@ -101,14 +75,11 @@ class FloodReportRepositoryTest {
         val result = repository.createReport(report)
 
         assertTrue(result.isFailure)
-        coVerify(exactly = 0) { dao.insertReport(any()) }
     }
 
     @Test
     fun testGetReportByIdLocalSuccess() = runTest {
         val testReportId = "test_report_id"
-        val entity = createTestEntity()
-        coEvery { dao.getReportById(testReportId) } returns entity
 
         val result = repository.getReportById(testReportId)
 
@@ -119,7 +90,6 @@ class FloodReportRepositoryTest {
     @Test
     fun testGetReportByIdRemoteSuccess() = runTest {
         val testReportId = "test_report_id"
-        coEvery { dao.getReportById(testReportId) } returns null
         val documentSnapshot: DocumentSnapshot = mockk(relaxed = true)
         val task: Task<DocumentSnapshot> = Tasks.forResult(documentSnapshot)
         every { documentRef.get() } returns task
@@ -130,13 +100,11 @@ class FloodReportRepositoryTest {
 
         assertTrue(result.isSuccess)
         assertEquals(testReportId, result.getOrNull()?.reportId)
-        coVerify { dao.insertReport(any()) }
     }
 
     @Test
     fun testGetReportByIdNotFound() = runTest {
         val testReportId = "nonexistent_id"
-        coEvery { dao.getReportById(testReportId) } returns null
         val documentSnapshot: DocumentSnapshot = mockk(relaxed = true)
         val task: Task<DocumentSnapshot> = Tasks.forResult(documentSnapshot)
         every { documentRef.get() } returns task
@@ -157,7 +125,6 @@ class FloodReportRepositoryTest {
         val result = repository.updateReport(report)
 
         assertTrue(result.isSuccess)
-        coVerify { dao.updateReport(any()) }
         verify { documentRef.set(any()) }
     }
 
@@ -170,7 +137,6 @@ class FloodReportRepositoryTest {
         val result = repository.deleteReport(testReportId)
 
         assertTrue(result.isSuccess)
-        coVerify { dao.deleteReport(any()) }
         verify { documentRef.delete() }
     }
 }

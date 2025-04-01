@@ -19,10 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.AuthState
 import edu.utap.auth.ForgotPasswordScreen
@@ -31,6 +33,7 @@ import edu.utap.auth.RegisterScreen
 import edu.utap.auth.di.ViewModelFactory
 import edu.utap.auth.model.AuthViewModel
 import edu.utap.flood.di.FloodViewModelFactory
+import edu.utap.flood.di.DiscussionViewModelFactory
 import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppBottomNavigation
@@ -38,6 +41,8 @@ import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
 import edu.utap.ui.screens.FloodMapTestScreen
 import edu.utap.ui.screens.ProfileScreen
+import edu.utap.ui.screens.discussion.DiscussionListScreen
+import edu.utap.ui.screens.discussion.DiscussionThreadScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
 import edu.utap.ui.viewmodel.WeatherViewModel
@@ -189,6 +194,7 @@ class MainActivity : ComponentActivity() {
 object AuthenticatedRoutes {
     const val DASHBOARD = "dashboard"
     const val DISCUSSIONS = "discussions"
+    const val DISCUSSIONS_THREAD = "discussions/{threadId}"
     const val EMERGENCY = "emergency"
     const val PROFILE = "profile"
     const val FLOOD_REPORT = "flood_report"
@@ -258,12 +264,25 @@ fun AuthenticatedApp(
             }
 
             composable(AuthenticatedRoutes.DISCUSSIONS) {
-                // TODO: Implement discussions screen
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Text("Discussions Screen")
-                }
+                DiscussionListScreen(
+                    onThreadClick = { threadId ->
+                        navController.navigate("discussions/$threadId")
+                    }
+                )
             }
 
+            composable(
+                route = AuthenticatedRoutes.DISCUSSIONS_THREAD,
+                arguments = listOf(
+                    navArgument("threadId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val threadId = backStackEntry.arguments?.getString("threadId") ?: ""
+                DiscussionThreadScreen(
+                    threadId = threadId,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
 
             composable(AuthenticatedRoutes.PROFILE) {
                 ProfileScreen(

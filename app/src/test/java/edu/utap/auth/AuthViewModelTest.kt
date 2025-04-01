@@ -186,7 +186,7 @@ class AuthViewModelTest {
     fun `resetPassword success sets PasswordResetSent state`() = runTest {
         coEvery { mockAuthRepository.resetPassword(testEmail) } returns Result.success(Unit)
 
-        authViewModel.resetPassword(testEmail)
+        authViewModel.resetPassword(testEmail) { success, message -> }
         testDispatcher.scheduler.advanceUntilIdle()
         testDispatcher.scheduler.advanceUntilIdle()
         
@@ -199,7 +199,7 @@ class AuthViewModelTest {
         val errorMessage = AuthState.Error.Authentication("Password reset failed")
         coEvery { mockAuthRepository.resetPassword(testEmail) } returns Result.failure(Exception(errorMessage.message))
 
-        authViewModel.resetPassword(testEmail)
+        authViewModel.resetPassword(testEmail) { success, message -> }
         testDispatcher.scheduler.advanceUntilIdle()
         testDispatcher.scheduler.advanceUntilIdle()
         
@@ -212,7 +212,7 @@ class AuthViewModelTest {
     fun `resetPassword with no network sets Error state`() = runTest {
         every { mockNetworkUtils.isNetworkAvailable(any()) } returns false
         
-        authViewModel.resetPassword(testEmail)
+        authViewModel.resetPassword(testEmail) { success, message -> }
         testDispatcher.scheduler.advanceUntilIdle()
         testDispatcher.scheduler.advanceUntilIdle()
         

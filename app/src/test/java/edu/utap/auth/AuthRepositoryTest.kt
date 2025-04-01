@@ -7,8 +7,7 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.db.UserDao
-// Removed import edu.utap.db.UserEntity as FirebaseUser is already imported
+import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.user.MainDispatcherRule
 import edu.utap.user.UserProfile
 import edu.utap.user.repository.UserRepository
@@ -33,10 +32,10 @@ class AuthRepositoryTest {
     
     @MockK
     private lateinit var firebaseAuth: FirebaseAuth
-    
+
     @MockK
-    private lateinit var userDao: UserDao
-    
+    private lateinit var firestore: FirebaseFirestore
+
     @MockK
     private lateinit var userRepository: UserRepository
     
@@ -45,8 +44,9 @@ class AuthRepositoryTest {
     
     @MockK
     private lateinit var mockUser: FirebaseUser
-    
-    private lateinit var authRepository: AuthRepository
+
+    @MockK
+    private lateinit var authRepository: FirestoreAuthRepository
     
     @Before
     fun setup() {
@@ -63,7 +63,7 @@ class AuthRepositoryTest {
         every { mockUser.updateProfile(any()) } returns profileUpdateTask
 
         // Setup repository
-        authRepository = AuthRepository(firebaseAuth, userDao, userRepository)
+        authRepository = FirestoreAuthRepository(firebaseAuth = firebaseAuth, firestore = firestore, userRepository = userRepository)
     }
     
     @Test
@@ -85,9 +85,6 @@ class AuthRepositoryTest {
         
         // Set up mock for userRepository.createUserProfile
         coEvery { userRepository.createUserProfile(any()) } returns Result.success(UserProfile(uid = "test-uid", displayName = name, email = email))
-            
-        // Set up mock for userDao operations
-        coEvery { userDao.insertUser(any()) } returns Unit
             
         // Set up mock for email and displayName
         every { mockUser.email } returns email
@@ -173,12 +170,6 @@ class AuthRepositoryTest {
         
         // Mock userRepository.getUserProfile to return success
         coEvery { userRepository.getUserProfile(any()) } returns Result.success(UserProfile(uid = "test-uid", displayName = "Test User", email = email))
-        
-        // Mock userDao.getUserById to return null (user doesn't exist locally)
-        coEvery { userDao.getUserById(any()) } returns null
-            
-        // Mock syncUserToLocal to return success
-        coEvery { userDao.insertUser(any()) } returns Unit
         
         // Mock the await extensions for coroutine suspending functions
         mockkStatic("kotlinx.coroutines.tasks.TasksKt")
