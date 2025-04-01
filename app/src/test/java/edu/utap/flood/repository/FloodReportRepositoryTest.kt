@@ -80,6 +80,11 @@ class FloodReportRepositoryTest {
     @Test
     fun testGetReportByIdLocalSuccess() = runTest {
         val testReportId = "test_report_id"
+        val documentSnapshot: DocumentSnapshot = mockk(relaxed = true)
+        val task: Task<DocumentSnapshot> = Tasks.forResult(documentSnapshot)
+        every { documentRef.get() } returns task
+        every { documentSnapshot.exists() } returns true
+        every { documentSnapshot.toObject(FloodReport::class.java) } returns createTestReport()
 
         val result = repository.getReportById(testReportId)
 

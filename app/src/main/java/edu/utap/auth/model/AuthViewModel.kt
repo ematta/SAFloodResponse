@@ -310,6 +310,6 @@ open class AuthViewModel(
     }
 
     override fun updateAuthState(sent: AuthState) {
-        authState = sent as StateFlow<AuthState>
+        stateManager.updateState(sent)
     }
 }

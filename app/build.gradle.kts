@@ -4,9 +4,15 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
     id("com.google.devtools.ksp") version "2.1.20-1.0.31"
+    id("jacoco")
 }
 
 android {
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
+    }
     namespace = "edu.utap"
     compileSdk = 35
 
@@ -51,6 +57,47 @@ android {
     }
 }
 
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+tasks.withType<Test> {
+    configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*"
+    )
+
+    val debugTree = fileTree("${project.buildDir}/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+
+    val mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(fileTree(project.buildDir) {
+        include("jacoco/testDebugUnitTest.exec")
+    })
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -93,15 +140,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     
-    // Mockk for testing (replacing Mockito)
+    // Test dependencies
     testImplementation(libs.mockk)
-    // testImplementation(libs.mockk.android) // Removed: Typically for instrumented tests
     testImplementation(libs.mockk.agent)
-
-    // Turbine for testing Flow emissions
     testImplementation(libs.turbine)
-    
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(kotlin("test"))
+    testImplementation(libs.junit)
 }

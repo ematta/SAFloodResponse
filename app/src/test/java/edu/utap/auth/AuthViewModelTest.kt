@@ -7,6 +7,7 @@ import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseUser
 import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.auth.model.FirestoreUser
 import edu.utap.utils.NetworkUtils
 import edu.utap.utils.NetworkUtilsInterface
 import edu.utap.utils.ApplicationContextProvider
@@ -58,6 +59,9 @@ class AuthViewModelTest {
     @Before
     fun setup() {
         MockKAnnotations.init(this)
+        every { mockFirebaseUser.uid } returns "test-uid"
+        every { mockFirebaseUser.email } returns testEmail
+        every { mockFirebaseUser.displayName } returns testName
         Dispatchers.setMain(testDispatcher)
         
         // Mock application context provider
@@ -118,14 +122,37 @@ class AuthViewModelTest {
 
     @Test
     fun `login success sets Authenticated state`() = runTest {
-        coEvery { mockAuthRepository.loginUser(testEmail, testPassword) } returns Result.success(mockFirebaseUser)
-
-        authViewModel.login(testEmail, testPassword) { success, message -> {}}
+        // Verify initial state after initialization
         testDispatcher.scheduler.advanceUntilIdle()
-        testDispatcher.scheduler.advanceUntilIdle() // Ensure coroutine completion
+        assertEquals(AuthState.Idle.Unauthenticated, authViewModel.authState.value)
+
+        coEvery { mockAuthRepository.loginUser(testEmail, testPassword) } returns Result.success(mockFirebaseUser)
+        coEvery { mockAuthRepository.getUserById(any()) } returns Result.success(FirestoreUser(
+            userId = "test-uid",
+            email = testEmail,
+            name = testName,
+            role = role
+        ))
         
-        val finalState = authViewModel.authState.value
-        assertTrue(finalState is AuthState.Idle.Authenticated)
+        authViewModel.login(testEmail, testPassword) { _, _ -> }
+        
+        // Wait for all coroutines to complete
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        // Verify initial auth state
+        val initialState = authViewModel.authState.value
+        assertTrue(initialState is AuthState.Idle.Authenticated)
+        assertEquals(testEmail, (initialState as AuthState.Idle.Authenticated).user.email)
+
+        // Trigger login and verify loading state immediately
+        authViewModel.login(testEmail, testPassword) { _, _ -> }
+        assertEquals(AuthState.Loading.Login, authViewModel.authState.value)
+
+        // Advance time and verify final auth state
+        testDispatcher.scheduler.advanceUntilIdle()
+        val endState = authViewModel.authState.value
+        assertTrue("Expected Authenticated state but got $endState",
+            endState is AuthState.Idle.Authenticated)
     }
 
     @Test
@@ -150,6 +177,12 @@ class AuthViewModelTest {
     @Test
     fun `register success sets Authenticated state`() = runTest {
         coEvery { mockAuthRepository.registerUser(testEmail, testPassword, testName, role) } returns Result.success(mockFirebaseUser)
+        coEvery { mockAuthRepository.getUserById(any()) } returns Result.success(FirestoreUser(
+            userId = "test-uid",
+            email = testEmail,
+            name = testName,
+            role = role
+        ))
 
         authViewModel.register(testEmail, testPassword, testName)
         testDispatcher.scheduler.advanceUntilIdle()

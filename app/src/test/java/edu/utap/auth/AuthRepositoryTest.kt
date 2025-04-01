@@ -7,10 +7,23 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import edu.utap.user.MainDispatcherRule
 import edu.utap.user.UserProfile
 import edu.utap.user.repository.UserRepository
+import io.mockk.MockKAnnotations
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import io.mockk.verify
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -18,8 +31,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import io.mockk.*
-import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.tasks.await
 
 @ExperimentalCoroutinesApi
@@ -46,8 +57,22 @@ class AuthRepositoryTest {
     private lateinit var mockUser: FirebaseUser
 
     @MockK
+    private lateinit var usersCollection: CollectionReference
+
+    @MockK
+    private lateinit var userDocument: DocumentReference
+
+    @MockK
+    private lateinit var documentSnapshot: DocumentSnapshot
+
+    @MockK
+    private lateinit var query: Query
+
+    @MockK
+    private lateinit var querySnapshot: QuerySnapshot
+
     private lateinit var authRepository: FirestoreAuthRepository
-    
+     
     @Before
     fun setup() {
         MockKAnnotations.init(this)
@@ -55,6 +80,33 @@ class AuthRepositoryTest {
         // Setup mock behaviors
         every { mockAuthResult.user } returns mockUser
         every { mockUser.uid } returns "test-uid"
+        every { mockUser.email } returns "test@example.com"
+        every { mockUser.displayName } returns "Test User"
+        
+        // Mock Firestore collection
+        every { firestore.collection("users") } returns usersCollection
+        every { usersCollection.document(any()) } returns userDocument
+        every { usersCollection.whereEqualTo("email", "test@example.com") } returns query
+        every { query.limit(any()) } returns query
+        every { query.get() } returns mockk<Task<QuerySnapshot>>().apply {
+            every { isComplete } returns true
+            every { isSuccessful } returns true
+            every { result } returns querySnapshot
+            every { exception } returns null
+        }
+        
+        // Mock document operations
+        every { userDocument.get() } returns mockk<Task<DocumentSnapshot>>().apply {
+            every { isComplete } returns true
+            every { isSuccessful } returns true
+            every { result } returns documentSnapshot
+            every { exception } returns null
+        }
+        every { userDocument.set(any()) } returns mockk<Task<Void>>().apply {
+            every { isComplete } returns true
+            every { isSuccessful } returns true
+            every { exception } returns null
+        }
         
         // Mock Tasks.forResult for updateProfile
         val profileUpdateTask = mockk<Task<Void>>()
@@ -62,7 +114,7 @@ class AuthRepositoryTest {
         every { profileUpdateTask.isSuccessful } returns true
         every { mockUser.updateProfile(any()) } returns profileUpdateTask
 
-        // Setup repository
+        // Setup repository with mocked dependencies
         authRepository = FirestoreAuthRepository(firebaseAuth = firebaseAuth, firestore = firestore, userRepository = userRepository)
     }
     
@@ -240,7 +292,7 @@ class AuthRepositoryTest {
     @Test
     fun testLogout() = runTest {
         // Given
-        every { firebaseAuth.signOut() } just runs
+        every { firebaseAuth.signOut() } returns Unit
         
         // When
         authRepository.logout()
