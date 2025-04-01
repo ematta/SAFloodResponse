@@ -54,7 +54,7 @@ open class AuthViewModel(
      * authenticated, and updates the authState flow accordingly.
      * UI components observing this flow will automatically react to state changes.
      */
-    private fun checkAuthState() {
+    fun checkAuthState() {
         viewModelScope.launch {
             val firebaseUser = authRepository.getCurrentUser()
             if (firebaseUser != null) {

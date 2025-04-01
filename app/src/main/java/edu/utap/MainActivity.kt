@@ -98,7 +98,8 @@ class MainActivity : ComponentActivity() {
                 SAFloodResponseTheme {
                     AuthenticatedApp(
                         networkMonitor = networkMonitor,
-                        locationPermissionHandler = locationPermissionHandler
+                        locationPermissionHandler = locationPermissionHandler,
+                        authViewModel = authViewModel
                     )
                 }
             } else if (showRegisterScreen) {
@@ -156,6 +157,8 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         Log.i("MainActivity_onResume", "Resuming activity [Thread: ${Thread.currentThread().name}]")
+        // Validate session on resume
+        authViewModel.checkAuthState()
     }
 
     override fun onPause() {
@@ -198,11 +201,25 @@ object AuthenticatedRoutes {
 @Composable
 fun AuthenticatedApp(
     networkMonitor: NetworkMonitor,
-    locationPermissionHandler: LocationPermissionHandler
+    locationPermissionHandler: LocationPermissionHandler,
+    authViewModel: AuthViewModel = viewModel()
 ) {
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route ?: AuthenticatedRoutes.DASHBOARD
+    val authState by authViewModel.authState.collectAsState()
+
+    // Redirect to login if not authenticated
+    if (authState !is AuthState.Idle.Authenticated) {
+        LaunchedEffect(Unit) {
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
+        }
+        return
+    }
 
     val applicationContext = LocalContext.current.applicationContext
     val firestore = FirebaseFirestore.getInstance()

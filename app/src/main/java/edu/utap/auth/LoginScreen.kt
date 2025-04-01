@@ -87,7 +87,11 @@ fun LoginScreen(
             Text(
                 text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(bottom = 16.dp)
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .padding(horizontal = 16.dp)
             )
         }
 
