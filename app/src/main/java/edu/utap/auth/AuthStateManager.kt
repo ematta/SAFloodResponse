@@ -1,6 +1,7 @@
 package edu.utap.auth
 
-import edu.utap.db.UserEntity
+import com.google.firebase.auth.FirebaseUser
+import edu.utap.auth.model.FirestoreUser // Keep existing import, might be needed elsewhere
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -13,25 +14,25 @@ class AuthStateManager {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle.Initial)
     val authState: StateFlow<AuthState> = _authState
 
-    // StateFlow to expose the current user entity
-    private val _currentUser = MutableStateFlow<UserEntity?>(null)
-    val currentUser: StateFlow<UserEntity?> = _currentUser
+    // StateFlow to expose the current Firebase user
+    private val _currentUser = MutableStateFlow<FirestoreUser?>(null)
+    val currentUser: StateFlow<FirestoreUser?> = _currentUser
 
     /**
      * Updates the authentication state and current user.
      * @param state The new authentication state
-     * @param user The current user entity (optional)
+     * @param user The current Firebase user (optional)
      */
-    fun updateState(state: AuthState, user: UserEntity? = null) {
+    fun updateState(state: AuthState, user: FirestoreUser? = null) {
         _authState.value = state
         _currentUser.value = user
     }
 
     /**
-     * Updates only the current user.
-     * @param user The current user entity
+     * Updates only the current Firebase user.
+     * @param user The current Firebase user
      */
-    fun updateCurrentUser(user: UserEntity?) {
+    fun updateCurrentUser(user: FirestoreUser) {
         _currentUser.value = user
     }
 

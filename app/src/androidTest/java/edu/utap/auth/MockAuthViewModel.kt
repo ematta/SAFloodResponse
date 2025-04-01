@@ -2,7 +2,7 @@ package edu.utap.auth
 
 import androidx.lifecycle.ViewModel
 import edu.utap.auth.model.AuthViewModelInterface
-import edu.utap.db.UserEntity
+import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -49,7 +49,7 @@ class MockAuthViewModel(
         TODO("Not yet implemented")
     }
 
-    override fun getCurrentUser(): UserEntity? {
+    override fun getCurrentUser(): FirebaseUser? {
         TODO("Not yet implemented")
     }
 

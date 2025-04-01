@@ -5,7 +5,7 @@ package edu.utap.flood
 import android.location.Location
 import com.google.android.gms.tasks.Task
 import edu.utap.auth.model.AuthViewModelInterface
-import edu.utap.db.UserEntity
+import com.google.firebase.auth.FirebaseUser
 import edu.utap.flood.model.FloodReport
 import edu.utap.flood.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationUtils
@@ -110,12 +110,11 @@ class FloodReportViewModelTest {
     @Test
     fun testSubmitReportSuccess() = runTest {
         // Given
-        val mockUser = UserEntity(
-            userId = "test-uid",
-            email = "test@example.com",
-            name = "Test User",
-            role = "regular"
-        )
+        val mockUser = mockk<FirebaseUser>(relaxed = true)
+        every { mockUser.uid } returns "test-uid"
+        every { mockUser.email } returns "test@example.com"
+        every { mockUser.displayName } returns "Test User"
+        // Note: FirebaseUser does not have a 'role' property.
         val mockLocation = mockk<Location>(relaxed = true)
         val description = "Test flood"
         val photoUrls = listOf("https://example.com/photo.jpg")
@@ -142,7 +141,7 @@ class FloodReportViewModelTest {
         coEvery { floodReportRepository.createReport(any()) } returns Result.success(
             FloodReport(
                 reportId = "test-report-id",
-                userId = mockUser.userId,
+                userId = mockUser.uid,
                 latitude = 37.7749,
                 longitude = -122.4194,
                 description = description,
@@ -166,12 +165,11 @@ class FloodReportViewModelTest {
     @Test
     fun testSubmitReportFailure() = runTest {
         // Given
-        val mockUser = UserEntity(
-            userId = "test-uid",
-            email = "test@example.com",
-            name = "Test User",
-            role = "regular"
-        )
+        val mockUser = mockk<FirebaseUser>(relaxed = true)
+        every { mockUser.uid } returns "test-uid"
+        every { mockUser.email } returns "test@example.com"
+        every { mockUser.displayName } returns "Test User"
+        // Note: FirebaseUser does not have a 'role' property.
         val mockLocation = mockk<Location>()
         val errorMessage = "Location not available"
         

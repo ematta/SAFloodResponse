@@ -1,11 +1,11 @@
 package edu.utap.auth.repository
 
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.db.UserEntity
+import edu.utap.auth.model.FirestoreUser
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepositoryInterface {
-    // Remote authentication methods
+    // Authentication methods
     suspend fun registerUser(
         email: String,
         password: String,
@@ -17,16 +17,16 @@ interface AuthRepositoryInterface {
     suspend fun logout()
     suspend fun resetPassword(email: String): Result<Unit>
 
-    // Local user management methods
-    suspend fun createLocalUser(user: UserEntity): Result<UserEntity>
-    suspend fun getLocalUserByEmail(email: String): Result<UserEntity>
-    suspend fun getLocalUserById(userId: String): Result<UserEntity>
-    suspend fun updateLocalUser(user: UserEntity): Result<UserEntity>
+    // User management methods
+    suspend fun createUser(user: FirestoreUser): Result<FirestoreUser>
+    suspend fun getUserByEmail(email: String): Result<FirestoreUser>
+    suspend fun getUserById(userId: String): Result<FirestoreUser>
+    suspend fun updateUser(user: FirestoreUser): Result<FirestoreUser>
 
     // Sync methods
-    suspend fun syncUserToLocal(remoteUser: FirebaseUser): Result<UserEntity>
+    suspend fun syncUser(remoteUser: FirebaseUser): Result<FirestoreUser>
     suspend fun isAuthenticated(): Boolean
 
-    // Observe user flow
-    fun observeLocalUsers(): Flow<List<UserEntity>>
+    // Observe users
+    fun observeUsers(): Flow<List<FirestoreUser>>
 }

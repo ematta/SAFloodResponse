@@ -1,25 +1,7 @@
 package edu.utap.auth.repository
 
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.db.UserEntity
+// Removed import edu.utap.db.UserEntity
 import edu.utap.utils.RoleUtils
 
-/**
- * Extension function to create a UserEntity from a FirebaseUser
- */
-fun FirebaseUser.toUserEntity(role: String = RoleUtils.ROLE_REGULAR): UserEntity = UserEntity(
-    userId = this.uid,
-    name = this.displayName ?: "",
-    email = this.email ?: "",
-    profilePic = this.photoUrl?.toString(),
-    role = role
-)
-
-/**
- * Extension function to update an existing UserEntity with Firebase user data
- */
-fun UserEntity.updateFromFirebaseUser(user: FirebaseUser): UserEntity = this.copy(
-    name = user.displayName ?: this.name,
-    email = user.email ?: this.email,
-    profilePic = user.photoUrl?.toString() ?: this.profilePic
-)
+// Removed mapping functions as UserEntity is being replaced by FirebaseUser

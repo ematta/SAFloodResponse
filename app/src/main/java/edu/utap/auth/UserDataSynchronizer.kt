@@ -2,7 +2,7 @@ package edu.utap.auth
 
 import com.google.firebase.auth.FirebaseUser
 import edu.utap.auth.repository.AuthRepositoryInterface
-import edu.utap.db.UserEntity
+// Removed import edu.utap.db.UserEntity
 import edu.utap.user.UserProfile
 import edu.utap.user.repository.FirebaseUserRepository
 import edu.utap.user.repository.UserRepository
@@ -18,71 +18,40 @@ class UserDataSynchronizer(
 ) {
     /**
      * Synchronizes a Firebase user with local storage.
-     * @param firebaseUser The Firebase user to synchronize
-     * @return Result containing the synchronized UserEntity
+     * @param firebaseUser The Firebase user whose profile should be synced to Firestore
+     * @return Result containing the FirebaseUser if successful
      */
-    suspend fun syncUserToLocal(firebaseUser: FirebaseUser): Result<UserEntity> = try {
-        // Get or create local user entity
-        val localUserResult = authRepository.getLocalUserById(firebaseUser.uid)
-        val userEntity = when {
-            localUserResult.isSuccess -> localUserResult.getOrNull()
-            else -> createNewUserEntity(firebaseUser)
-        } ?: throw Exception("Failed to create or retrieve user entity")
+    suspend fun syncUserToLocal(firebaseUser: FirebaseUser): Result<FirebaseUser> = try {
+        // Removed logic related to local UserEntity fetching/creation
 
         // Update Firestore profile
         val firestoreProfile = UserProfile(
-            uid = userEntity.userId,
-            displayName = userEntity.name,
-            email = userEntity.email,
-            photoUrl = userEntity.profilePic ?: ""
+            uid = firebaseUser.uid,
+            displayName = firebaseUser.displayName ?: "",
+            email = firebaseUser.email ?: "",
+            photoUrl = firebaseUser.photoUrl?.toString() ?: ""
         )
         userRepository.updateUserProfile(firestoreProfile)
 
-        Result.success(userEntity)
+        Result.success(firebaseUser) // Return the original FirebaseUser
     } catch (e: Exception) {
         Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
     }
 
-    /**
-     * Creates a new user entity from a Firebase user.
-     * @param firebaseUser The Firebase user to create the entity from
-     * @return The created UserEntity
-     */
-    private suspend fun createNewUserEntity(firebaseUser: FirebaseUser): UserEntity {
-        val userEntity = UserEntity(
-            userId = firebaseUser.uid,
-            name = firebaseUser.displayName ?: "",
-            email = firebaseUser.email ?: "",
-            profilePic = firebaseUser.photoUrl?.toString(),
-            role = "regular"
-        )
-        authRepository.createLocalUser(userEntity)
-        return userEntity
-    }
-
+    // Removed createNewUserEntity function as UserEntity is removed
     /**
      * Updates a user's role and synchronizes the change.
      * @param userId The ID of the user to update
-     * @param newRole The new role to set
-     * @return Result containing the updated UserEntity
+     * @param newRole The new role to set (Note: This function needs complete redesign)
+     * @return Result containing the FirebaseUser if successful (Not implemented)
      */
-    suspend fun updateUserRole(userId: String, newRole: String): Result<UserEntity> = try {
-        val userResult = authRepository.getLocalUserById(userId)
-        val userEntity = userResult.getOrNull() ?: throw Exception("User not found")
-
-        val updatedUser = userEntity.copy(role = newRole)
-        authRepository.updateLocalUser(updatedUser)
-
-        // Update Firestore profile
-        val firestoreProfile = UserProfile(
-            uid = updatedUser.userId,
-            displayName = updatedUser.name,
-            email = updatedUser.email,
-            photoUrl = updatedUser.profilePic ?: ""
-        )
-        userRepository.updateUserProfile(firestoreProfile)
-
-        Result.success(updatedUser)
+    suspend fun updateUserRole(userId: String, newRole: String): Result<FirebaseUser> = try {
+        // TODO: Implement role update logic.
+        // This requires updating custom claims or Firestore directly.
+        // The previous logic relied on a local UserEntity which is now removed.
+        // Cannot return a FirebaseUser object representing the update easily.
+        throw UnsupportedOperationException("updateUserRole needs redesign after UserEntity removal")
+        // Result.success(updatedUser) // Placeholder removed
     } catch (e: Exception) {
         Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
     }

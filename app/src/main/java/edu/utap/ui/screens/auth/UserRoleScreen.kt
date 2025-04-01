@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.model.AuthViewModel
-import edu.utap.db.UserEntity
 import edu.utap.utils.PermissionCheck
 import edu.utap.utils.RoleUtils
 
@@ -79,9 +78,8 @@ fun UserRoleScreen(authViewModel: AuthViewModel = viewModel(), onNavigateBack: (
 }
 
 @Composable
-private fun UserRoleItem(user: UserEntity, authViewModel: AuthViewModel) {
+private fun UserRoleItem(user: edu.utap.auth.model.FirestoreUser, authViewModel: AuthViewModel) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedRole by remember { mutableStateOf(user.role) }
 
     Card(
         modifier = Modifier
@@ -109,7 +107,7 @@ private fun UserRoleItem(user: UserEntity, authViewModel: AuthViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Role: ${selectedRole ?: "None"}",
+                    text = "Role: regular",
                     style = MaterialTheme.typography.bodyMedium
                 )
 
@@ -125,8 +123,7 @@ private fun UserRoleItem(user: UserEntity, authViewModel: AuthViewModel) {
                         DropdownMenuItem(
                             text = { Text(RoleUtils.ROLE_REGULAR) },
                             onClick = {
-                                selectedRole = RoleUtils.ROLE_REGULAR
-                                authViewModel.updateUserRole(user.userId, RoleUtils.ROLE_REGULAR)
+                                // authViewModel.updateUserRole(user.userId, RoleUtils.ROLE_REGULAR)
                                 expanded = false
                             }
                         )
@@ -134,8 +131,7 @@ private fun UserRoleItem(user: UserEntity, authViewModel: AuthViewModel) {
                         DropdownMenuItem(
                             text = { Text(RoleUtils.ROLE_ADMIN) },
                             onClick = {
-                                selectedRole = RoleUtils.ROLE_ADMIN
-                                authViewModel.updateUserRole(user.userId, RoleUtils.ROLE_ADMIN)
+                                // authViewModel.updateUserRole(user.userId, RoleUtils.ROLE_ADMIN)
                                 expanded = false
                             }
                         )

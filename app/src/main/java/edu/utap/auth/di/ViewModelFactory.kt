@@ -14,7 +14,7 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(AuthViewModel::class.java) -> {
-            val authRepository = AuthModule.provideAuthRepository(context)
+            val authRepository = AuthModule.provideAuthRepository()
             AuthViewModel(
                 authRepository
             ) as T

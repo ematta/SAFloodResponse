@@ -1,7 +1,7 @@
 package edu.utap.auth.model
 
 import edu.utap.auth.AuthState
-import edu.utap.db.UserEntity
+import edu.utap.auth.model.FirestoreUser
 import edu.utap.utils.RoleUtils
 import kotlinx.coroutines.flow.StateFlow
 
@@ -25,7 +25,7 @@ interface AuthViewModelInterface {
     )
     fun logout()
     fun resetPassword(email: String, callback: (Boolean, String?) -> Unit)
-    fun getCurrentUser(): UserEntity?
+    fun getCurrentUser(): FirestoreUser?
     fun restoreAuthState()
     fun updateAuthState(sent: AuthState)
 }

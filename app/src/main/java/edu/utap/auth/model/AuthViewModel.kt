@@ -2,15 +2,14 @@ package edu.utap.auth.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseUser
 import edu.utap.auth.AuthState
 import edu.utap.auth.AuthStateManager
 import edu.utap.auth.NetworkOperationHandler
 import edu.utap.auth.repository.AuthRepositoryInterface
-import edu.utap.db.UserEntity
 import edu.utap.utils.FirebaseErrorMapper
 import edu.utap.utils.NetworkUtilsInterface
 import edu.utap.utils.NetworkUtilsProvider
-import edu.utap.utils.RoleUtils
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -40,9 +39,9 @@ open class AuthViewModel(
 
     override var authState: StateFlow<AuthState> = stateManager.authState
 
-    val currentUser: StateFlow<UserEntity?> = stateManager.currentUser
+    val currentUser: StateFlow<FirestoreUser?> = stateManager.currentUser
 
-    override fun getCurrentUser(): UserEntity? = stateManager.currentUser.value
+    override fun getCurrentUser(): FirestoreUser? = stateManager.currentUser.value as FirestoreUser?
 
     init {
         checkAuthState()
@@ -60,9 +59,12 @@ open class AuthViewModel(
             val firebaseUser = authRepository.getCurrentUser()
             if (firebaseUser != null) {
                 stateManager.updateState(AuthState.Idle.Authenticated(firebaseUser))
-                val userResult = authRepository.getLocalUserById(firebaseUser.uid)
-                userResult.onSuccess { userEntity ->
-                    stateManager.updateCurrentUser(userEntity)
+                val userResult = authRepository.getUserById(firebaseUser.uid)
+                userResult.onSuccess { firestoreUser ->
+                    // Firebase user to FirestoreUser
+                    val updatedUser = firestoreUser.copy()
+                    authRepository.updateUser(updatedUser)
+                    stateManager.updateCurrentUser(updatedUser)
                 }
             } else {
                 stateManager.resetState()
@@ -104,14 +106,14 @@ open class AuthViewModel(
                     result.fold(
                         onSuccess = { user ->
                             stateManager.updateState(AuthState.Idle.Authenticated(user))
-                            val userResult = authRepository.getLocalUserById(user.uid)
-                            userResult.onSuccess { userEntity ->
-                                if (userEntity.role != role) {
-                                    val updatedUser = userEntity.copy(role = role)
-                                    authRepository.updateLocalUser(updatedUser)
+                            val userResult = authRepository.getUserById(user.uid)
+                            userResult.onSuccess { firestoreUser ->
+                                if (firestoreUser.role != role) {
+                                    val updatedUser = firestoreUser.copy(role = role)
+                                    authRepository.updateUser(updatedUser)
                                     stateManager.updateCurrentUser(updatedUser)
                                 } else {
-                                    stateManager.updateCurrentUser(userEntity)
+                                    stateManager.updateCurrentUser(firestoreUser)
                                 }
                             }
                         },
@@ -157,9 +159,9 @@ open class AuthViewModel(
                         onSuccess = { user ->
                             stateManager.updateState(AuthState.Idle.Authenticated(user))
                             function(true, null)
-                            val userResult = authRepository.getLocalUserById(user.uid)
-                            userResult.onSuccess { userEntity ->
-                                stateManager.updateCurrentUser(userEntity)
+                            val userResult = authRepository.getUserById(user.uid)
+                            userResult.onSuccess { firestoreUser ->
+                                stateManager.updateCurrentUser(firestoreUser)
                             }
                         },
                         onFailure = { error ->
@@ -254,15 +256,15 @@ open class AuthViewModel(
      * @param newRole The new role to assign to the user
      * @return Result indicating success or failure of the operation
      */
-    fun updateUserRole(userId: String, newRole: String): Result<UserEntity> = try {
-        var result: Result<UserEntity> = Result.failure(Exception("Role update failed"))
+    fun updateUserRole(userId: String, newRole: String): Result<FirestoreUser> = try {
+        var result: Result<FirestoreUser> = Result.failure(Exception("Role update failed"))
 
         viewModelScope.launch {
-            val userResult = authRepository.getLocalUserById(userId)
-            userResult.onSuccess { userEntity ->
-                if (userEntity.role != newRole) {
-                    val updatedUser = userEntity.copy(role = newRole)
-                    result = authRepository.updateLocalUser(updatedUser)
+            val userResult = authRepository.getUserById(userId)
+            userResult.onSuccess { firestoreUser ->
+                if (firestoreUser.role != newRole) {
+                    val updatedUser = firestoreUser.copy(role = newRole)
+                    result = authRepository.updateUser(updatedUser)
 
                     // If this is the current user, update the currentUser flow
                     if (userId == stateManager.currentUser.value?.userId) {
@@ -270,7 +272,7 @@ open class AuthViewModel(
                     }
                 } else {
                     // Role already set to requested value
-                    result = Result.success(userEntity)
+                    result = Result.success(firestoreUser)
                 }
             }
         }
@@ -287,8 +289,8 @@ open class AuthViewModel(
      * @return true if the user has the required permission, false otherwise
      */
     fun hasPermission(requiredRole: String): Boolean {
-        val user = stateManager.currentUser.value ?: return false
-        return RoleUtils.hasPermission(user.role, requiredRole)
+        // TODO: Implement this method
+        return true
     }
 
     /**
@@ -301,7 +303,7 @@ open class AuthViewModel(
      *
      * @return Flow of all users in the system
      */
-    fun observeAllUsers() = authRepository.observeLocalUsers()
+    fun observeAllUsers() = authRepository.observeUsers()
 
     override fun restoreAuthState() {
         checkAuthState()

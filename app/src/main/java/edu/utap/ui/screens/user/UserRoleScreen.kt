@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.model.AuthViewModel
-import edu.utap.db.UserEntity
+import edu.utap.auth.model.FirestoreUser
 import edu.utap.utils.PermissionCheck
 import edu.utap.utils.RoleUtils
 
@@ -89,7 +89,7 @@ fun UserRoleScreen(authViewModel: AuthViewModel = viewModel(), onNavigateBack: (
  * @param onRoleChange Callback for when the user's role is changed
  */
 @Composable
-fun UserRoleItem(user: UserEntity, onRoleChange: (String, String) -> Unit) {
+fun UserRoleItem(user: FirestoreUser, onRoleChange: (String, String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val roles = RoleUtils.getAllRoles()
 

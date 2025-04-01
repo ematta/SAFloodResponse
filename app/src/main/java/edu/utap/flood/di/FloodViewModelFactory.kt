@@ -5,8 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import edu.utap.auth.di.AuthModule
 import edu.utap.auth.model.AuthViewModel
-import edu.utap.db.AppDatabase
-import edu.utap.db.FloodReportDaoAdapter
 import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.utils.LocationUtils
@@ -21,16 +19,13 @@ class FloodViewModelFactory(private val context: Context) : ViewModelProvider.Fa
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(FloodReportViewModel::class.java) -> {
             // Get the AuthViewModel from the existing factory
-            val authViewModel = AuthModule.provideAuthRepository(context).let { repo ->
+            val authViewModel = AuthModule.provideAuthRepository().let { repo ->
                 AuthViewModel(repo)
             }
 
             // Create the FloodReportRepository
             // Convert the auth.db.FloodReportDao to flood.db.FloodReportDao using an adapter
-            val authFloodReportDao = AppDatabase.getDatabase(context).floodReportDao()
-            val floodReportDao = FloodReportDaoAdapter(authFloodReportDao)
-            val floodReportRepository = FloodReportRepository(floodReportDao = floodReportDao)
-
+            val floodReportRepository = FloodReportRepository()
             // Create the LocationUtils
             val locationUtils = LocationUtils(context)
 

@@ -30,7 +30,6 @@ import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
 import edu.utap.auth.di.ViewModelFactory
 import edu.utap.auth.model.AuthViewModel
-import edu.utap.db.AppDatabase
 import edu.utap.flood.di.FloodViewModelFactory
 import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.location.LocationPermissionHandler
@@ -206,11 +205,9 @@ fun AuthenticatedApp(
     val currentRoute = currentBackStackEntry?.destination?.route ?: AuthenticatedRoutes.DASHBOARD
 
     val applicationContext = LocalContext.current.applicationContext
-    val floodReportDao = AppDatabase.getDatabase(applicationContext).floodReportDao()
     val firestore = FirebaseFirestore.getInstance()
 
     val floodReportRepository = FloodReportRepository(
-        floodReportDao = floodReportDao,
         firestore = firestore
     )
 

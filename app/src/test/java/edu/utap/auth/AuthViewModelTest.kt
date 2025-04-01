@@ -10,7 +10,7 @@ import edu.utap.auth.repository.AuthRepositoryInterface
 import edu.utap.utils.NetworkUtils
 import edu.utap.utils.NetworkUtilsInterface
 import edu.utap.utils.ApplicationContextProvider
-import edu.utap.db.UserEntity
+// Removed import edu.utap.db.UserEntity as FirebaseUser is already imported
 import edu.utap.utils.NetworkUtilsImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -88,9 +88,8 @@ class AuthViewModelTest {
         
         coEvery { mockAuthRepository.getCurrentUser() } returns null
         
-        // Mock UserEntity for getLocalUserById calls
-        val mockUserEntity = mockk<UserEntity>(relaxed = true)
-        coEvery { mockAuthRepository.getLocalUserById(any()) } returns Result.success(mockUserEntity)
+        // Removed mocking for getLocalUserById returning UserEntity
+        // coEvery { mockAuthRepository.getLocalUserById(any()) } returns Result.success(...) // Needs update based on refactored repository
         
         authViewModel = AuthViewModel(mockAuthRepository, mockNetworkUtils)
         testDispatcher.scheduler.advanceUntilIdle() // Process initial coroutine

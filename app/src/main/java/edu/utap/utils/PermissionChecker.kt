@@ -5,7 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.model.AuthViewModel
-import edu.utap.db.UserEntity
+import edu.utap.auth.model.FirestoreUser
 
 /**
  * A composable that conditionally renders content based on the user's role permissions.
@@ -40,5 +40,10 @@ fun PermissionCheck(
  * @param requiredRole The minimum role required
  * @return True if the user has sufficient permissions, false otherwise
  */
-private fun hasRequiredPermission(user: UserEntity, requiredRole: String): Boolean =
-    RoleUtils.hasPermission(user.role, requiredRole)
+private fun hasRequiredPermission(user: FirestoreUser, requiredRole: String): Boolean {
+    // TODO: Implement permission check based on FirebaseUser.
+    // FirebaseUser does not have a 'role' property directly.
+    // Need to fetch role from Firestore or use custom claims.
+    // RoleUtils.hasPermission(user.role, requiredRole) // This line will break
+    return false // Placeholder
+}

@@ -8,7 +8,7 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import edu.utap.db.UserDao
-import edu.utap.db.UserEntity
+// Removed import edu.utap.db.UserEntity as FirebaseUser is already imported
 import edu.utap.user.MainDispatcherRule
 import edu.utap.user.UserProfile
 import edu.utap.user.repository.UserRepository
@@ -165,13 +165,7 @@ class AuthRepositoryTest {
         val email = "test@example.com"
         val password = "password123"
         val successTask: Task<AuthResult> = Tasks.forResult(mockAuthResult)
-        val userEntity = UserEntity(
-            userId = "test-uid",
-            name = "Test User",
-            email = email,
-            profilePic = null,
-            role = "regular"
-        )
+        // Removed UserEntity instantiation
         
         // Setup mock behaviors
         every { firebaseAuth.signInWithEmailAndPassword(any(), any()) } returns successTask
