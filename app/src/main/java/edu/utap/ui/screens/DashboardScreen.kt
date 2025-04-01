@@ -36,26 +36,12 @@ fun DashboardScreen(
     val weatherError by weatherViewModel.error.collectAsState()
     
     // Flood reports state
-    val floodReports by floodReportRepository.observeAllReports().collectAsState(initial = emptyList())
-    var isFloodReportsLoading by remember { mutableStateOf(false) }
-    var floodReportsError by remember { mutableStateOf<String?>(null) }
-
-    // Load flood reports on first composition
-    LaunchedEffect(Unit) {
-        isFloodReportsLoading = true
-        try {
-            val sanAntonio = LatLng(29.4241, -98.4936)
-            floodReportRepository.getReportsInRadius(
-                sanAntonio.latitude,
-                sanAntonio.longitude,
-                50.0 // 50 mile radius
-            )
-            isFloodReportsLoading = false
-        } catch (e: Exception) {
-            isFloodReportsLoading = false
-            floodReportsError = e.message ?: "Failed to load flood reports"
-        }
-    }
+    val sanAntonio = LatLng(29.4241, -98.4936) // San Antonio coordinates
+    val floodReports by floodReportRepository.getReportsInRadius(
+        sanAntonio.latitude,
+        sanAntonio.longitude,
+        50.0 // 50 mile radius
+    ).collectAsState(initial = emptyList())
 
     LaunchedEffect(Unit) {
         locationPermissionHandler.checkAndRequestLocationPermission(
@@ -64,7 +50,6 @@ fun DashboardScreen(
         )
     }
 
-    val sanAntonio = LatLng(29.4241, -98.4936) // San Antonio coordinates
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(sanAntonio, 12f)
     }
@@ -145,43 +130,21 @@ fun DashboardScreen(
 
             // Flood Reports List - takes 40% of screen
             Box(modifier = Modifier.weight(0.4f)) {
-                    when {
-                        isFloodReportsLoading -> {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                        floodReportsError != null -> {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text(
-                                    text = floodReportsError!!,
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            }
-                        }
-                        floodReports.isEmpty() -> {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text(text = "No flood reports found")
-                            }
-                        }
-                        else -> {
-                            LazyColumn {
-                                items(floodReports) { report ->
-                                    FloodReportItem(report = report)
-                                }
-                            }
+                if (floodReports.isEmpty()) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text("No flood reports found")
+                    }
+                } else {
+                    LazyColumn {
+                        items(floodReports) { report ->
+                            FloodReportItem(report = report)
                         }
                     }
                 }
+            }
             }
 
             // Bottom Navigation

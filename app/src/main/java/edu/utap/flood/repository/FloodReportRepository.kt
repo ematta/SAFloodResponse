@@ -69,8 +69,9 @@ class FloodReportRepository(
         latitude: Double,
         longitude: Double,
         radius: Double
-    ) {
+    ): Flow<List<FloodReport>> {
         // TODO: Implement Firestore query for reports in radius
+        return flowOf(emptyList())
     }
 
     override fun observeAllReports(): Flow<List<FloodReport>> {

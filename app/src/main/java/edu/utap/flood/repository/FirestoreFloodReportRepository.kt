@@ -75,7 +75,28 @@ class FirestoreFloodReportRepository @Inject constructor(
         latitude: Double,
         longitude: Double,
         radius: Double
-    ) {
-        // TODO: Implement this function to fetch reports within a specified radius
+    ): Flow<List<FloodReport>> = callbackFlow {
+        // Convert radius from miles to degrees (approximate)
+        val radiusInDegrees = radius / 69.0
+        
+        val listener = reportsCollection
+            .whereGreaterThanOrEqualTo("latitude", latitude - radiusInDegrees)
+            .whereLessThanOrEqualTo("latitude", latitude + radiusInDegrees)
+            .whereGreaterThanOrEqualTo("longitude", longitude - radiusInDegrees)
+            .whereLessThanOrEqualTo("longitude", longitude + radiusInDegrees)
+            .addSnapshotListener { querySnapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                
+                val reports = querySnapshot?.documents?.mapNotNull { document ->
+                    document.toObject<FloodReport>()
+                } ?: emptyList()
+                
+                trySend(reports)
+            }
+        
+        awaitClose { listener.remove() }
     }
 }
