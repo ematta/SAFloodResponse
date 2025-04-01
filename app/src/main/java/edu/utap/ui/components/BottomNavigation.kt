@@ -3,6 +3,7 @@ package edu.utap.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import edu.utap.AuthenticatedRoutes
@@ -39,6 +40,19 @@ fun AppBottomNavigation(navController: NavController, currentRoute: String) {
             },
             icon = { Icon(Icons.Filled.Warning, contentDescription = "Report") },
             label = { Text("Report") }
+        )
+
+        NavigationBarItem(
+            selected = currentRoute == AuthenticatedRoutes.DISCUSSIONS,
+            onClick = {
+                if (currentRoute != AuthenticatedRoutes.DISCUSSIONS) {
+                    navController.navigate(AuthenticatedRoutes.DISCUSSIONS) {
+                        popUpTo(AuthenticatedRoutes.DISCUSSIONS)
+                    }
+                }
+            },
+            icon = { Icon(Icons.Filled.Menu, contentDescription = "Discussions") },
+            label = { Text("Discussions") }
         )
 
         NavigationBarItem(

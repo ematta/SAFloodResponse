@@ -237,9 +237,6 @@ fun AuthenticatedApp(
                 }
             )
         },
-        bottomBar = {
-            AppBottomNavigation(navController = navController, currentRoute = currentRoute)
-        },
         snackbarHost = {
             NetworkConnectivitySnackbar(networkMonitor = networkMonitor)
         }
