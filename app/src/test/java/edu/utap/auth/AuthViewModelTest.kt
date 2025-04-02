@@ -52,7 +52,7 @@ class AuthViewModelTest {
     @MockK(relaxed = true)
     private lateinit var mockFirebaseUser: FirebaseUser
 
-    private val testEmail = "test@example.com"
+    private val testEmail = "test@user.com"
     private val testPassword = "password"
     private val testName = "Test User"
 

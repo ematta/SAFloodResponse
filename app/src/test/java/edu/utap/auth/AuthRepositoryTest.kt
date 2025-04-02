@@ -80,13 +80,13 @@ class AuthRepositoryTest {
         // Setup mock behaviors
         every { mockAuthResult.user } returns mockUser
         every { mockUser.uid } returns "test-uid"
-        every { mockUser.email } returns "test@example.com"
+        every { mockUser.email } returns "test@user.com"
         every { mockUser.displayName } returns "Test User"
         
         // Mock Firestore collection
         every { firestore.collection("users") } returns usersCollection
         every { usersCollection.document(any()) } returns userDocument
-        every { usersCollection.whereEqualTo("email", "test@example.com") } returns query
+        every { usersCollection.whereEqualTo("email", "test@user.com") } returns query
         every { query.limit(any()) } returns query
         every { query.get() } returns mockk<Task<QuerySnapshot>>().apply {
             every { isComplete } returns true
@@ -121,8 +121,8 @@ class AuthRepositoryTest {
     @Test
     fun testRegisterUserSuccess() = runTest {
         // Given
-        val email = "test@example.com"
-        val password = "password123"
+        val email = "test@user.com"
+        val password = "test123"
         val name = "Test User"
         val successTask: Task<AuthResult> = mockk()
         
@@ -184,8 +184,8 @@ class AuthRepositoryTest {
     @Test
     fun testRegisterUserFailure() = runTest {
         // Given
-        val email = "test@example.com"
-        val password = "password123"
+        val email = "test@user.com"
+        val password = "test123"
         val name = "Test User"
         val exception = Exception("Registration failed")
         val failureTask: Task<AuthResult> = Tasks.forException(exception)
@@ -211,8 +211,8 @@ class AuthRepositoryTest {
     @Test
     fun testLoginUserSuccess() = runTest {
         // Given
-        val email = "test@example.com"
-        val password = "password123"
+        val email = "test@user.com"
+        val password = "test123"
         val successTask: Task<AuthResult> = Tasks.forResult(mockAuthResult)
         // Removed UserEntity instantiation
         
@@ -243,8 +243,8 @@ class AuthRepositoryTest {
     @Test
     fun testLoginUserFailure() = runTest {
         // Given
-        val email = "test@example.com"
-        val password = "password123"
+        val email = "test@user.com"
+        val password = "test123"
         val exception = Exception("Login failed")
         val failureTask: Task<AuthResult> = Tasks.forException(exception)
         
@@ -304,7 +304,7 @@ class AuthRepositoryTest {
     @Test
     fun testResetPasswordSuccess() = runTest {
         // Given
-        val email = "test@example.com"
+        val email = "test@user.com"
         val successTask: Task<Void> = mockk()
         
         // Setup complete mock behaviors for the task
@@ -339,7 +339,7 @@ class AuthRepositoryTest {
     @Test
     fun testResetPasswordFailure() = runTest {
         // Given
-        val email = "test@example.com"
+        val email = "test@user.com"
         val exception = Exception("Password reset failed")
         val failureTask: Task<Void> = Tasks.forException(exception)
         

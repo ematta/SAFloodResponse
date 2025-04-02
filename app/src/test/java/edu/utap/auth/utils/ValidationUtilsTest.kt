@@ -11,7 +11,7 @@ class ValidationUtilsTest {
     @Test
     fun `validateEmail returns valid for correct email format`() {
         // Given
-        val email = "test@example.com"
+        val email = "test@user.com"
         
         // When
         val result = ValidationUtils.validateEmail(email)
@@ -50,7 +50,7 @@ class ValidationUtilsTest {
     @Test
     fun `validatePassword returns valid for correct password length`() {
         // Given
-        val password = "password123"
+        val password = "test123"
         
         // When
         val result = ValidationUtils.validatePassword(password)
@@ -89,8 +89,8 @@ class ValidationUtilsTest {
     @Test
     fun `validateLoginCredentials returns valid for correct credentials`() {
         // Given
-        val email = "test@example.com"
-        val password = "password123"
+        val email = "test@user.com"
+        val password = "test123"
         
         // When
         val result = ValidationUtils.validateLoginCredentials(email, password)
@@ -104,7 +104,7 @@ class ValidationUtilsTest {
     fun `validateLoginCredentials returns invalid for invalid email`() {
         // Given
         val email = "invalid-email"
-        val password = "password123"
+        val password = "test123"
         
         // When
         val result = ValidationUtils.validateLoginCredentials(email, password)
@@ -117,7 +117,7 @@ class ValidationUtilsTest {
     @Test
     fun `validateLoginCredentials returns invalid for invalid password`() {
         // Given
-        val email = "test@example.com"
+        val email = "test@user.com"
         val password = "12345"
         
         // When

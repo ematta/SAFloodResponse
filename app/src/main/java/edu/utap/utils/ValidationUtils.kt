@@ -70,7 +70,7 @@ object ValidationUtils {
      *
      * Example usage:
      * ```kotlin
-     * val result1 = validateEmail("test@example.com") // result1.first == true, result1.second == null
+     * val result1 = validateEmail("test@user.com") // result1.first == true, result1.second == null
      * val result2 = validateEmail("") // result2.first == false, result2.second == "Email cannot be empty"
      * val result3 = validateEmail("invalid-email") // result3.first == false, result3.second == "Please enter a valid email address"
      * ```

@@ -1,7 +1,11 @@
 package edu.utap.auth
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -26,14 +30,37 @@ object TestViewModelFactoryProvider {
 }
 
 /**
+ * Custom matcher to check if a text field has an error message
+ */
+fun hasTextInputError(expectedError: String): SemanticsMatcher {
+    return SemanticsMatcher("Text field has error: $expectedError") { node ->
+        val errorMessage = node.config.getOrNull(SemanticsProperties.Text)?.firstOrNull()
+        errorMessage?.contains(expectedError) ?: false
+    }
+}
+
+/**
+ * Custom matcher to check if a text field has no error
+ */
+fun hasNoTextInputError(): SemanticsMatcher {
+    return SemanticsMatcher("Text field has no error") { node ->
+        node.config.getOrNull(SemanticsProperties.Error) == null
+    }
+}
+
+/**
  * Extension function to wrap content with the test ViewModelFactory
  */
-fun ComposeContentTestRule.setContentWithTestViewModelFactory(content: @Composable () -> Unit) {
+fun AndroidComposeTestRule<*, *>.setContentWithTestViewModelFactory(content: @Composable () -> Unit) {
     this.setContent {
-        // Simply call the content function directly
-        // The TestViewModelFactoryProvider.factory will be used by the viewModel() function
-        // through the ViewModelFactoryHolder pattern in the test code
-        content()
+        val factory = TestViewModelFactoryProvider.factory
+        requireNotNull(factory) { "TestViewModelFactoryProvider.factory must be set before calling setContentWithTestViewModelFactory" }
+        
+        CompositionLocalProvider(
+            LocalViewModelStoreOwner provides this.activity,
+        ) {
+            content()
+        }
     }
 }
 
