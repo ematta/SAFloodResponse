@@ -1,7 +1,9 @@
 package edu.utap.ui.screens.discussion
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,9 +11,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -52,6 +58,17 @@ fun DiscussionListScreen(
             TopAppBar(
                 title = { Text("Discussion Threads") }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { onThreadClick("new") },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Discussion"
+                )
+            }
         }
     ) { padding ->
         Box(
@@ -122,16 +139,28 @@ private fun ThreadCard(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = "Thread for report: ${thread.reportId}",
+                text = thread.reportId.ifEmpty { thread.category.ifEmpty { "Discussion" } },
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Messages: ${thread.messages.size}",
-                style = MaterialTheme.typography.bodySmall
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Messages: ${thread.messages.size}",
+                    style = MaterialTheme.typography.bodySmall
+                )
+                if (thread.tags.isNotEmpty()) {
+                    Text(
+                        text = thread.tags.joinToString(", "),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun ComposeContentTestRule.setViewModelFactory(factory: ViewModelProvider.Factory) {
     // Store the factory for later use in setContent calls
     TestViewModelFactoryProvider.factory = factory
+    println("setViewModelFactory called with factory: $factory")
 }
 
 /**
@@ -41,7 +42,8 @@ fun ComposeContentTestRule.setContentWithTestViewModelFactory(content: @Composab
  */
 @Composable
 inline fun <reified VM : ViewModel> createTestViewModel(): VM {
-    return viewModel(
-        factory = TestViewModelFactoryProvider.factory ?: ViewModelProvider.AndroidViewModelFactory.getInstance(androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application)
-    )
+    val factory = TestViewModelFactoryProvider.factory
+    requireNotNull(factory) { "TestViewModelFactoryProvider.factory is null" }
+    println("createTestViewModel: Factory is being used to create ViewModel of type: ${VM::class.java}")
+    return viewModel(factory = factory)
 }

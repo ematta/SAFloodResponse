@@ -22,12 +22,14 @@ class LoginScreenTest {
         mockViewModel = MockAuthViewModel()
         testViewModelFactory = TestViewModelFactory(mockViewModel)
         composeTestRule.setViewModelFactory(testViewModelFactory)
+        assert(TestViewModelFactoryProvider.factory == testViewModelFactory) { "Factory not set correctly in LoginScreenTest" }
+        println("LoginScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
     }
 
     @Test
     fun loginScreen_emptyEmailShowsError() {
         // Given: Set up the login screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             LoginScreen(
                 onNavigateToRegister = {},
                 onLoginSuccess = {},
@@ -45,7 +47,7 @@ class LoginScreenTest {
     @Test
     fun loginScreen_invalidEmailShowsError() {
         // Given: Set up the login screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             LoginScreen(
                 onNavigateToRegister = {},
                 onLoginSuccess = {},
@@ -64,7 +66,7 @@ class LoginScreenTest {
     @Test
     fun loginScreen_emptyPasswordShowsError() {
         // Given: Set up the login screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             LoginScreen(
                 onNavigateToRegister = {},
                 onLoginSuccess = {},
@@ -83,7 +85,7 @@ class LoginScreenTest {
     @Test
     fun loginScreen_shortPasswordShowsError() {
         // Given: Set up the login screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             LoginScreen(
                 onNavigateToRegister = {},
                 onLoginSuccess = {},
@@ -106,9 +108,9 @@ class LoginScreenTest {
         val mockViewModel = MockAuthViewModel()
         var loginSuccessful = false
         
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             LoginScreen(
-                authViewModel = mockViewModel,
+                authViewModel = createTestViewModel(),
                 onNavigateToRegister = {},
                 onLoginSuccess = { loginSuccessful = true },
                 onNavigateToForgotPassword = {}

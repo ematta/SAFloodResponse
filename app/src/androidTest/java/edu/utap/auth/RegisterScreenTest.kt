@@ -22,13 +22,17 @@ class RegisterScreenTest {
         mockViewModel = MockAuthViewModel()
         testViewModelFactory = TestViewModelFactory(mockViewModel)
         composeTestRule.setViewModelFactory(testViewModelFactory)
+
+        println("RegisterScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
+        assert(TestViewModelFactoryProvider.factory == testViewModelFactory) { "Factory not set correctly in RegisterScreenTest" }
     }
 
     @Test
     fun registerScreen_emptyNameShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             RegisterScreen(
+                authViewModel = mockViewModel,
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
             )
@@ -44,8 +48,9 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_emptyEmailShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             RegisterScreen(
+                authViewModel = mockViewModel,
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
             )
@@ -62,8 +67,9 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_invalidEmailShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             RegisterScreen(
+                authViewModel = mockViewModel,
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
             )
@@ -81,8 +87,9 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_emptyPasswordShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             RegisterScreen(
+                authViewModel = mockViewModel,
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
             )
@@ -100,8 +107,9 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_shortPasswordShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             RegisterScreen(
+                authViewModel = mockViewModel,
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
             )
@@ -120,8 +128,9 @@ class RegisterScreenTest {
     @Test
     fun registerScreen_passwordMismatchShowsError() {
         // Given: Set up the register screen
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             RegisterScreen(
+                authViewModel = mockViewModel,
                 onNavigateToLogin = {},
                 onRegisterSuccess = {}
             )
@@ -144,7 +153,7 @@ class RegisterScreenTest {
         val mockViewModel = MockAuthViewModel()
         var registrationSuccessful = false
         
-        composeTestRule.setContentWithTestViewModelFactory {
+        composeTestRule.setContent {
             RegisterScreen(
                 authViewModel = mockViewModel,
                 onNavigateToLogin = {},

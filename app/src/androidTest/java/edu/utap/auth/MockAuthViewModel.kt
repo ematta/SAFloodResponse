@@ -2,6 +2,7 @@ package edu.utap.auth
 
 import androidx.lifecycle.ViewModel
 import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.auth.model.FirestoreUser
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,12 +50,15 @@ class MockAuthViewModel(
         TODO("Not yet implemented")
     }
 
-    override fun getCurrentUser(): FirebaseUser? {
-        TODO("Not yet implemented")
+    override fun restoreAuthState() {
+        _authState.value = initialState
     }
 
-    override fun resetPassword(email: String) {
-        _authState.value = AuthState.Loading.PasswordReset
-        _authState.value = AuthState.Idle.PasswordResetSent
+    override fun updateAuthState(sent: AuthState) {
+        _authState.value = sent
+    }
+
+    override fun getCurrentUser(): FirestoreUser? {
+        return null // Mock implementation returns null
     }
 }
