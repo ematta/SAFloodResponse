@@ -170,11 +170,11 @@ class RegisterScreenTest {
         composeTestRule.waitForIdle()
 
         // When: Enter name, valid email, valid password but different confirm password
-        composeTestRule.onNodeWithTag("nameField").performTextInput("Test User")
-        composeTestRule.onNodeWithTag("emailField").performTextInput("test@user.com")
+        composeTestRule.onNodeWithTag("edu.utap.auth.nameField").performTextInput("Test User")
+        composeTestRule.onNodeWithTag("edu.utap.auth.emailField").performTextInput("test@user.com")
         composeTestRule.onNodeWithTag("edu.utap.auth.passwordField").performTextInput("test123")
         composeTestRule.onNodeWithTag("edu.utap.auth.confirmPasswordField").performTextInput("different123")
-        composeTestRule.onNodeWithTag("registerButton").performClick()
+        composeTestRule.onNodeWithTag("edu.utap.auth.registerButton").performClick()
 
         // Then: Password mismatch error should be displayed
         composeTestRule.onNodeWithText("Passwords do not match")
@@ -199,11 +199,11 @@ class RegisterScreenTest {
         composeTestRule.waitForIdle()
 
         // When: Enter valid inputs for all fields
-        composeTestRule.onNodeWithTag("nameField").performTextInput("Test User")
-        composeTestRule.onNodeWithTag("emailField").performTextInput("test@user.com")
+        composeTestRule.onNodeWithTag("edu.utap.auth.nameField").performTextInput("Test User")
+        composeTestRule.onNodeWithTag("edu.utap.auth.emailField").performTextInput("test@user.com")
         composeTestRule.onNodeWithTag("edu.utap.auth.passwordField").performTextInput("test123")
         composeTestRule.onNodeWithTag("edu.utap.auth.confirmPasswordField").performTextInput("test123")
-        composeTestRule.onNodeWithTag("registerButton").performClick()
+        composeTestRule.onNodeWithTag("edu.utap.auth.registerButton").performClick()
 
         // Then: No error messages should be displayed and registration should be successful
         composeTestRule.onNodeWithText("Email cannot be empty").assertDoesNotExist()

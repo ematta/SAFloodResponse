@@ -86,27 +86,6 @@ class LoginScreenTest {
     }
 
     @Test
-    fun loginScreen_shortPasswordShowsError() {
-        // Given: Set up the login screen
-        composeTestRule.setContent {
-            LoginScreen(
-                authViewModel = createTestViewModel(),
-                onNavigateToRegister = {},
-                onLoginSuccess = {},
-                onNavigateToForgotPassword = {}
-            )
-        }
-
-        // When: Enter valid email but short password and click login
-        composeTestRule.onNodeWithText("Email").performTextInput("test@user.com")
-        composeTestRule.onNodeWithText("Password").performTextInput("test123")
-        composeTestRule.onNodeWithTag("loginButton").performClick()
-
-        // Then: Password length error should be displayed
-        composeTestRule.onNodeWithText("Password must be at least 6 characters long").assertIsDisplayed()
-    }
-
-    @Test
     fun loginScreen_validInputsNoErrors() {
         // Given: Set up the login screen with a mock ViewModel
         val mockViewModel = MockAuthViewModel()
@@ -126,8 +105,9 @@ class LoginScreenTest {
         composeTestRule.onNodeWithText("Password").performTextInput("test123")
         composeTestRule.onNodeWithTag("loginButton").performClick()
 
-        // Then: No error messages should be displayed
+        // Then: No error messages should be displayed and login should be successful
         composeTestRule.onNodeWithText("Email cannot be empty").assertDoesNotExist()
         composeTestRule.onNodeWithText("Password cannot be empty").assertDoesNotExist()
+        assert(loginSuccessful) { "Login was not successful" }
     }
 }

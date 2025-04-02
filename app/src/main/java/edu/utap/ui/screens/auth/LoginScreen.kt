@@ -126,6 +126,15 @@ fun LoginScreen(
                 val isEmailValid = ValidationUtils.isValidEmail(email)
                 val isPasswordValid = ValidationUtils.isValidPassword(password)
 
+                // Add validation for empty password and email
+                if (email.isEmpty()) {
+                    emailError = "Email cannot be empty"
+                }
+
+                if (password.isEmpty()) {
+                    passwordError = "Password cannot be empty"
+                }
+
                 if (!isEmailValid) {
                     emailError = "Please enter a valid email address"
                 }
