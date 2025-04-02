@@ -34,6 +34,21 @@ class DiscussionViewModel(
     private val _newMessageText = MutableStateFlow("")
     val newMessageText: StateFlow<String> = _newMessageText
 
+    // New discussion composition
+    private val _newDiscussionTitle = MutableStateFlow("")
+    val newDiscussionTitle: StateFlow<String> = _newDiscussionTitle
+
+    private val _newDiscussionMessage = MutableStateFlow("")
+    val newDiscussionMessage: StateFlow<String> = _newDiscussionMessage
+
+    // New discussion category
+    private val _newDiscussionCategory = MutableStateFlow("")
+    val newDiscussionCategory: StateFlow<String> = _newDiscussionCategory
+
+    // New discussion tags
+    private val _newDiscussionTags = MutableStateFlow<List<String>>(emptyList())
+    val newDiscussionTags: StateFlow<List<String>> = _newDiscussionTags
+
     // Loading states
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -48,6 +63,22 @@ class DiscussionViewModel(
 
     fun updateNewMessageText(text: String) {
         _newMessageText.value = text
+    }
+
+    fun updateNewDiscussionTitle(title: String) {
+        _newDiscussionTitle.value = title
+    }
+
+    fun updateNewDiscussionMessage(message: String) {
+        _newDiscussionMessage.value = message
+    }
+
+    fun updateNewDiscussionCategory(category: String) {
+        _newDiscussionCategory.value = category
+    }
+
+    fun updateNewDiscussionTags(tags: List<String>) {
+        _newDiscussionTags.value = tags
     }
 
     fun fetchAllThreads() {
@@ -130,6 +161,79 @@ class DiscussionViewModel(
                 )
             } catch (e: Exception) {
                 _error.value = e.message ?: "Failed to create thread"
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun createNewDiscussion() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            
+            try {
+                val currentUser = authViewModel.getCurrentUser()
+                if (currentUser == null) {
+                    _error.value = "User not logged in"
+                    _isLoading.value = false
+                    return@launch
+                }
+                
+                if (_newDiscussionTitle.value.isBlank()) {
+                    _error.value = "Title cannot be empty"
+                    _isLoading.value = false
+                    return@launch
+                }
+                
+                if (_newDiscussionMessage.value.isBlank()) {
+                    _error.value = "Message cannot be empty"
+                    _isLoading.value = false
+                    return@launch
+                }
+                
+                // Generate a unique ID for the new thread
+                val threadId = System.currentTimeMillis().toString()
+                
+                val newThread = DiscussionThread(
+                    threadId = threadId,
+                    reportId = "", // No associated flood report
+                    createdBy = currentUser.userId,
+                    category = _newDiscussionCategory.value,
+                    tags = _newDiscussionTags.value
+                )
+                
+                val newMessage = DiscussionMessage(
+                    messageId = System.currentTimeMillis().toString(),
+                    userId = currentUser.userId,
+                    text = _newDiscussionMessage.value
+                )
+                
+                // First create the thread
+                val threadResult = discussionRepository.createThread(newThread)
+                threadResult.fold(
+                    onSuccess = { thread ->
+                        // Then add the initial message
+                        val messageResult = discussionRepository.addMessage(thread.threadId, newMessage)
+                        messageResult.fold(
+                            onSuccess = {
+                                _newDiscussionTitle.value = ""
+                                _newDiscussionMessage.value = ""
+                                _isLoading.value = false
+                                fetchAllThreads() // Refresh the list
+                            },
+                            onFailure = { error ->
+                                _error.value = error.message ?: "Failed to add initial message"
+                                _isLoading.value = false
+                            }
+                        )
+                    },
+                    onFailure = { error ->
+                        _error.value = error.message ?: "Failed to create thread"
+                        _isLoading.value = false
+                    }
+                )
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to create discussion"
                 _isLoading.value = false
             }
         }

@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.utils.ValidationUtils
@@ -44,7 +43,7 @@ import edu.utap.utils.ValidationUtils
  */
 @Composable
 fun LoginScreen(
-    authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),
+    authViewModel: AuthViewModelInterface,
     onNavigateToRegister: () -> Unit,
     onNavigateToForgotPassword: () -> Unit,
     onLoginSuccess: () -> Unit
