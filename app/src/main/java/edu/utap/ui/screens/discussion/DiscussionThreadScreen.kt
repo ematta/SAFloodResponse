@@ -2,7 +2,6 @@ package edu.utap.ui.screens.discussion
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,8 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.flood.di.DiscussionViewModelFactory
 import edu.utap.flood.model.DiscussionMessage
-import edu.utap.ui.components.AppHeader
-import edu.utap.ui.components.LoadingIndicator
 import edu.utap.ui.viewmodel.DiscussionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +53,11 @@ fun DiscussionThreadScreen(
     val error by viewModel.error.collectAsState()
 
     LaunchedEffect(threadId) {
-        viewModel.fetchThreadMessages(threadId)
+        if (threadId.isNotEmpty()) {
+            viewModel.fetchThreadMessages(threadId)
+        } else {
+            viewModel.setError("Thread ID is empty")
+        }
     }
 
     Scaffold(

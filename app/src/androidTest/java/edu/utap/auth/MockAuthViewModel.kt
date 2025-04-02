@@ -1,64 +1,55 @@
 package edu.utap.auth
 
 import androidx.lifecycle.ViewModel
+import edu.utap.auth.AuthState
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.auth.model.FirestoreUser
-import com.google.firebase.auth.FirebaseUser
+import edu.utap.utils.RoleUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/**
- * Mock implementation of AuthViewModelInterface for testing
- */
-class MockAuthViewModel(
-    private val initialState: AuthState = AuthState.Idle.Initial,
-    private val registerBehavior: (String, String, String) -> AuthState = { _, _, _ -> AuthState.Idle.Unauthenticated }
-) : ViewModel(), AuthViewModelInterface {
-    
-    private val _authState = MutableStateFlow<AuthState>(initialState)
-    override val authState: StateFlow<AuthState> = _authState
+// Mock implementation of AuthViewModelInterface for testing purposes
+class MockAuthViewModel : ViewModel(), AuthViewModelInterface {
+
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Idle.Unauthenticated)
+    override val authState: StateFlow<AuthState> get() = _authState
+
     override fun register(
         email: String,
         password: String,
         name: String,
         role: String,
-        function: (Boolean, String?) -> Unit
+        function: (boolean: Boolean, message: String?) -> Unit
     ) {
-        _authState.value = AuthState.Loading.Registration
-        _authState.value = registerBehavior(email, password, name)
-        function(true, null)
+        function(true, "Mock registration successful")
     }
 
     override fun login(
         email: String,
         password: String,
-        function: (Boolean, String?) -> Unit
+        function: (boolean: Boolean, message: String?) -> Unit
     ) {
-        _authState.value = AuthState.Loading.Login
-        _authState.value = AuthState.Idle.Unauthenticated
-        function(true, null)
+        function(true, "Mock login successful")
     }
 
-    override fun logout() {
+    override fun logout(): AuthState.Idle.Unauthenticated {
         _authState.value = AuthState.Idle.Unauthenticated
+        return AuthState.Idle.Unauthenticated
     }
 
-    override fun resetPassword(
-        email: String,
-        callback: (Boolean, String?) -> Unit
-    ) {
-        TODO("Not yet implemented")
+    override fun resetPassword(email: String, callback: (Boolean, String?) -> Unit) {
+        callback(true, "Mock password reset successful")
+    }
+
+    override fun getCurrentUser(): FirestoreUser? {
+        return FirestoreUser("mockUserId", "mockName", "mockEmail", RoleUtils.ROLE_REGULAR)
     }
 
     override fun restoreAuthState() {
-        _authState.value = initialState
+        _authState.value = AuthState.Idle.Unauthenticated
     }
 
     override fun updateAuthState(sent: AuthState) {
         _authState.value = sent
-    }
-
-    override fun getCurrentUser(): FirestoreUser? {
-        return null // Mock implementation returns null
     }
 }

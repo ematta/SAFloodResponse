@@ -277,11 +277,18 @@ fun AuthenticatedApp(
                     navArgument("threadId") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
-                val threadId = backStackEntry.arguments?.getString("threadId") ?: ""
-                DiscussionThreadScreen(
-                    threadId = threadId,
-                    onBackClick = { navController.popBackStack() }
-                )
+                val threadId = backStackEntry.arguments?.getString("threadId")
+                if (threadId.isNullOrEmpty()) {
+                    // Handle the error: navigate back or show an error message
+                    LaunchedEffect(Unit) {
+                        navController.popBackStack()
+                    }
+                } else {
+                    DiscussionThreadScreen(
+                        threadId = threadId,
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
             }
 
             composable(AuthenticatedRoutes.PROFILE) {

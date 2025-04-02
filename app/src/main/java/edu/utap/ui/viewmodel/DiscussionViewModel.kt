@@ -56,6 +56,10 @@ class DiscussionViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    fun setError(message: String) {
+        _error.value = message
+    }
+
     // Initialize by loading all threads
     init {
         fetchAllThreads()

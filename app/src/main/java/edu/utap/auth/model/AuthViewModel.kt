@@ -2,7 +2,6 @@ package edu.utap.auth.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseUser
 import edu.utap.auth.AuthState
 import edu.utap.auth.AuthStateManager
 import edu.utap.auth.NetworkOperationHandler
@@ -189,16 +188,20 @@ open class AuthViewModel(
      * Unlike other authentication operations, logout doesn't require
      * network connectivity as it primarily clears local session data.
      */
-    override fun logout() {
+    override fun logout(): AuthState.Idle.Unauthenticated {
         viewModelScope.launch {
             try {
                 authRepository.logout()
                 stateManager.resetState()
+                stateManager.updateState(AuthState.Idle.Unauthenticated)
+                return@launch
             } catch (e: Exception) {
                 val errorMessage = FirebaseErrorMapper.getErrorMessage(e)
                 stateManager.updateState(AuthState.Error.Authentication(errorMessage))
+                return@launch
             }
         }
+        return AuthState.Idle.Unauthenticated
     }
 
     /**

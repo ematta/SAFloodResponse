@@ -1,6 +1,7 @@
 package edu.utap.auth
 
 import com.google.firebase.auth.FirebaseUser
+import edu.utap.auth.model.FirestoreUser
 
 /**
  * Sealed class representing the different states of authentication operations.

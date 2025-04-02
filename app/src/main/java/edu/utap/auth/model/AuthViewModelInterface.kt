@@ -23,7 +23,7 @@ interface AuthViewModelInterface {
         password: String,
         function: (boolean: Boolean, message: String?) -> Unit
     )
-    fun logout()
+    fun logout(): AuthState.Idle.Unauthenticated
     fun resetPassword(email: String, callback: (Boolean, String?) -> Unit)
     fun getCurrentUser(): FirestoreUser?
     fun restoreAuthState()
