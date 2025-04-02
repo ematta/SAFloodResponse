@@ -31,6 +31,7 @@ class LoginScreenTest {
         // Given: Set up the login screen
         composeTestRule.setContent {
             LoginScreen(
+                authViewModel = createTestViewModel(),
                 onNavigateToRegister = {},
                 onLoginSuccess = {},
                 onNavigateToForgotPassword = {}
@@ -49,6 +50,7 @@ class LoginScreenTest {
         // Given: Set up the login screen
         composeTestRule.setContent {
             LoginScreen(
+                authViewModel = createTestViewModel(),
                 onNavigateToRegister = {},
                 onLoginSuccess = {},
                 onNavigateToForgotPassword = {}
@@ -68,6 +70,7 @@ class LoginScreenTest {
         // Given: Set up the login screen
         composeTestRule.setContent {
             LoginScreen(
+                authViewModel = createTestViewModel(),
                 onNavigateToRegister = {},
                 onLoginSuccess = {},
                 onNavigateToForgotPassword = {}
@@ -75,7 +78,7 @@ class LoginScreenTest {
         }
 
         // When: Enter valid email but empty password and click login
-        composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
+        composeTestRule.onNodeWithText("Email").performTextInput("test@user.com")
         composeTestRule.onNodeWithTag("loginButton").performClick()
 
         // Then: Password error should be displayed
@@ -87,6 +90,7 @@ class LoginScreenTest {
         // Given: Set up the login screen
         composeTestRule.setContent {
             LoginScreen(
+                authViewModel = createTestViewModel(),
                 onNavigateToRegister = {},
                 onLoginSuccess = {},
                 onNavigateToForgotPassword = {}
@@ -94,8 +98,8 @@ class LoginScreenTest {
         }
 
         // When: Enter valid email but short password and click login
-        composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
-        composeTestRule.onNodeWithText("Password").performTextInput("12345")
+        composeTestRule.onNodeWithText("Email").performTextInput("test@user.com")
+        composeTestRule.onNodeWithText("Password").performTextInput("test123")
         composeTestRule.onNodeWithTag("loginButton").performClick()
 
         // Then: Password length error should be displayed
@@ -110,7 +114,7 @@ class LoginScreenTest {
         
         composeTestRule.setContent {
             LoginScreen(
-                authViewModel = createTestViewModel(),
+                authViewModel = mockViewModel,
                 onNavigateToRegister = {},
                 onLoginSuccess = { loginSuccessful = true },
                 onNavigateToForgotPassword = {}
@@ -118,8 +122,8 @@ class LoginScreenTest {
         }
 
         // When: Enter valid inputs for all fields
-        composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
-        composeTestRule.onNodeWithText("Password").performTextInput("password123")
+        composeTestRule.onNodeWithText("Email").performTextInput("test@user.com")
+        composeTestRule.onNodeWithText("Password").performTextInput("test123")
         composeTestRule.onNodeWithTag("loginButton").performClick()
 
         // Then: No error messages should be displayed

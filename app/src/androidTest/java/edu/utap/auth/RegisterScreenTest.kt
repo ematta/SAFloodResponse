@@ -25,6 +25,9 @@ class RegisterScreenTest {
 
         println("RegisterScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
         assert(TestViewModelFactoryProvider.factory == testViewModelFactory) { "Factory not set correctly in RegisterScreenTest" }
+        
+        // Set initial auth state
+        mockViewModel.updateAuthState(AuthState.Idle.Unauthenticated)
     }
 
     @Test
@@ -38,11 +41,18 @@ class RegisterScreenTest {
             )
         }
 
+        // Wait for UI to be idle
+        composeTestRule.waitForIdle()
+        
+        // Debug: Print UI hierarchy
+        composeTestRule.onRoot().printToLog("RegisterScreenTest")
+
         // When: Click register button with empty name
-        composeTestRule.onNodeWithText("Register").performClick()
+        composeTestRule.onNodeWithTag("edu.utap.auth.registerButton").performClick()
 
         // Then: Name error should be displayed
-        composeTestRule.onNodeWithText("Please enter your name").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Please enter your name")
+            .assertIsDisplayed()
     }
 
     @Test
@@ -56,12 +66,19 @@ class RegisterScreenTest {
             )
         }
 
+        // Wait for UI to be idle
+        composeTestRule.waitForIdle()
+        
+        // Debug: Print UI hierarchy
+        composeTestRule.onRoot().printToLog("RegisterScreenTest")
+
         // When: Enter name but empty email and click register
-        composeTestRule.onNodeWithText("Full Name").performTextInput("Test User")
-        composeTestRule.onNodeWithText("Register").performClick()
+        composeTestRule.onNodeWithTag("edu.utap.auth.nameField").performTextInput("Test User")
+        composeTestRule.onNodeWithTag("edu.utap.auth.registerButton").performClick()
 
         // Then: Email error should be displayed
-        composeTestRule.onNodeWithText("Email cannot be empty").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Email cannot be empty")
+            .assertIsDisplayed()
     }
 
     @Test
@@ -75,19 +92,24 @@ class RegisterScreenTest {
             )
         }
 
+        // Wait for UI to be idle
+        composeTestRule.waitForIdle()
+
         // When: Enter name and invalid email and click register
-        composeTestRule.onNodeWithText("Full Name").performTextInput("Test User")
-        composeTestRule.onNodeWithText("Email").performTextInput("invalid-email")
-        composeTestRule.onNodeWithText("Register").performClick()
+        composeTestRule.onNodeWithTag("edu.utap.auth.nameField").performTextInput("Test User")
+        composeTestRule.onNodeWithTag("edu.utap.auth.emailField").performTextInput("invalid-email")
+        composeTestRule.onNodeWithTag("edu.utap.auth.registerButton").performClick()
 
         // Then: Email format error should be displayed
-        composeTestRule.onNodeWithText("Please enter a valid email address").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Please enter a valid email address")
+            .assertIsDisplayed()
     }
 
     @Test
     fun registerScreen_emptyPasswordShowsError() {
         // Given: Set up the register screen
         composeTestRule.setContent {
+            println("Setting up RegisterScreen content with mockViewModel: $mockViewModel")
             RegisterScreen(
                 authViewModel = mockViewModel,
                 onNavigateToLogin = {},
@@ -95,13 +117,17 @@ class RegisterScreenTest {
             )
         }
 
+        // Wait for UI to be idle
+        composeTestRule.waitForIdle()
+
         // When: Enter name and valid email but empty password and click register
-        composeTestRule.onNodeWithText("Full Name").performTextInput("Test User")
-        composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
-        composeTestRule.onNodeWithText("Register").performClick()
+        composeTestRule.onNodeWithTag("edu.utap.auth.nameField").performTextInput("Test User")
+        composeTestRule.onNodeWithTag("edu.utap.auth.emailField").performTextInput("test@user.com")
+        composeTestRule.onNodeWithTag("edu.utap.auth.registerButton").performClick()
 
         // Then: Password error should be displayed
-        composeTestRule.onNodeWithText("Password cannot be empty").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Password cannot be empty")
+            .assertIsDisplayed()
     }
 
     @Test
@@ -115,14 +141,18 @@ class RegisterScreenTest {
             )
         }
 
+        // Wait for UI to be idle
+        composeTestRule.waitForIdle()
+
         // When: Enter name, valid email but short password and click register
-        composeTestRule.onNodeWithText("Full Name").performTextInput("Test User")
-        composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
-        composeTestRule.onNodeWithText("Password").performTextInput("12345")
-        composeTestRule.onNodeWithText("Register").performClick()
+        composeTestRule.onNodeWithTag("edu.utap.auth.nameField").performTextInput("Test User")
+        composeTestRule.onNodeWithTag("edu.utap.auth.emailField").performTextInput("test@user.com")
+        composeTestRule.onNodeWithTag("edu.utap.auth.passwordField").performTextInput("12345")
+        composeTestRule.onNodeWithTag("edu.utap.auth.registerButton").performClick()
 
         // Then: Password length error should be displayed
-        composeTestRule.onNodeWithText("Password must be at least 6 characters long").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Password must be at least 6 characters")
+            .assertIsDisplayed()
     }
 
     @Test
@@ -136,15 +166,19 @@ class RegisterScreenTest {
             )
         }
 
+        // Wait for UI to be idle
+        composeTestRule.waitForIdle()
+
         // When: Enter name, valid email, valid password but different confirm password
-        composeTestRule.onNodeWithText("Full Name").performTextInput("Test User")
-        composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
-        composeTestRule.onNodeWithText("Password").performTextInput("password123")
-        composeTestRule.onNodeWithText("Confirm Password").performTextInput("different123")
-        composeTestRule.onNodeWithText("Register").performClick()
+        composeTestRule.onNodeWithTag("nameField").performTextInput("Test User")
+        composeTestRule.onNodeWithTag("emailField").performTextInput("test@user.com")
+        composeTestRule.onNodeWithTag("edu.utap.auth.passwordField").performTextInput("test123")
+        composeTestRule.onNodeWithTag("edu.utap.auth.confirmPasswordField").performTextInput("different123")
+        composeTestRule.onNodeWithTag("registerButton").performClick()
 
         // Then: Password mismatch error should be displayed
-        composeTestRule.onNodeWithText("Passwords do not match").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Passwords do not match")
+            .assertIsDisplayed()
     }
 
     @Test
@@ -161,12 +195,15 @@ class RegisterScreenTest {
             )
         }
 
+        // Wait for UI to be idle
+        composeTestRule.waitForIdle()
+
         // When: Enter valid inputs for all fields
-        composeTestRule.onNodeWithText("Full Name").performTextInput("Test User")
-        composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
-        composeTestRule.onNodeWithText("Password").performTextInput("password123")
-        composeTestRule.onNodeWithText("Confirm Password").performTextInput("password123")
-        composeTestRule.onNodeWithText("Register").performClick()
+        composeTestRule.onNodeWithTag("nameField").performTextInput("Test User")
+        composeTestRule.onNodeWithTag("emailField").performTextInput("test@user.com")
+        composeTestRule.onNodeWithTag("edu.utap.auth.passwordField").performTextInput("test123")
+        composeTestRule.onNodeWithTag("edu.utap.auth.confirmPasswordField").performTextInput("test123")
+        composeTestRule.onNodeWithTag("registerButton").performClick()
 
         // Then: No error messages should be displayed and registration should be successful
         composeTestRule.onNodeWithText("Email cannot be empty").assertDoesNotExist()

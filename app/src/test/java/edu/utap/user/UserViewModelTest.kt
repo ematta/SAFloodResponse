@@ -49,7 +49,7 @@ class UserViewModelTest {
     private val testUserProfile = UserProfile(
         uid = testUid,
         displayName = "Test User",
-        email = "test@example.com",
+        email = "test@user.com",
         phoneNumber = "123-456-7890",
         address = "123 Test St"
     )

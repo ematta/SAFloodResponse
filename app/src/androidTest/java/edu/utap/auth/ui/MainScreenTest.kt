@@ -4,6 +4,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import edu.utap.MainActivity
+import edu.utap.test.BuildConfig
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -18,8 +19,8 @@ class MainScreenTest {
     @Before
     fun loginToApp() {
         // Login to the app before each test
-        composeTestRule.onNodeWithText("Email").performTextInput("test@example.com")
-        composeTestRule.onNodeWithText("Password").performTextInput("password123")
+        composeTestRule.onNodeWithText("Email").performTextInput("${BuildConfig.TEST_USERNAME}")
+        composeTestRule.onNodeWithText("Password").performTextInput("${BuildConfig.TEST_PASSWORD}")
         composeTestRule.onNodeWithText("Sign In").performClick()
         
         // Wait for navigation to complete

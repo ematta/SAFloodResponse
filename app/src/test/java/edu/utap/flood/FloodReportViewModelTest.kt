@@ -113,7 +113,7 @@ class FloodReportViewModelTest {
         // Given
         val mockUser = mockk<FirestoreUser>(relaxed = true)
         every { mockUser.userId } returns "test-uid"
-        every { mockUser.email } returns "test@example.com"
+        every { mockUser.email } returns "test@user.com"
         every { mockUser.name } returns "Test User"
         // Note: FirebaseUser does not have a 'role' property.
         val mockLocation = mockk<Location>(relaxed = true)
@@ -168,7 +168,7 @@ class FloodReportViewModelTest {
         // Given
         val mockUser = mockk<FirestoreUser>(relaxed = true)
         every { mockUser.userId } returns "test-uid"
-        every { mockUser.email } returns "test@example.com"
+        every { mockUser.email } returns "test@user.com"
         every { mockUser.name } returns "Test User"
         // Note: FirebaseUser does not have a 'role' property.
         val mockLocation = mockk<Location>()

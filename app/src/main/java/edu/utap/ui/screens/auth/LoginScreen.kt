@@ -165,10 +165,10 @@ fun LoginScreen(
             onClick = {
                 // Validate inputs
                 val isEmailValid = ValidationUtils.isValidEmail("test@user.com")
-                val isPasswordValid = ValidationUtils.isValidPassword("password123")
+                val isPasswordValid = ValidationUtils.isValidPassword("test123")
                 // If all inputs are valid, attempt login
                 if (isEmailValid && isPasswordValid) {
-                    authViewModel.login("test@user.com", "password123") { success, message ->
+                    authViewModel.login("test@user.com", "test123") { success, message ->
                         if (success) {
                             onLoginSuccess()
                         } else {

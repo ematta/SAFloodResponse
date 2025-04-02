@@ -14,6 +14,8 @@ android {
         val properties = org.jetbrains.kotlin.konan.properties.Properties()
         properties.load(project.rootProject.file("local.properties").inputStream())
         manifestPlaceholders["MAPS_API_KEY"] = properties.getProperty("MAPS_API_KEY", "")
+        buildConfigField("String", "TEST_USERNAME", "\"${properties.getProperty("TEST_USERNAME")}\"")
+        buildConfigField("String", "TEST_PASSWORD", "\"${properties.getProperty("TEST_PASSWORD")}\"")
         applicationId = "edu.utap"
         minSdk = 24
         targetSdk = 35
@@ -41,6 +43,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
