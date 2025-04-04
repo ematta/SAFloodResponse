@@ -209,13 +209,23 @@ fun AuthenticatedApp(
     val currentRoute = currentBackStackEntry?.destination?.route ?: AuthenticatedRoutes.DASHBOARD
     val authState by authViewModel.authState.collectAsState()
 
+    val context = LocalContext.current
+
     // Redirect to login if not authenticated
     if (authState !is AuthState.Idle.Authenticated) {
         LaunchedEffect(Unit) {
-            navController.navigate("login") {
-                popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true
+            val activity = context as? android.app.Activity
+            if (activity == null || activity.isFinishing || activity.isDestroyed) {
+                return@LaunchedEffect
+            }
+            try {
+                navController.navigate("login") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
                 }
+            } catch (e: android.os.DeadObjectException) {
+                android.util.Log.w("AuthenticatedApp", "DeadObjectException during navigation, ignoring", e)
             }
         }
         return
