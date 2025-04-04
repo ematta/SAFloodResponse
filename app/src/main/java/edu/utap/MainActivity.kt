@@ -39,7 +39,6 @@ import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppBottomNavigation
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
-import edu.utap.ui.screens.FloodMapTestScreen
 import edu.utap.ui.screens.ProfileScreen
 import edu.utap.ui.screens.discussion.DiscussionListScreen
 import edu.utap.ui.screens.discussion.DiscussionThreadScreen
@@ -180,6 +179,8 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.i("MainActivity_onDestroy", "Destroying activity [Thread: ${Thread.currentThread().name}]")
+        lifecycle.removeObserver(locationPermissionHandler)
+        networkMonitor.shutdown()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -296,12 +297,6 @@ fun AuthenticatedApp(
                     onNavigateBack = {
                         navController.popBackStack()
                     }
-                )
-            }
-
-            composable("flood_map_test") {
-                FloodMapTestScreen(
-                    navController = navController
                 )
             }
 

@@ -56,6 +56,10 @@ class DiscussionViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    // State to track discussion creation result
+    private val _discussionCreationSuccess = MutableStateFlow<Boolean?>(null) // null: initial, true: success, false: failure
+    val discussionCreationSuccess: StateFlow<Boolean?> = _discussionCreationSuccess
+
     fun setError(message: String) {
         _error.value = message
     }
@@ -174,24 +178,28 @@ class DiscussionViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
+            _discussionCreationSuccess.value = null // Reset status at the start
             
             try {
                 val currentUser = authViewModel.getCurrentUser()
                 if (currentUser == null) {
                     _error.value = "User not logged in"
                     _isLoading.value = false
+                    _discussionCreationSuccess.value = false // Signal failure
                     return@launch
                 }
                 
                 if (_newDiscussionTitle.value.isBlank()) {
                     _error.value = "Title cannot be empty"
                     _isLoading.value = false
+                    _discussionCreationSuccess.value = false // Signal failure
                     return@launch
                 }
                 
                 if (_newDiscussionMessage.value.isBlank()) {
                     _error.value = "Message cannot be empty"
                     _isLoading.value = false
+                    _discussionCreationSuccess.value = false // Signal failure
                     return@launch
                 }
                 
@@ -222,22 +230,32 @@ class DiscussionViewModel(
                             onSuccess = {
                                 _newDiscussionTitle.value = ""
                                 _newDiscussionMessage.value = ""
+                                _newDiscussionCategory.value = "" // Clear category
+                                _newDiscussionTags.value = emptyList() // Clear tags
                                 _isLoading.value = false
+                                _discussionCreationSuccess.value = true // Signal success
                                 fetchAllThreads() // Refresh the list
                             },
                             onFailure = { error ->
+                                android.util.Log.e("DiscussionViewModel", "Failed to add initial message for thread ${thread.threadId}", error)
                                 _error.value = error.message ?: "Failed to add initial message"
                                 _isLoading.value = false
+                                _discussionCreationSuccess.value = false // Signal failure
                             }
                         )
                     },
                     onFailure = { error ->
+                        android.util.Log.e("DiscussionViewModel", "Failed to create thread", error)
                         _error.value = error.message ?: "Failed to create thread"
                         _isLoading.value = false
+                        _discussionCreationSuccess.value = false // Signal failure
                     }
                 )
             } catch (e: Exception) {
+                android.util.Log.e("DiscussionViewModel", "Failed to create discussion", e)
                 _error.value = e.message ?: "Failed to create discussion"
+                _isLoading.value = false
+                _discussionCreationSuccess.value = false // Signal failure
                 _isLoading.value = false
             }
         }
@@ -325,5 +343,9 @@ class DiscussionViewModel(
                 _isLoading.value = false
             }
         }
+    }
+
+    fun resetDiscussionCreationStatus() {
+        _discussionCreationSuccess.value = null
     }
 }

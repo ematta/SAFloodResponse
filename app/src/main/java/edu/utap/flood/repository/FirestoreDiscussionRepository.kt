@@ -66,11 +66,8 @@ class FirestoreDiscussionRepository @Inject constructor(
             .set(message)
             .await()
         
-        // Update thread's messages list
-        val thread = getThreadById(threadId).getOrThrow()
-        val updatedThread = thread.copy(messages = thread.messages + message)
-        updateThread(updatedThread)
-        
+        // The message is added to the subcollection above.
+        // No need to update the main thread document's message list here.
         Result.success(message)
     } catch (e: Exception) {
         Result.failure(e)

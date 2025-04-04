@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +33,10 @@ fun DiscussionFormScreen(
     val tags by viewModel.newDiscussionTags.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val creationSuccess by viewModel.discussionCreationSuccess.collectAsState()
     var showPreview by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -58,7 +62,8 @@ fun DiscussionFormScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -264,13 +269,39 @@ fun DiscussionFormScreen(
                             Text("Add File")
                         }
                     }
+                
+                    // Handle feedback and navigation based on creation status
+                    LaunchedEffect(creationSuccess) {
+                        when (creationSuccess) {
+                            true -> {
+                                snackbarHostState.showSnackbar(
+                                    message = "Discussion created successfully!",
+                                    duration = SnackbarDuration.Short
+                                )
+                                // Wait a moment for snackbar to be seen before navigating
+                                kotlinx.coroutines.delay(1500)
+                                onNavigateBack()
+                                viewModel.resetDiscussionCreationStatus()
+                            }
+                            false -> {
+                                snackbarHostState.showSnackbar(
+                                    message = "Error creating discussion: ${error ?: "Unknown error"}",
+                                    duration = SnackbarDuration.Long
+                                )
+                                viewModel.resetDiscussionCreationStatus()
+                            }
+                            null -> {
+                                // Initial state, do nothing
+                            }
+                        }
+                    }
                 }
 
                 // Submit Button
                 Button(
                     onClick = {
                         viewModel.createNewDiscussion()
-                        onNavigateBack()
+                        // Navigation is now handled by LaunchedEffect below
                     },
                     modifier = Modifier
                         .fillMaxWidth()

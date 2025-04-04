@@ -23,12 +23,14 @@ enum class NetworkState {
  * A utility class that monitors network connectivity changes and provides a Flow of NetworkState
  */
 class NetworkMonitor(private val context: Context) {
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private var connectivityManager: ConnectivityManager? = null
 
     /**
      * Returns a Flow of NetworkState that emits the current network state and subsequent changes
      */
     fun networkState(): Flow<NetworkState> = callbackFlow {
-        val connectivityManager = context.getSystemService(
+        connectivityManager = context.getSystemService(
             Context.CONNECTIVITY_SERVICE
         ) as? ConnectivityManager
         if (connectivityManager == null) {
@@ -41,7 +43,7 @@ class NetworkMonitor(private val context: Context) {
         trySend(if (isConnected) NetworkState.AVAILABLE else NetworkState.UNAVAILABLE)
 
         // Create network callback
-        val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 trySend(NetworkState.AVAILABLE)
             }
@@ -64,11 +66,22 @@ class NetworkMonitor(private val context: Context) {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
 
-        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
+        connectivityManager?.registerNetworkCallback(networkRequest, networkCallback!!)
 
         // Unregister when the flow is cancelled
         awaitClose {
-            connectivityManager.unregisterNetworkCallback(networkCallback)
+            shutdown()
         }
+    }
+
+    /**
+     * Clean up network monitoring resources
+     */
+    fun shutdown() {
+        networkCallback?.let { callback ->
+            connectivityManager?.unregisterNetworkCallback(callback)
+            networkCallback = null
+        }
+        connectivityManager = null
     }
 }
