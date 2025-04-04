@@ -1,11 +1,17 @@
 package edu.utap.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import edu.utap.flood.FloodReport
-import kotlin.math.min
+import edu.utap.flood.model.FloodReport
+import edu.utap.flood.repository.FloodReportRepositoryInterface
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -35,41 +41,29 @@ enum class TerrainType {
     }
 }
 
-class FloodMapTestViewModel : ViewModel() {
+class FloodMapTestViewModel @Inject constructor(
+    private val floodReportRepository: FloodReportRepositoryInterface
+) : ViewModel() {
     private val _state = MutableStateFlow(FloodMapTestState())
     val state: StateFlow<FloodMapTestState> = _state.asStateFlow()
 
-    fun toggleSimulationMode() {
-        _state.update { it.copy(isSimulationMode = !it.isSimulationMode) }
+    private var reportsJob: Job? = null
+
+    init {
+        observeFloodReports()
     }
 
-    fun setSimulationSpeed(speed: Float) {
-        _state.update { it.copy(simulationSpeed = speed.coerceIn(0.1f, 5f)) }
-    }
-
-    fun addFloodReport(report: FloodReport) {
-        val updatedReport = report.copy(
-            waterLevel = report.severity.toWaterLevel(),
-            spreadRate =
-            report.severity.toSpreadRate() * _state.value.terrainType.toSpreadMultiplier(),
-            geometryPoints = generateGeometryPoints(report.location, report.radius)
-        )
-
-        // Check for overlaps with existing reports
-        val reports = _state.value.floodReports.toMutableList()
-        var mergedReport = updatedReport
-
-        for (i in reports.indices) {
-            if (mergedReport.overlapsWith(reports[i])) {
-                mergedReport = mergedReport.mergeWith(reports[i])
-            }
+    private fun observeFloodReports() {
+        reportsJob?.cancel()
+        reportsJob = viewModelScope.launch {
+            floodReportRepository.observeAllReports()
+                .catch { e ->
+                    Log.e("FloodMapVM", "Error observing reports", e)
+                }
+                .collect { reports ->
+                    _state.update { it.copy(floodReports = reports) }
+                }
         }
-
-        _state.update { it.copy(floodReports = reports + mergedReport) }
-    }
-
-    fun removeFloodReport(reportId: String) {
-        _state.update { it.copy(floodReports = it.floodReports.filter { it.id != reportId }) }
     }
 
     fun selectReport(report: FloodReport?) {
@@ -84,90 +78,8 @@ class FloodMapTestViewModel : ViewModel() {
         _state.update { it.copy(currentLocation = location) }
     }
 
-    fun toggleGeometryPoints() {
-        _state.update { it.copy(showGeometryPoints = !it.showGeometryPoints) }
-    }
-
-    fun toggleMergedAreas() {
-        _state.update { it.copy(showMergedAreas = !it.showMergedAreas) }
-    }
-
-    fun setTerrainType(type: TerrainType) {
-        _state.update {
-            it.copy(
-                terrainType = type,
-                floodReports = it.floodReports.map { report ->
-                    report.copy(
-                        spreadRate = report.severity.toSpreadRate() * type.toSpreadMultiplier()
-                    )
-                }
-            )
-        }
-    }
-
-    // Simulation functions
-    fun simulateFloodSpread() {
-        if (!_state.value.isSimulationMode) return
-
-        val reports = _state.value.floodReports.map { report ->
-            if (!report.isExpanding) return@map report
-
-            val newRadius = min(
-                report.radius * (1 + report.spreadRate * _state.value.simulationSpeed * 0.05f),
-                report.maxRadius
-            )
-
-            // Stop expanding if max radius is reached
-            val isExpanding = newRadius < report.maxRadius
-
-            report.copy(
-                radius = newRadius,
-                isExpanding = isExpanding,
-                geometryPoints = generateGeometryPoints(report.location, newRadius)
-            )
-        }
-
-        // Check for and handle merging
-        val mergedReports = mutableListOf<FloodReport>()
-        val reportsToProcess = reports.toMutableList()
-
-        while (reportsToProcess.isNotEmpty()) {
-            var currentReport = reportsToProcess.removeAt(0)
-            var i = 0
-            while (i < reportsToProcess.size) {
-                if (currentReport.overlapsWith(reportsToProcess[i])) {
-                    currentReport = currentReport.mergeWith(reportsToProcess[i])
-                    reportsToProcess.removeAt(i)
-                } else {
-                    i++
-                }
-            }
-            mergedReports.add(currentReport)
-        }
-
-        _state.update { it.copy(floodReports = mergedReports) }
-    }
-
-    fun clearSimulation() {
-        _state.update { it.copy(floodReports = emptyList()) }
-    }
-
-    private fun generateGeometryPoints(center: LatLng, radius: Float): List<LatLng> {
-        val points = mutableListOf<LatLng>()
-        val numPoints = 32 // Number of points to create a smooth circle
-        val radiusInDegrees = radius / 111320f // Convert meters to degrees (approximate)
-
-        for (i in 0 until numPoints) {
-            val angle = (2 * Math.PI * i) / numPoints
-            val lat = center.latitude + (radiusInDegrees * Math.sin(angle))
-            val lng =
-                center.longitude +
-                    (radiusInDegrees * Math.cos(angle) / Math.cos(Math.toRadians(center.latitude)))
-            points.add(LatLng(lat, lng))
-        }
-
-        // Close the polygon
-        points.add(points[0])
-        return points
+    override fun onCleared() {
+        super.onCleared()
+        reportsJob?.cancel()
     }
 }

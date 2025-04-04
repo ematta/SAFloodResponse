@@ -54,6 +54,7 @@ class FirestoreFloodReportRepository @Inject constructor(
                     try {
                         val report = document.toObject<FloodReport>()
                         Log.d(TAG, "Fetched report: ${report?.reportId} at (${report?.latitude}, ${report?.longitude})")
+                        report
                     } catch (e: Exception) {
                         Log.d(TAG, "Error parsing document ${document.id}: ${e.message}")
                         null
