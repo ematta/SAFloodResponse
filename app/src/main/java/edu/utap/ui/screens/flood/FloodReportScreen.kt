@@ -177,7 +177,7 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                         }
                         Button(
                             onClick = {
-                                viewModel.addPhoto()
+                                viewModel.addPhoto("https://example.com/photo.jpg")
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {

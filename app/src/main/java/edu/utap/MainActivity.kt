@@ -192,14 +192,6 @@ class MainActivity : ComponentActivity() {
 /**
  * Navigation routes for the authenticated part of the app
  */
-object AuthenticatedRoutes {
-    const val DASHBOARD = "dashboard"
-    const val DISCUSSIONS = "discussions"
-    const val DISCUSSIONS_THREAD = "discussions/{threadId}"
-    const val EMERGENCY = "emergency"
-    const val PROFILE = "profile"
-    const val FLOOD_REPORT = "flood_report"
-}
 
 /**
  * Main composable for the authenticated part of the app.
