@@ -40,7 +40,7 @@ open class AuthViewModel(
 
     val currentUser: StateFlow<FirestoreUser?> = stateManager.currentUser
 
-    override fun getCurrentUser(): FirestoreUser? = stateManager.currentUser.value as FirestoreUser?
+    override fun getCurrentUser(): FirestoreUser? = stateManager.currentUser.value
 
     init {
         checkAuthState()
@@ -292,7 +292,21 @@ open class AuthViewModel(
      * @return true if the user has the required permission, false otherwise
      */
     fun hasPermission(requiredRole: String): Boolean {
-        // TODO: Implement this method
+        if (stateManager.currentUser.value == null) {
+            return false
+        }
+        val currentUserRole = stateManager.currentUser.value?.role ?: return false
+        // Check if the current user's role is greater than or equal to the required role
+        val roles = listOf("user", "moderator", "admin")
+        val currentUserRoleIndex = roles.indexOf(currentUserRole)
+        val requiredRoleIndex = roles.indexOf(requiredRole)
+        if (currentUserRoleIndex == -1 || requiredRoleIndex == -1) {
+            return false
+        }
+        if (currentUserRoleIndex < requiredRoleIndex) {
+            return false
+        }
+        // User has the required permission 
         return true
     }
 
