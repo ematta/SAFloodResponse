@@ -261,6 +261,53 @@ class DiscussionViewModel(
         }
     }
 
+    fun createNewDiscussion(title: String, description: String, reportId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            _discussionCreationSuccess.value = null
+
+            try {
+                val currentUser = authViewModel.getCurrentUser()
+                if (currentUser == null) {
+                    _error.value = "User not logged in"
+                    _isLoading.value = false
+                    _discussionCreationSuccess.value = false
+                    return@launch
+                }
+
+                val threadId = System.currentTimeMillis().toString()
+                val timestamp = System.currentTimeMillis()
+
+                val newThread = DiscussionThread(
+                    threadId = threadId,
+                    reportId = reportId,
+                    createdBy = currentUser.userId,
+                    title = title,
+                    description = description
+                )
+
+                val threadResult = discussionRepository.createThread(newThread)
+                threadResult.fold(
+                    onSuccess = { thread ->
+                        _isLoading.value = false
+                        _discussionCreationSuccess.value = true
+                        fetchAllThreads()
+                    },
+                    onFailure = { error ->
+                        _error.value = error.message ?: "Failed to create discussion thread"
+                        _isLoading.value = false
+                        _discussionCreationSuccess.value = false
+                    }
+                )
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Failed to create discussion thread"
+                _isLoading.value = false
+                _discussionCreationSuccess.value = false
+            }
+        }
+    }
+
     fun submitMessage() {
         viewModelScope.launch {
             _isLoading.value = true

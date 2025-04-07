@@ -1,5 +1,6 @@
 package edu.utap.ui.screens.discussion
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.Date
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.flood.di.DiscussionViewModelFactory
 import edu.utap.flood.model.DiscussionThread
@@ -100,11 +105,29 @@ fun DiscussionListScreen(
                     )
                 }
             } else if (allThreads.isEmpty()) {
-                Text(
-                    text = "No discussion threads found",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(id = edu.utap.R.drawable.ic_smiley_face),
+                        contentDescription = "No topics",
+                        modifier = Modifier
+                            .height(100.dp)
+                            .padding(bottom = 16.dp)
+                    )
+                    Text(
+                        text = "No topics yet",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Be the first to start a discussion!",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -145,6 +168,15 @@ private fun ThreadCard(
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(4.dp))
+            val displayTimestamp = thread.editTimestamp ?: thread.timestamp
+            if (displayTimestamp != null) {
+                Text(
+                    text = formatTimestamp(displayTimestamp.toDate()),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -162,5 +194,13 @@ private fun ThreadCard(
                 }
             }
         }
+    }
+}
+private fun formatTimestamp(date: Date): String {
+    return try {
+        val sdf = SimpleDateFormat("MMM d, yyyy h:mm a", Locale.getDefault())
+        sdf.format(date)
+    } catch (e: Exception) {
+        ""
     }
 }

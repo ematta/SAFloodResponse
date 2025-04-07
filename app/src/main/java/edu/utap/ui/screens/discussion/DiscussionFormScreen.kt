@@ -38,6 +38,17 @@ fun DiscussionFormScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
+    // FloodReportViewModel instance
+    val floodReportViewModel: edu.utap.ui.viewmodel.FloodReportViewModel = viewModel()
+
+    LaunchedEffect(Unit) {
+        floodReportViewModel.refreshActiveFloodReports()
+    }
+
+    val activeFloodReports by floodReportViewModel.activeFloodReports.collectAsState()
+    var selectedFloodReportId by remember { mutableStateOf<String?>(null) }
+    var floodDropdownExpanded by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -119,6 +130,17 @@ fun DiscussionFormScreen(
                             text = message,
                             style = MaterialTheme.typography.bodyLarge
                         )
+                        if (selectedFloodReportId != null) {
+                            val selectedReport = activeFloodReports.find { it.reportId == selectedFloodReportId }
+                            if (selectedReport != null) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Linked Flood Report: ${selectedReport.description}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
             } else {
@@ -136,6 +158,39 @@ fun DiscussionFormScreen(
                         }
                     }
                 )
+
+                // Flood Report Dropdown
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = activeFloodReports.find { it.reportId == selectedFloodReportId }?.description ?: "",
+                        onValueChange = {},
+                        label = { Text("Link to Flood Report (optional)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        readOnly = true,
+                        trailingIcon = {
+                            IconButton(onClick = { floodDropdownExpanded = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = "Select Flood Report"
+                                )
+                            }
+                        }
+                    )
+                    DropdownMenu(
+                        expanded = floodDropdownExpanded,
+                        onDismissRequest = { floodDropdownExpanded = false }
+                    ) {
+                        activeFloodReports.forEach { report ->
+                            DropdownMenuItem(
+                                text = { Text(report.description) },
+                                onClick = {
+                                    selectedFloodReportId = report.reportId
+                                    floodDropdownExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
 
                 // Category Selection
                 var expanded by remember { mutableStateOf(false) }

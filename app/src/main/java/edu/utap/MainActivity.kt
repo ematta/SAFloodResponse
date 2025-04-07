@@ -8,23 +8,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.AuthState
 import edu.utap.auth.ForgotPasswordScreen
@@ -33,10 +28,8 @@ import edu.utap.auth.RegisterScreen
 import edu.utap.auth.di.ViewModelFactory
 import edu.utap.auth.model.AuthViewModel
 import edu.utap.flood.di.FloodViewModelFactory
-import edu.utap.flood.di.DiscussionViewModelFactory
 import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.location.LocationPermissionHandler
-import edu.utap.ui.components.AppBottomNavigation
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
 import edu.utap.ui.screens.ProfileScreen
@@ -205,8 +198,6 @@ fun AuthenticatedApp(
     authViewModel: AuthViewModel = viewModel()
 ) {
     val navController = rememberNavController()
-    val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStackEntry?.destination?.route ?: AuthenticatedRoutes.DASHBOARD
     val authState by authViewModel.authState.collectAsState()
 
     val context = LocalContext.current
@@ -225,13 +216,12 @@ fun AuthenticatedApp(
                     }
                 }
             } catch (e: android.os.DeadObjectException) {
-                android.util.Log.w("AuthenticatedApp", "DeadObjectException during navigation, ignoring", e)
+                Log.w("AuthenticatedApp", "DeadObjectException during navigation, ignoring", e)
             }
         }
         return
     }
 
-    val applicationContext = LocalContext.current.applicationContext
     val firestore = FirebaseFirestore.getInstance()
 
     val floodReportRepository = FloodReportRepository(
