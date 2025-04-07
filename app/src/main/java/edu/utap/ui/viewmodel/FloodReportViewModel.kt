@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlinx.coroutines.flow.first
 
 /**
  * ViewModel responsible for managing flood report state and operations.
@@ -32,6 +33,9 @@ class FloodReportViewModel(
     private val authViewModel: AuthViewModelInterface,
     private val locationUtils: LocationUtils
 ) : ViewModel() {
+
+    private val _activeFloodReports = MutableStateFlow<List<FloodReport>>(emptyList())
+    val activeFloodReports: StateFlow<List<FloodReport>> get() = _activeFloodReports
 
     // State flows
     private val _reportState = MutableStateFlow<ReportState>(ReportState.Idle)
@@ -207,11 +211,24 @@ class FloodReportViewModel(
                 floodReportRepository.observeAllReports()
                     .collect { reports ->
                         _allReports.value = reports
+                        _activeFloodReports.value = reports.filter { it.status == "active" }
                         _reportsLoading.value = false
                     }
             } catch (e: Exception) {
                 _reportsError.value = e.message ?: "Failed to load flood reports"
                 _reportsLoading.value = false
+            }
+        }
+    }
+
+    fun refreshActiveFloodReports() {
+        viewModelScope.launch {
+            try {
+                val reports = floodReportRepository.observeAllReports().first()
+                val activeReports = reports.filter { it.status == "active" }
+                _activeFloodReports.value = activeReports
+            } catch (e: Exception) {
+                _activeFloodReports.value = emptyList()
             }
         }
     }
