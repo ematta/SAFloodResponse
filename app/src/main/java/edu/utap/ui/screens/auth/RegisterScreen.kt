@@ -34,6 +34,7 @@ import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.utils.RoleUtils
 import edu.utap.utils.ValidationUtils
+import android.util.Log
 
 // Test tags for UI testing
 const val REGISTER_NAME_FIELD_TAG = "edu.utap.auth.nameField"
@@ -48,7 +49,7 @@ fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
     onRegisterSuccess: () -> Unit
 ) {
-    println("RegisterScreen: Composable called with viewModel: $authViewModel")
+    Log.d("RegisterScreen: Composable called with viewModel: $authViewModel")
     val authState by authViewModel.authState.collectAsState()
 
     var name by remember { mutableStateOf("") }

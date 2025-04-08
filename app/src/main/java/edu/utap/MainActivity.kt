@@ -225,7 +225,7 @@ class MainActivity : ComponentActivity() {
                     longitude = -98.8 + kotlin.random.Random.nextDouble() * 0.5,
                     description = "Test flood report #$index",
                     photoUrls = emptyList(),
-                    status = "pending",
+                    status = "active",
                     createdAt = com.google.firebase.Timestamp.now(),
                     updatedAt = com.google.firebase.Timestamp.now(),
                     isManualLocation = kotlin.random.Random.nextBoolean(),

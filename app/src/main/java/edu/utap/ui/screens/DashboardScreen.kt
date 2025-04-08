@@ -98,6 +98,7 @@ fun DashboardScreen(
     // Fetch flood alerts when the screen is loaded
     LaunchedEffect(Unit) {
         weatherViewModel.fetchFloodAlerts(29.4241, -98.4936)
+        floodReportViewModel.refreshActiveFloodReports()
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -178,7 +179,7 @@ fun DashboardScreen(
                                         floodReportViewModel.fetchReportsInRadius(
                                             location.latitude,
                                             location.longitude,
-                                            10.0
+                                            10000.0
                                         )
                                     }
                                 },
