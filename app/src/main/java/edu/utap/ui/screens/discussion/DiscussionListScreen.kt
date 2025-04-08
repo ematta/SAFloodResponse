@@ -45,6 +45,7 @@ import edu.utap.ui.viewmodel.DiscussionViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscussionListScreen(
+    navController: androidx.navigation.NavController,
     viewModel: DiscussionViewModel = viewModel(
         factory = DiscussionViewModelFactory.provideFactory(LocalContext.current)
     ),
@@ -66,7 +67,7 @@ fun DiscussionListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { onThreadClick("new") },
+                onClick = { navController.navigate("discussions/new") },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(

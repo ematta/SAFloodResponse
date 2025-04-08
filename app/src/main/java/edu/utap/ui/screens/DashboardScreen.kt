@@ -59,41 +59,39 @@ fun DashboardScreen(
     val isLoading by weatherViewModel.isLoading.collectAsState()
     val weatherError by weatherViewModel.error.collectAsState()
 
-    // Flood reports state
-    val sanAntonio = LatLng(29.4241, -98.4936) // San Antonio coordinates
-    Log.d(TAG, "Fetching reports for location: $sanAntonio with 50 mile radius")
-    val floodReports by remember {
-        floodReportRepository.getReportsInRadius(
-            sanAntonio.latitude, sanAntonio.longitude, 50.0 // 50 mile radius
-        ).also { flow ->
-            Log.d(TAG, "Flow created for reports")
-        }
-    }.collectAsState(initial = emptyList<FloodReport>().also {
-        Log.d(TAG, "Initial empty state set for reports")
-    }).also { state ->
-        LaunchedEffect(state.value) {
-            Log.d(TAG, "Reports updated: ${state.value.size} reports")
-            state.value.forEach {
-                Log.d(TAG, "Report: ${it.reportId} at (${it.latitude}, ${it.longitude})")
-            }
-        }
-    }
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    val floodReportViewModel: edu.utap.ui.viewmodel.FloodReportViewModel = viewModel(
+        factory = edu.utap.flood.di.FloodViewModelFactory(context)
+    )
 
     LaunchedEffect(Unit) {
         locationPermissionHandler.checkAndRequestLocationPermission(
             onGranted = {
                 isLocationPermissionGranted = true
+                val location = floodReportViewModel.currentLocation.value
+                if (location != null) {
+                    floodReportViewModel.fetchReportsInRadius(
+                        location.latitude,
+                        location.longitude,
+                        10.0
+                    )
+                }
             },
-            onDenied = { isLocationPermissionGranted = false })
+            onDenied = { isLocationPermissionGranted = false }
+        )
     }
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(sanAntonio, 12f)
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(29.4241, -98.4936), // Default to San Antonio
+            12f
+        )
     }
 
     // Fetch flood alerts when the screen is loaded
     LaunchedEffect(Unit) {
-        weatherViewModel.fetchFloodAlerts(sanAntonio.latitude, sanAntonio.longitude)
+        weatherViewModel.fetchFloodAlerts(29.4241, -98.4936)
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -151,6 +149,14 @@ fun DashboardScreen(
                             locationPermissionHandler.checkAndRequestLocationPermission(
                                 onGranted = {
                                     isLocationPermissionGranted = true
+                                    val location = floodReportViewModel.currentLocation.value
+                                    if (location != null) {
+                                        floodReportViewModel.fetchReportsInRadius(
+                                            location.latitude,
+                                            location.longitude,
+                                            10.0
+                                        )
+                                    }
                                 },
                                 onDenied = { isLocationPermissionGranted = false })
                         }) {
@@ -161,21 +167,12 @@ fun DashboardScreen(
                 }
             }
 
-            // Flood Reports List - takes 40% of screen
+            // Local Flood Reports List - takes 40% of screen
             Box(modifier = Modifier.weight(0.4f)) {
-                if (floodReports.isEmpty()) {
-                    Box(
-                        contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()
-                    ) {
-                        Text("No flood reports found")
-                    }
-                } else {
-                    LazyColumn {
-                        items(floodReports) { report ->
-                            FloodReportItem(report = report)
-                        }
-                    }
-                }
+                edu.utap.ui.screens.flood.LocalFloodListScreen(
+                    viewModel = floodReportViewModel,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
 
@@ -184,7 +181,7 @@ fun DashboardScreen(
         // Floating Action Button for refreshing alerts
         FloatingActionButton(
             onClick = {
-                weatherViewModel.fetchFloodAlerts(sanAntonio.latitude, sanAntonio.longitude)
+                weatherViewModel.fetchFloodAlerts(29.4241, -98.4936)
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)

@@ -87,18 +87,12 @@ class FloodReportViewModel(
     private val _reportsError = MutableStateFlow<String?>(null)
     val reportsError: StateFlow<String?> = _reportsError
 
-    init {
-        // Initialize location updates
-        locationUtils.requestLocationUpdates { location ->
-            _currentLocation.value = location
-        }
+    private val _localFloodReports = MutableStateFlow<List<FloodReport>>(emptyList())
+    val localFloodReports: StateFlow<List<FloodReport>> = _localFloodReports
 
+    init {
         // Fetch all flood reports on initialization
         fetchAllReports()
-        // Request location updates
-        locationUtils.requestLocationUpdates { location ->
-            _currentLocation.value = location
-        }
     }
 
     /**
@@ -216,6 +210,24 @@ class FloodReportViewModel(
                     }
             } catch (e: Exception) {
                 _reportsError.value = e.message ?: "Failed to load flood reports"
+                _reportsLoading.value = false
+            }
+        }
+    }
+
+    fun fetchReportsInRadius(latitude: Double, longitude: Double, radiusKm: Double) {
+        viewModelScope.launch {
+            _reportsLoading.value = true
+            _reportsError.value = null
+
+            try {
+                floodReportRepository.getReportsInRadius(latitude, longitude, radiusKm)
+                    .collect { reports ->
+                        _localFloodReports.value = reports
+                        _reportsLoading.value = false
+                    }
+            } catch (e: Exception) {
+                _reportsError.value = e.message ?: "Failed to load local flood reports"
                 _reportsLoading.value = false
             }
         }
@@ -354,6 +366,14 @@ class FloodReportViewModel(
                 )
             } catch (e: Exception) {
                 _reportState.value = ReportState.Error(e.message ?: "An unexpected error occurred")
+            }
+        }
+        /**
+         * Starts location updates. Should be called after location permissions are granted.
+         */
+        fun startLocationUpdates() {
+            locationUtils.requestLocationUpdates { location ->
+                _currentLocation.value = location
             }
         }
     }
