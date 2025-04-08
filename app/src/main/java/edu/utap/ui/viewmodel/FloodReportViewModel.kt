@@ -17,7 +17,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlinx.coroutines.flow.first
-
+import edu.utap.weather.repository.WeatherRepository
+import edu.utap.flood.FloodDataIntegrator
 /**
  * ViewModel responsible for managing flood report state and operations.
  *
@@ -31,11 +32,15 @@ import kotlinx.coroutines.flow.first
 class FloodReportViewModel(
     private val floodReportRepository: FloodReportRepositoryInterface,
     private val authViewModel: AuthViewModelInterface,
-    private val locationUtils: LocationUtils
+    private val locationUtils: LocationUtils,
+    private val weatherRepository: WeatherRepository
 ) : ViewModel() {
 
     private val _activeFloodReports = MutableStateFlow<List<FloodReport>>(emptyList())
     val activeFloodReports: StateFlow<List<FloodReport>> get() = _activeFloodReports
+
+    private val _combinedFloodReports = MutableStateFlow<List<edu.utap.flood.UnifiedFloodReport>>(emptyList())
+    val combinedFloodReports: StateFlow<List<edu.utap.flood.UnifiedFloodReport>> get() = _combinedFloodReports
 
     // State flows
     private val _reportState = MutableStateFlow<ReportState>(ReportState.Idle)
@@ -221,13 +226,15 @@ class FloodReportViewModel(
             _reportsError.value = null
 
             try {
-                floodReportRepository.getReportsInRadius(latitude, longitude, radiusKm)
-                    .collect { reports ->
-                        _localFloodReports.value = reports
-                        _reportsLoading.value = false
-                    }
+                val firestoreReportsDeferred = floodReportRepository.getReportsInRadius(latitude, longitude, radiusKm).first()
+                val nwsAlerts = weatherRepository.getFloodAlerts(latitude, longitude)
+
+                val combined = FloodDataIntegrator.integrateData(firestoreReportsDeferred, nwsAlerts)
+
+                _combinedFloodReports.value = combined
+                _reportsLoading.value = false
             } catch (e: Exception) {
-                _reportsError.value = e.message ?: "Failed to load local flood reports"
+                _reportsError.value = e.message ?: "Failed to load flood reports"
                 _reportsLoading.value = false
             }
         }

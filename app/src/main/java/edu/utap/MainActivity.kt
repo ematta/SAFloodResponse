@@ -39,10 +39,12 @@ import edu.utap.ui.screens.discussion.DiscussionListScreen
 import edu.utap.ui.screens.discussion.DiscussionThreadScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
-import edu.utap.ui.viewmodel.DiscussionViewModel
 import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.NetworkConnectivitySnackbar
 import edu.utap.utils.NetworkMonitor
+import edu.utap.weather.NOAAService
+import edu.utap.weather.repository.WeatherRepositoryImpl
+import okhttp3.OkHttpClient
 import kotlin.getValue
 
 /**
@@ -238,6 +240,10 @@ fun AuthenticatedApp(
         firestore = firestore
     )
 
+    val weatherRepository = WeatherRepositoryImpl(
+        NOAAService(OkHttpClient())
+    )
+
     Scaffold(
         topBar = {
             AppHeader(
@@ -304,9 +310,17 @@ fun AuthenticatedApp(
             }
 
             composable(AuthenticatedRoutes.FLOOD_REPORT) {
+                val floodReportRepository = FloodReportRepository(firestore)
+                val weatherRepository = WeatherRepositoryImpl(
+                    NOAAService(OkHttpClient())
+                )
                 FloodReportFormScreen(
                     viewModel = viewModel(
-                        factory = FloodViewModelFactory(context = LocalContext.current)
+                        factory = FloodViewModelFactory(
+                            context = LocalContext.current,
+                            floodReportRepository = floodReportRepository,
+                            weatherRepository = weatherRepository
+                        )
                     ),
                     onNavigateBack = {
                         navController.popBackStack()

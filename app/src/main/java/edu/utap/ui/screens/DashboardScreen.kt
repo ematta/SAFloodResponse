@@ -1,14 +1,11 @@
 package edu.utap.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,11 +34,10 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import edu.utap.flood.model.FloodReport
+import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.flood.repository.FloodReportRepositoryInterface
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppBottomNavigation
-import edu.utap.ui.components.FloodReportItem
 import edu.utap.ui.viewmodel.WeatherViewModel
 
 private const val TAG = "DashboardScreen"
@@ -50,7 +46,7 @@ private const val TAG = "DashboardScreen"
 fun DashboardScreen(
     navController: NavController,
     locationPermissionHandler: LocationPermissionHandler,
-    weatherViewModel: WeatherViewModel = viewModel(),
+    weatherViewModel: WeatherViewModel,
     floodReportRepository: FloodReportRepositoryInterface,
     modifier: Modifier = Modifier
 ) {
@@ -61,8 +57,15 @@ fun DashboardScreen(
 
     val context = androidx.compose.ui.platform.LocalContext.current
 
+    val weatherRepository = edu.utap.weather.repository.WeatherRepositoryImpl(
+        edu.utap.weather.NOAAService(
+            okhttp3.OkHttpClient()
+        )
+    )
+
     val floodReportViewModel: edu.utap.ui.viewmodel.FloodReportViewModel = viewModel(
-        factory = edu.utap.flood.di.FloodViewModelFactory(context)
+        factory = edu.utap.flood.di.FloodViewModelFactory(context,
+            floodReportRepository as FloodReportRepository, weatherRepository)
     )
 
     LaunchedEffect(Unit) {

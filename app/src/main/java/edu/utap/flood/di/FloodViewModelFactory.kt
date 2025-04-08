@@ -5,17 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import edu.utap.auth.di.AuthModule
 import edu.utap.auth.model.AuthViewModel
-import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.flood.repository.FirestoreFloodReportRepository
 import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.utils.LocationUtils
+import edu.utap.weather.repository.WeatherRepositoryImpl
 
 /**
  * Factory for creating FloodReportViewModel with dependencies.
  * This provides the necessary dependencies for the FloodReportViewModel constructor.
  */
-class FloodViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+class FloodViewModelFactory(
+    private val context: Context,
+    private val floodReportRepository: FloodReportRepository,
+    private val weatherRepository: WeatherRepositoryImpl
+) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
@@ -25,10 +28,6 @@ class FloodViewModelFactory(private val context: Context) : ViewModelProvider.Fa
                 AuthViewModel(repo)
             }
 
-            // Create the FirestoreFloodReportRepository
-            val firestore = FirebaseFirestore.getInstance()
-            val floodReportRepository = FirestoreFloodReportRepository(firestore)
-            println("FirestoreFloodReportRepository initialized with Firestore instance")
             // Create the LocationUtils
             val locationUtils = LocationUtils(context)
 
@@ -36,7 +35,8 @@ class FloodViewModelFactory(private val context: Context) : ViewModelProvider.Fa
             FloodReportViewModel(
                 floodReportRepository = floodReportRepository,
                 authViewModel = authViewModel,
-                locationUtils = locationUtils
+                locationUtils = locationUtils,
+                weatherRepository = weatherRepository
             ) as T
         }
         else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
