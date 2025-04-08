@@ -32,6 +32,15 @@ import edu.utap.user.UserProfileState
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * User profile screen composable.
+ *
+ * Displays and allows editing of the user's profile information,
+ * including display name, email, phone number, address, and profile picture.
+ *
+ * @param userViewModel The [UserViewModel] managing profile data.
+ * @param onNavigateBack Callback invoked when navigating back.
+ */
 @Composable
 fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: () -> Unit = {}) {
     val profileState by userViewModel.profileState.collectAsStateWithLifecycle()
@@ -228,6 +237,12 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
     }
 }
 
+/**
+ * Displays a labeled row of profile information with a divider.
+ *
+ * @param label The label for the information.
+ * @param value The value to display.
+ */
 @Composable
 fun ProfileRow(label: String, value: String) {
     Column(
@@ -249,6 +264,12 @@ fun ProfileRow(label: String, value: String) {
     }
 }
 
+/**
+ * Profile image picker composable with camera and gallery options.
+ *
+ * @param photoUrl URL of the current profile image.
+ * @param onImageSelected Callback invoked with the selected image URI.
+ */
 @Composable
 fun ProfileImagePicker(photoUrl: String, onImageSelected: (Uri) -> Unit) {
     val context = LocalContext.current

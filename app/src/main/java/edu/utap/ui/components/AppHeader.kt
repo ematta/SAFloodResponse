@@ -11,6 +11,13 @@ import androidx.compose.ui.unit.dp
 import edu.utap.R
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Top app bar composable for the Flood Response app.
+ *
+ * Displays the app logo and title, with an optional test screen button.
+ *
+ * @param onTestScreenClick Callback invoked when the test button is clicked.
+ */
 @Composable
 fun AppHeader(onTestScreenClick: () -> Unit = {}) {
     TopAppBar(

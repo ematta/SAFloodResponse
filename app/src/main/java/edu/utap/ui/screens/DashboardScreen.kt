@@ -44,6 +44,20 @@ import edu.utap.ui.viewmodel.WeatherViewModel
 
 private const val TAG = "DashboardScreen"
 
+/**
+ * Dashboard screen composable displaying:
+ * - Google Map with flood alerts and user reports
+ * - List of active flood reports
+ * - Weather alerts and loading/error states
+ * - Location permission handling
+ * - Refresh button and bottom navigation
+ *
+ * @param navController Navigation controller for navigating between screens.
+ * @param locationPermissionHandler Handler for location permissions.
+ * @param weatherViewModel ViewModel for weather alerts.
+ * @param floodReportRepository Repository for flood reports.
+ * @param modifier Modifier to apply to the root container.
+ */
 @Composable
 fun DashboardScreen(
     navController: NavController,

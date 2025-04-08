@@ -21,6 +21,16 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
+/**
+ * Composable for displaying and selecting a user profile image.
+ *
+ * Shows the current profile picture or a placeholder, with an edit icon to pick a new image.
+ *
+ * @param photoUrl URL of the current profile image.
+ * @param onImageSelected Callback invoked with the selected image URI.
+ * @param modifier Modifier to apply to the container.
+ * @param enabled Whether the image picker is enabled.
+ */
 @Composable
 fun ProfileImagePicker(
     photoUrl: String,

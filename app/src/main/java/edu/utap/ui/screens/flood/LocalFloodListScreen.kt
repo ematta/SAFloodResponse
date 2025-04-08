@@ -18,6 +18,14 @@ import androidx.compose.ui.unit.dp
 import edu.utap.ui.components.FloodReportItem
 import edu.utap.ui.viewmodel.FloodReportViewModel
 
+/**
+ * Local flood reports list screen composable.
+ *
+ * Displays a list of nearby flood reports, with loading and error states.
+ *
+ * @param viewModel The [FloodReportViewModel] managing flood report data.
+ * @param modifier Modifier to apply to the root container.
+ */
 @Composable
 fun LocalFloodListScreen(
     viewModel: FloodReportViewModel,

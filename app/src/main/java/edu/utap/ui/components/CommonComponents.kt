@@ -9,6 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
+/**
+ * Displays a centered circular progress indicator filling the available space.
+ *
+ * @param modifier Modifier to apply to the container.
+ */
 @Composable
 fun LoadingIndicator(modifier: Modifier = Modifier) {
     Box(
@@ -20,6 +25,19 @@ fun LoadingIndicator(modifier: Modifier = Modifier) {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Styled outlined text field used throughout the app.
+ *
+ * @param value The current text value.
+ * @param onValueChange Callback when the text changes.
+ * @param label The label to display inside the text field.
+ * @param modifier Modifier to apply to the text field.
+ * @param enabled Whether the text field is enabled.
+ * @param isError Whether to show error styling.
+ * @param visualTransformation Visual transformation for the input (e.g., password).
+ * @param supportingText Optional supporting/error text below the field.
+ * @param keyboardOptions Keyboard options such as input type.
+ */
 @Composable
 fun AppTextField(
     value: String,
@@ -50,6 +68,13 @@ fun AppTextField(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Styled button with optional loading indicator.
+ *
+ * @param onClick Callback when the button is clicked.
+ * @param text The button label.
+ * @param modifier Modifier to apply to the button.
+ */
 @Composable
 fun AppButton(onClick: () -> Unit, text: String, modifier: Modifier = Modifier) {
     var loading by remember { mutableStateOf(false) }
@@ -71,6 +96,12 @@ fun AppButton(onClick: () -> Unit, text: String, modifier: Modifier = Modifier) 
     }
 }
 
+/**
+ * Displays an error message styled with error color.
+ *
+ * @param message The error message text.
+ * @param modifier Modifier to apply to the text.
+ */
 @Composable
 fun ErrorMessage(message: String, modifier: Modifier = Modifier) {
     Text(
@@ -81,11 +112,21 @@ fun ErrorMessage(message: String, modifier: Modifier = Modifier) {
     )
 }
 
+/**
+ * Spacer with fixed height.
+ *
+ * @param height Height in dp.
+ */
 @Composable
 fun SpacerHeight(height: Int) {
     Spacer(modifier = Modifier.height(height.dp))
 }
 
+/**
+ * Spacer with fixed width.
+ *
+ * @param width Width in dp.
+ */
 @Composable
 fun SpacerWidth(width: Int) {
     Spacer(modifier = Modifier.width(width.dp))

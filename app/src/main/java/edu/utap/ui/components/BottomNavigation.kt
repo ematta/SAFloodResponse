@@ -13,6 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 
+/**
+ * Bottom navigation bar composable for the Flood Response app.
+ *
+ * Provides navigation between Home, Report, Discussions, and Profile screens.
+ *
+ * @param navController The navigation controller used to navigate between screens.
+ * @param currentRoute The current navigation route to highlight the selected item.
+ */
 @Composable
 fun AppBottomNavigation(navController: NavController, currentRoute: String) {
     NavigationBar {

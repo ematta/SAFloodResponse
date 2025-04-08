@@ -31,6 +31,17 @@ import edu.utap.utils.LocationUtils
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+/**
+ * Flood report submission screen composable.
+ *
+ * Allows users to:
+ * - Submit new flood reports with description, photos, and location
+ * - Toggle manual location input
+ * - View and confirm/deny nearby reports
+ *
+ * @param viewModel The [FloodReportViewModel] managing report data.
+ * @param onNavigateToMap Callback invoked to navigate to the map screen.
+ */
 fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Unit) {
     val context = LocalContext.current
     val locationUtils = remember { LocationUtils(context) }
@@ -226,6 +237,13 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
  * @param onDeny Callback for when the report is denied
  */
 @Composable
+/**
+ * Card composable displaying a single flood report with confirm/deny buttons.
+ *
+ * @param report The [FloodReport] to display.
+ * @param onConfirm Callback invoked when the report is confirmed.
+ * @param onDeny Callback invoked when the report is denied.
+ */
 fun FloodReportItem(report: FloodReport, onConfirm: () -> Unit, onDeny: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth()

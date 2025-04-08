@@ -21,6 +21,15 @@ import edu.utap.utils.RoleUtils
  * It displays a list of all users and allows changing their roles.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Screen for administrators to manage user roles.
+ *
+ * Displays a list of users and allows changing their roles via dropdown menus.
+ * Protected by permission checks to restrict access to admins.
+ *
+ * @param authViewModel The authentication ViewModel.
+ * @param onNavigateBack Callback invoked when navigating back.
+ */
 @Composable
 fun UserRoleScreen(authViewModel: AuthViewModel = viewModel(), onNavigateBack: () -> Unit) {
     // Get the list of all users from the repository
@@ -77,6 +86,12 @@ fun UserRoleScreen(authViewModel: AuthViewModel = viewModel(), onNavigateBack: (
     )
 }
 
+/**
+ * Displays a user item with role change dropdown.
+ *
+ * @param user The user to display.
+ * @param authViewModel The authentication ViewModel.
+ */
 @Composable
 private fun UserRoleItem(user: edu.utap.auth.model.FirestoreUser, authViewModel: AuthViewModel) {
     var expanded by remember { mutableStateOf(false) }
