@@ -1,5 +1,8 @@
 package edu.utap.ui.screens.discussion
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.graphics.Color
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +40,7 @@ import edu.utap.flood.di.DiscussionViewModelFactory
 import edu.utap.flood.model.DiscussionMessage
 import edu.utap.ui.viewmodel.DiscussionViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscussionThreadScreen(
@@ -67,7 +71,7 @@ fun DiscussionThreadScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack, 
+                            imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -75,71 +79,89 @@ fun DiscussionThreadScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            if (isLoading) {
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+        if (error != null) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Error: ${error ?: "Thread not found or has been deleted."}",
+                    color = Color.Red
+                )
+                Button(onClick = onBackClick, modifier = Modifier.padding(top = 16.dp)) {
+                    Text("Back")
                 }
-            } else if (error != null) {
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Error: $error", 
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            } else {
-                // Messages list
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp)
-                ) {
-                    items(messages) { message ->
-                        MessageCard(message = message)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
-                }
+                } else if (error != null) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Error: $error",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                } else {
+                    // Messages list
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
+                    ) {
+                        items(messages) { message ->
+                            MessageCard(message = message)
+                        }
+                    }
 
-                // Message composer
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Column(
+                    // Message composer
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
                     ) {
-                        OutlinedTextField(
-                            value = newMessageText,
-                            onValueChange = viewModel::updateNewMessageText,
-                            label = { Text("Type your message") },
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 8.dp)
-                        )
-                        Button(
-                            onClick = { viewModel.submitMessage() },
-                            modifier = Modifier.align(Alignment.End)
+                                .padding(8.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Send,
-                                contentDescription = "Send"
+                            OutlinedTextField(
+                                value = newMessageText,
+                                onValueChange = viewModel::updateNewMessageText,
+                                label = { Text("Type your message") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 8.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Send")
+                            Button(
+                                onClick = { viewModel.submitMessage() },
+                                modifier = Modifier.align(Alignment.End)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Send,
+                                    contentDescription = "Send"
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Send")
+                            }
                         }
                     }
                 }
@@ -149,7 +171,7 @@ fun DiscussionThreadScreen(
 }
 
 @Composable
-private fun MessageCard(message: DiscussionMessage) {
+fun MessageCard(message: DiscussionMessage) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
