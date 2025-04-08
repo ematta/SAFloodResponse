@@ -21,6 +21,14 @@ import androidx.compose.ui.unit.dp
 import edu.utap.flood.model.FloodReport
 import edu.utap.ui.theme.Dimensions
 
+/**
+ * Displays a card summarizing a flood report.
+ *
+ * Shows the report's description, status, and location with an icon indicating severity.
+ *
+ * @param report The [FloodReport] to display.
+ * @param modifier Modifier to apply to the card.
+ */
 @Composable
 fun FloodReportItem(
     report: FloodReport,

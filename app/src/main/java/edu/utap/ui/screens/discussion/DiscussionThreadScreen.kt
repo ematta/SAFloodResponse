@@ -42,6 +42,16 @@ import edu.utap.ui.viewmodel.DiscussionViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Discussion thread screen composable.
+ *
+ * Displays a list of messages in a discussion thread, allows composing and sending new messages,
+ * and handles loading and error states.
+ *
+ * @param threadId The ID of the discussion thread.
+ * @param viewModel The [DiscussionViewModel] managing thread data.
+ * @param onBackClick Callback invoked when navigating back.
+ */
 @Composable
 fun DiscussionThreadScreen(
     threadId: String,
@@ -170,6 +180,11 @@ fun DiscussionThreadScreen(
     }
 }
 
+/**
+ * Card composable displaying a single discussion message.
+ *
+ * @param message The [DiscussionMessage] to display.
+ */
 @Composable
 fun MessageCard(message: DiscussionMessage) {
     Card(

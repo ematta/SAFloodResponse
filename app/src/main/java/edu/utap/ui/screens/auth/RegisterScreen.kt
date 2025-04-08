@@ -43,13 +43,23 @@ const val REGISTER_PASSWORD_FIELD_TAG = "edu.utap.auth.passwordField"
 const val REGISTER_CONFIRM_PASSWORD_FIELD_TAG = "edu.utap.auth.confirmPasswordField"
 const val REGISTER_BUTTON_TAG = "edu.utap.auth.registerButton"
 
+/**
+ * User registration screen composable.
+ *
+ * Allows users to register with name, email, and password.
+ * Performs validation and displays error messages.
+ *
+ * @param authViewModel The authentication ViewModel interface.
+ * @param onNavigateToLogin Callback invoked to navigate to the login screen.
+ * @param onRegisterSuccess Callback invoked when registration is successful.
+ */
 @Composable
 fun RegisterScreen(
     authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),
     onNavigateToLogin: () -> Unit,
     onRegisterSuccess: () -> Unit
 ) {
-    Log.d("RegisterScreen: Composable called with viewModel: $authViewModel")
+    Log.d("RegisterScreen", "Composable called with viewModel: $authViewModel")
     val authState by authViewModel.authState.collectAsState()
 
     var name by remember { mutableStateOf("") }

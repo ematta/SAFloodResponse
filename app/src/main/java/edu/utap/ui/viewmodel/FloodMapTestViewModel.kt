@@ -41,6 +41,17 @@ enum class TerrainType {
     }
 }
 
+/**
+ * ViewModel for managing flood map simulation and visualization state.
+ *
+ * Handles:
+ * - Observing live flood reports
+ * - Managing simulation mode and speed
+ * - Selecting reports and toggling dialogs
+ * - Tracking current location and terrain type
+ *
+ * @param floodReportRepository The repository for flood report data.
+ */
 class FloodMapTestViewModel @Inject constructor(
     private val floodReportRepository: FloodReportRepositoryInterface
 ) : ViewModel() {

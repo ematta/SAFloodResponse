@@ -10,6 +10,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 
+/**
+ * ViewModel for managing weather and flood alert data.
+ *
+ * Fetches flood alerts from NOAA and exposes loading and error states.
+ *
+ * @param noaaService The NOAA service used to fetch flood alerts.
+ */
 class WeatherViewModel(private val noaaService: NOAAService = NOAAService(OkHttpClient())) :
     ViewModel() {
 

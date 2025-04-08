@@ -24,6 +24,14 @@ data class FloodAlert(
     val timestamp: Long
 )
 
+/**
+ * Service class for fetching flood alerts from the NOAA API.
+ *
+ * Handles HTTP requests, JSON parsing, and error handling.
+ *
+ * @property client The OkHttpClient used for network requests.
+ * @property dispatcher The coroutine dispatcher for network operations (default: IO).
+ */
 class NOAAService(
     private val client: OkHttpClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -33,6 +41,13 @@ class NOAAService(
         private const val BASE_URL = "https://api.weather.gov"
     }
 
+    /**
+     * Makes an HTTP GET request to the specified URL and returns the response as a JSONObject.
+     *
+     * @param url The URL to request.
+     * @return The response body parsed as a JSONObject.
+     * @throws IOException if the request fails or the response is invalid.
+     */
     private suspend fun makeRequest(url: String): JSONObject = withContext(dispatcher) {
         val request = Request.Builder()
             .url(url)
@@ -81,6 +96,13 @@ class NOAAService(
         }
     }
 
+    /**
+     * Fetches flood alerts from NOAA for the specified latitude and longitude.
+     *
+     * @param latitude The latitude coordinate.
+     * @param longitude The longitude coordinate.
+     * @return A list of [FloodAlert]s near the specified location.
+     */
     suspend fun getFloodAlerts(latitude: Double, longitude: Double): List<FloodAlert> {
         try {
             Log.d(TAG, "Getting flood alerts for lat: $latitude, lon: $longitude")
@@ -160,6 +182,12 @@ class NOAAService(
         }
     }
 
+    /**
+     * Parses an ISO 8601 timestamp string to milliseconds since epoch.
+     *
+     * @param timestamp The ISO 8601 timestamp string.
+     * @return The epoch milliseconds.
+     */
     private fun parseTimestamp(timestamp: String): Long {
         val zonedDateTime = ZonedDateTime.parse(timestamp, DateTimeFormatter.ISO_DATE_TIME)
         return zonedDateTime.toInstant().toEpochMilli()

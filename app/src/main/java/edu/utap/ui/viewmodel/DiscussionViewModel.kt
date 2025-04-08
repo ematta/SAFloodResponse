@@ -14,6 +14,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for managing discussion threads and messages.
+ *
+ * Handles:
+ * - Fetching all threads and messages
+ * - Creating new threads and discussions
+ * - Composing and submitting messages
+ * - Upvoting messages
+ * - Managing UI state such as loading, errors, and form inputs
+ *
+ * @param discussionRepository The repository for discussion data.
+ * @param authViewModel The authentication ViewModel interface.
+ */
 class DiscussionViewModel(
     private val discussionRepository: DiscussionRepositoryInterface,
     private val authViewModel: AuthViewModelInterface

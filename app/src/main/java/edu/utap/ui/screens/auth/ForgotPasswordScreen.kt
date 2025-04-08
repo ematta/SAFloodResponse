@@ -27,6 +27,15 @@ import androidx.compose.ui.unit.dp
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.utils.ValidationUtils
 
+/**
+ * Forgot password screen composable.
+ *
+ * Allows users to request a password reset email.
+ * Displays success and error messages, and a link back to login.
+ *
+ * @param viewModel The authentication ViewModel interface.
+ * @param onNavigateToLogin Callback invoked to navigate back to the login screen.
+ */
 @Composable
 fun ForgotPasswordScreen(viewModel: AuthViewModelInterface, onNavigateToLogin: () -> Unit) {
     var email by remember { mutableStateOf("") }

@@ -44,6 +44,16 @@ import edu.utap.ui.viewmodel.DiscussionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+/**
+ * Discussion list screen composable.
+ *
+ * Displays a list of discussion threads, with loading and error states,
+ * and a button to create a new discussion.
+ *
+ * @param navController Navigation controller for navigating to thread details or new thread.
+ * @param viewModel The [DiscussionViewModel] managing discussion data.
+ * @param onThreadClick Callback invoked when a thread is clicked.
+ */
 fun DiscussionListScreen(
     navController: androidx.navigation.NavController,
     viewModel: DiscussionViewModel = viewModel(
@@ -149,6 +159,12 @@ fun DiscussionListScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+/**
+ * Card composable displaying a single discussion thread summary.
+ *
+ * @param thread The [DiscussionThread] to display.
+ * @param onClick Callback invoked when the card is clicked.
+ */
 private fun ThreadCard(
     thread: DiscussionThread,
     onClick: () -> Unit

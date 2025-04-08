@@ -20,6 +20,15 @@ import edu.utap.flood.di.DiscussionViewModelFactory
 import edu.utap.ui.viewmodel.DiscussionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+/**
+ * Discussion creation form screen composable.
+ *
+ * Allows users to create a new discussion thread, link it to a flood report,
+ * add categories and tags, attach files, and preview before submission.
+ *
+ * @param viewModel The [DiscussionViewModel] managing discussion data.
+ * @param onNavigateBack Callback invoked when navigating back.
+ */
 @Composable
 fun DiscussionFormScreen(
     viewModel: DiscussionViewModel = viewModel(
