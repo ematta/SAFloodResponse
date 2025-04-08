@@ -2,6 +2,7 @@ package edu.utap
 
 import android.app.Application
 import edu.utap.utils.ApplicationContextProvider
+import edu.utap.utils.SecurePrefsProvider
 
 /**
  * Application class for the Flood Response app
@@ -14,5 +15,8 @@ class FloodResponseApplication : Application() {
 
         // Initialize the ApplicationContextProvider with the application context
         ApplicationContextProvider.init(this)
+
+        // Initialize EncryptedSharedPreferences
+        SecurePrefsProvider.init(this)
     }
 }

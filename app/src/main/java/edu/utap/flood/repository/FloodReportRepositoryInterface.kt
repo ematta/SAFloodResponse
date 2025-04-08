@@ -10,5 +10,5 @@ interface FloodReportRepositoryInterface {
     fun observeAllReports(): Flow<List<FloodReport>>
     suspend fun updateReport(report: FloodReport): Result<FloodReport>
     suspend fun deleteReport(id: String): Result<Unit>
-    fun getReportsInRadius(latitude: Double, longitude: Double, radius: Double): Flow<List<FloodReport>>
+    fun getReportsInRadius(latitude: Double, longitude: Double, radiusKm: Double): Flow<List<FloodReport>>
 }

@@ -33,6 +33,10 @@ sealed class AuthState {
          * State when password reset email has been sent successfully
          */
         data object PasswordResetSent : Idle()
+        /**
+         * State when authentication has expired and user must re-authenticate
+         */
+        data object Expired : Idle()
     }
 
     /**

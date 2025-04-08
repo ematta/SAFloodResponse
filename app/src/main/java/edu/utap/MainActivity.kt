@@ -1,7 +1,9 @@
 package edu.utap
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Bundle
+import android.os.DeadObjectException
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.activity.ComponentActivity
@@ -63,6 +65,13 @@ class MainActivity : ComponentActivity() {
         // Restore auth state
         authViewModel.restoreAuthState()
 
+        // Check cached authentication and expiration
+        val cachedUser = authViewModel.getCachedUser()
+        var initialIsAuthenticated = cachedUser != null && !authViewModel.isAuthExpired()
+        if (!initialIsAuthenticated) {
+            authViewModel.clearAuthCache()
+        }
+
         // Initialize location permission handler first
         locationPermissionHandler = LocationPermissionHandler(this)
         lifecycle.addObserver(locationPermissionHandler)
@@ -78,7 +87,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             var showRegisterScreen by rememberSaveable { mutableStateOf(false) }
             var showForgotPasswordScreen by rememberSaveable { mutableStateOf(false) }
-            var isAuthenticated by rememberSaveable { mutableStateOf(false) }
+            var isAuthenticated by rememberSaveable { mutableStateOf(initialIsAuthenticated) }
 
             // Observe authentication state
             LaunchedEffect(Unit) {
@@ -205,7 +214,7 @@ fun AuthenticatedApp(
     // Redirect to login if not authenticated
     if (authState !is AuthState.Idle.Authenticated) {
         LaunchedEffect(Unit) {
-            val activity = context as? android.app.Activity
+            val activity = context as? Activity
             if (activity == null || activity.isFinishing || activity.isDestroyed) {
                 return@LaunchedEffect
             }
@@ -215,7 +224,7 @@ fun AuthenticatedApp(
                         inclusive = true
                     }
                 }
-            } catch (e: android.os.DeadObjectException) {
+            } catch (e: DeadObjectException) {
                 Log.w("AuthenticatedApp", "DeadObjectException during navigation, ignoring", e)
             }
         }
@@ -260,7 +269,9 @@ fun AuthenticatedApp(
                 DiscussionListScreen(
                     onThreadClick = { threadId ->
                         navController.navigate("discussions/$threadId")
-                    }
+                    },
+                    navController = navController,
+                    viewModel = viewModel()
                 )
             }
 

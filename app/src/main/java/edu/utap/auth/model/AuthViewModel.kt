@@ -1,4 +1,8 @@
 package edu.utap.auth.model
+import android.os.SystemClock
+import com.google.gson.Gson
+import edu.utap.utils.SecurePrefsProvider
+
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -107,6 +111,7 @@ open class AuthViewModel(
                             stateManager.updateState(AuthState.Idle.Authenticated(user))
                             val userResult = authRepository.getUserById(user.uid)
                             userResult.onSuccess { firestoreUser ->
+                                cacheUser(firestoreUser)
                                 if (firestoreUser.role != role) {
                                     val updatedUser = firestoreUser.copy(role = role)
                                     authRepository.updateUser(updatedUser)
@@ -160,6 +165,7 @@ open class AuthViewModel(
                             function(true, null)
                             val userResult = authRepository.getUserById(user.uid)
                             userResult.onSuccess { firestoreUser ->
+                                cacheUser(firestoreUser)
                                 stateManager.updateCurrentUser(firestoreUser)
                             }
                         },
@@ -328,5 +334,34 @@ open class AuthViewModel(
 
     override fun updateAuthState(sent: AuthState) {
         stateManager.updateState(sent)
+    }
+    fun getCachedUser(): FirestoreUser? {
+        val json = SecurePrefsProvider.getCachedUserData()
+        return if (json != null) {
+            try {
+                Gson().fromJson(json, FirestoreUser::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        } else {
+            null
+        }
+    }
+
+    fun isAuthExpired(): Boolean {
+        val loginTime = SecurePrefsProvider.getInitialLoginTime()
+        val now = System.currentTimeMillis()
+        val ninetyDaysMillis = 90L * 24 * 60 * 60 * 1000
+        return (now - loginTime) > ninetyDaysMillis
+    }
+
+    fun cacheUser(user: FirestoreUser) {
+        val now = System.currentTimeMillis()
+        val json = Gson().toJson(user)
+        SecurePrefsProvider.cacheUserData(json, now)
+    }
+
+    fun clearAuthCache() {
+        SecurePrefsProvider.clearAuthCache()
     }
 }

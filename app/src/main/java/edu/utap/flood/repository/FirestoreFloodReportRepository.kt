@@ -88,12 +88,12 @@ class FirestoreFloodReportRepository @Inject constructor(
     override fun getReportsInRadius(
         latitude: Double,
         longitude: Double,
-        radius: Double
+        radiusKm: Double
     ): Flow<List<FloodReport>> = callbackFlow {
-        // Convert radius from miles to degrees (approximate)
-        val radiusInDegrees = radius / 69.0
+        // Convert radius from kilometers to degrees (approximate)
+        val radiusInDegrees = radiusKm / 111.0
         
-        Log.d(TAG, "Querying reports within $radius miles of ($latitude, $longitude)")
+        Log.d(TAG, "Querying reports within $radiusKm km of ($latitude, $longitude)")
         Log.d(TAG, "Radius in degrees: $radiusInDegrees")
         Log.d(TAG, "Latitude range: [${latitude - radiusInDegrees}, ${latitude + radiusInDegrees}]")
         Log.d(TAG, "Longitude range: [${longitude - radiusInDegrees}, ${longitude + radiusInDegrees}]")
