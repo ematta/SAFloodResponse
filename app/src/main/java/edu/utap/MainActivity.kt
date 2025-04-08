@@ -46,12 +46,18 @@ import edu.utap.weather.NOAAService
 import edu.utap.weather.repository.WeatherRepositoryImpl
 import okhttp3.OkHttpClient
 import kotlin.getValue
+import kotlinx.coroutines.launch
+
+import androidx.lifecycle.lifecycleScope
 
 /**
  * Main activity for the Flood Response application.
  * Handles authentication flow and main navigation.
  */
 class MainActivity : ComponentActivity() {
+
+    private val floodReportRepository = FloodReportRepository()
+
     private lateinit var locationPermissionHandler: LocationPermissionHandler
     private lateinit var networkMonitor: NetworkMonitor
 
@@ -114,9 +120,14 @@ class MainActivity : ComponentActivity() {
                 }
             } else if (showRegisterScreen) {
                 SAFloodResponseTheme {
+                    val context = LocalContext.current
                     Scaffold(
                         topBar = {
-                            AppHeader()
+                            AppHeader(
+                                onTestScreenClick = {
+                                    (context as? MainActivity)?.onTestScreenClick()
+                                }
+                            )
                         }
                     ) {
                         RegisterScreen(
@@ -128,9 +139,14 @@ class MainActivity : ComponentActivity() {
                 }
             } else if (showForgotPasswordScreen) {
                 SAFloodResponseTheme {
+                    val context = LocalContext.current
                     Scaffold(
                         topBar = {
-                            AppHeader()
+                            AppHeader(
+                                onTestScreenClick = {
+                                    (context as? MainActivity)?.onTestScreenClick()
+                                }
+                            )
                         },
                         content = {
                             ForgotPasswordScreen(
@@ -142,8 +158,15 @@ class MainActivity : ComponentActivity() {
                 }
             } else {
                 SAFloodResponseTheme {
+                    val context = LocalContext.current
                     Scaffold(
-                        topBar = { AppHeader() },
+                        topBar = {
+                            AppHeader(
+                                onTestScreenClick = {
+                                    (context as? MainActivity)?.onTestScreenClick()
+                                }
+                            )
+                        },
                         content = { padding: PaddingValues ->
                             LoginScreen(
                                 authViewModel = authViewModel,
@@ -191,6 +214,35 @@ class MainActivity : ComponentActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         // No need to explicitly save state - ViewModel handles it
+    }
+    fun onTestScreenClick() {
+        lifecycleScope.launch {
+            repeat(5) { index ->
+                val dummyReport = edu.utap.flood.model.FloodReport(
+                    reportId = java.util.UUID.randomUUID().toString(),
+                    userId = "testUser${(1..1000).random()}",
+                    latitude = 29.2 + kotlin.random.Random.nextDouble() * 0.4, // San Antonio approx
+                    longitude = -98.8 + kotlin.random.Random.nextDouble() * 0.5,
+                    description = "Test flood report #$index",
+                    photoUrls = emptyList(),
+                    status = "pending",
+                    createdAt = com.google.firebase.Timestamp.now(),
+                    updatedAt = com.google.firebase.Timestamp.now(),
+                    isManualLocation = kotlin.random.Random.nextBoolean(),
+                    confirmedCount = kotlin.random.Random.nextInt(0, 5),
+                    deniedCount = kotlin.random.Random.nextInt(0, 5),
+                    severity = listOf("low", "medium", "high").random(),
+                    waterDepthInches = kotlin.random.Random.nextDouble(0.0, 36.0),
+                    isRoadClosed = kotlin.random.Random.nextBoolean()
+                )
+                try {
+                    Log.d("MainActivity", "Inserting dummy report: $dummyReport")
+                    floodReportRepository.createReport(dummyReport)
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "Failed to insert dummy report", e)
+                }
+            }
+        }
     }
 }
 
@@ -240,15 +292,11 @@ fun AuthenticatedApp(
         firestore = firestore
     )
 
-    val weatherRepository = WeatherRepositoryImpl(
-        NOAAService(OkHttpClient())
-    )
-
     Scaffold(
         topBar = {
             AppHeader(
                 onTestScreenClick = {
-
+                    (context as? MainActivity)?.onTestScreenClick()
                 }
             )
         },
