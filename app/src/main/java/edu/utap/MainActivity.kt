@@ -248,7 +248,7 @@ fun AuthenticatedApp(
         topBar = {
             AppHeader(
                 onTestScreenClick = {
-                    navController.navigate("flood_map_test")
+
                 }
             )
         },
