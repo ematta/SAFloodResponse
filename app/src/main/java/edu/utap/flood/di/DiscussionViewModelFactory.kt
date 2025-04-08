@@ -9,6 +9,18 @@ import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.flood.repository.DiscussionRepositoryInterface
 import edu.utap.ui.viewmodel.DiscussionViewModel
 
+/**
+ * Factory for creating [DiscussionViewModel] instances with required dependencies.
+ *
+ * This factory initializes the discussion repository and authentication ViewModel,
+ * handling exceptions and casting internally.
+ *
+ * Usage:
+ * ```
+ * val factory = DiscussionViewModelFactory.provideFactory(context)
+ * val viewModel = ViewModelProvider(this, factory).get(DiscussionViewModel::class.java)
+ * ```
+ */
 class DiscussionViewModelFactory private constructor() : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -16,8 +28,24 @@ class DiscussionViewModelFactory private constructor() : ViewModelProvider.Facto
     }
 
     companion object {
+        /**
+         * Provides a [ViewModelProvider.Factory] that creates [DiscussionViewModel] instances.
+         *
+         * This factory initializes dependencies including the discussion repository
+         * and authentication ViewModel.
+         *
+         * @param context Application context.
+         * @return A [ViewModelProvider.Factory] for [DiscussionViewModel].
+         */
         fun provideFactory(context: Context): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
+                /**
+                 * Creates a [DiscussionViewModel] with injected dependencies.
+                 *
+                 * @param modelClass The ViewModel class.
+                 * @return The created ViewModel instance.
+                 * @throws IllegalArgumentException if the ViewModel class is unknown.
+                 */
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     val discussionRepository: DiscussionRepositoryInterface = try {

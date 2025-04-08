@@ -15,6 +15,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
+/**
+ * Repository implementation handling user authentication and profile management
+ * using Firebase Authentication and Firestore.
+ *
+ * This class provides methods to register and authenticate users, synchronize
+ * user data with Firestore, and manage user roles.
+ *
+ * @property firebaseAuth Firebase Authentication instance (default: singleton)
+ * @property firestore Firebase Firestore instance (default: singleton)
+ * @property userRepository Repository for user profile operations (default: FirebaseUserRepository)
+ */
 class FirestoreAuthRepository(
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
@@ -22,6 +33,20 @@ class FirestoreAuthRepository(
 ) : AuthRepositoryInterface {
     private val usersCollection = firestore.collection("users")
 
+    /**
+     * Registers a new user with email, password, display name, and role.
+     *
+     * This method performs the following steps:
+     * 1. Creates a Firebase Authentication account.
+     * 2. Updates the user's display name in Firebase Auth.
+     * 3. Creates a corresponding user profile in Firestore.
+     *
+     * @param email User's email address.
+     * @param password User's password.
+     * @param name Display name to associate with the user.
+     * @param role User role (e.g., regular, volunteer, admin).
+     * @return [Result] containing the created [FirebaseUser] on success, or an exception on failure.
+     */
     override suspend fun registerUser(
         email: String,
         password: String,
@@ -50,6 +75,16 @@ class FirestoreAuthRepository(
         user
     }
 
+    /**
+     * Authenticates an existing user with email and password.
+     *
+     * This method signs in the user via Firebase Authentication and synchronizes
+     * their profile data with Firestore.
+     *
+     * @param email User's email address.
+     * @param password User's password.
+     * @return [Result] containing the authenticated [FirebaseUser] on success, or an exception on failure.
+     */
     override suspend fun loginUser(email: String, password: String): Result<FirebaseUser> =
         executeFirebaseAuthOperation {
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()

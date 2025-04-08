@@ -5,12 +5,23 @@ import edu.utap.flood.repository.DiscussionRepositoryInterface
 import edu.utap.flood.repository.FirestoreDiscussionRepository
 
 /**
- * A simple dependency provider for the DiscussionRepository
+ * Simple singleton dependency provider for the discussion repository.
+ *
+ * This avoids tight coupling and allows for easier testing or replacement.
+ * In a production app, this would typically be replaced by a DI framework like Hilt or Dagger.
  */
 object DiscussionModule {
 
     private var discussionRepository: DiscussionRepositoryInterface? = null
 
+    /**
+     * Provides a singleton instance of [DiscussionRepositoryInterface].
+     *
+     * Lazily initializes the repository with Firestore.
+     * Thread-safe via `synchronized`.
+     *
+     * @return The singleton [DiscussionRepositoryInterface] implementation.
+     */
     fun provideDiscussionRepository(): DiscussionRepositoryInterface =
         discussionRepository ?: synchronized(this) {
             val firestore = FirebaseFirestore.getInstance()

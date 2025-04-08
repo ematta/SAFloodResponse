@@ -9,8 +9,26 @@ import edu.utap.auth.model.AuthViewModel
  * Factory for creating ViewModels with dependencies.
  * This is a simplified version of what DI frameworks like Hilt or Dagger would provide.
  */
+/**
+ * Factory for creating ViewModels with required dependencies.
+ *
+ * This avoids tight coupling and allows injecting repositories or other dependencies.
+ * In a production app, this would typically be replaced by a DI framework like Hilt or Dagger.
+ *
+ * @param context Application context, if needed for ViewModel dependencies.
+ */
 class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
 
+    /**
+     * Creates a ViewModel instance of the given class, injecting dependencies.
+     *
+     * Currently supports:
+     * - [AuthViewModel]
+     *
+     * @param modelClass The class of the ViewModel to create.
+     * @return The created ViewModel instance.
+     * @throws IllegalArgumentException if the ViewModel class is unknown.
+     */
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(AuthViewModel::class.java) -> {

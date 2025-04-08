@@ -17,6 +17,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.utap.auth.model.AuthViewModelInterface
 
+/**
+ * Composable screen for initiating a password reset via email.
+ *
+ * This screen allows users to enter their email address and request a password reset link.
+ * It performs email validation, displays success or error messages, and navigates back
+ * to the login screen upon successful request.
+ *
+ * @param viewModel The authentication ViewModel interface used to perform password reset.
+ * @param onNavigateToLogin Callback invoked to navigate back to the login screen.
+ */
 @Composable
 fun ForgotPasswordScreen(viewModel: AuthViewModelInterface, onNavigateToLogin: () -> Unit) {
     val authState by viewModel.authState.collectAsState()

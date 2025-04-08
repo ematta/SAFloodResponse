@@ -3,6 +3,12 @@ package edu.utap.auth.model
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.PropertyName
 
+/**
+ * Data class representing a user profile stored in Firestore.
+ *
+ * Includes user ID, name, email, profile picture URL, role, location info,
+ * and timestamps for creation and update.
+ */
 data class FirestoreUser(
     @DocumentId
     val userId: String = "",
@@ -22,6 +28,12 @@ data class FirestoreUser(
     var updatedAt: Long = System.currentTimeMillis()
 ) {
     companion object {
+        /**
+         * Creates a [FirestoreUser] instance from a Firebase Authentication user.
+         *
+         * @param firebaseUser The Firebase Authentication user.
+         * @return A corresponding [FirestoreUser].
+         */
         fun fromFirebaseUser(firebaseUser: com.google.firebase.auth.FirebaseUser): FirestoreUser {
             return FirestoreUser(
                 userId = firebaseUser.uid,

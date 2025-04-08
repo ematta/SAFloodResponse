@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
 
 /**
- * Implementation of FloodReportRepositoryInterface that handles Firestore operations for flood reports.
+ * Implementation of [FloodReportRepositoryInterface] that handles Firestore operations for flood reports.
+ *
+ * @property firestore The Firestore database instance.
  */
 class FloodReportRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),

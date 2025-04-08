@@ -32,6 +32,18 @@ import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.utils.ValidationUtils
 
+/**
+ * Composable screen for user login with email and password.
+ *
+ * This screen provides input fields for email and password, performs validation,
+ * displays error messages, and triggers authentication via the provided ViewModel.
+ * It also provides navigation options to registration and password reset screens.
+ *
+ * @param authViewModel The authentication ViewModel interface used to perform login.
+ * @param onNavigateToRegister Callback invoked to navigate to the registration screen.
+ * @param onNavigateToForgotPassword Callback invoked to navigate to the forgot password screen.
+ * @param onLoginSuccess Callback invoked when login is successful.
+ */
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),
