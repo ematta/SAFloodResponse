@@ -15,6 +15,14 @@ import javax.inject.Inject
 
 private const val TAG = "FirestoreDiscussionRepo"
 
+/**
+ * Firestore-backed implementation of [DiscussionRepositoryInterface].
+ *
+ * This repository manages discussion threads and messages stored in Firestore,
+ * including real-time updates via snapshot listeners.
+ *
+ * @property firestore The Firestore database instance.
+ */
 class FirestoreDiscussionRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : DiscussionRepositoryInterface {

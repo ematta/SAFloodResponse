@@ -51,8 +51,13 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
 
 /**
- * Main activity for the Flood Response application.
- * Handles authentication flow and main navigation.
+ * Main [ComponentActivity] for the Flood Response application.
+ *
+ * Handles:
+ * - Authentication flow (login, register, forgot password)
+ * - Navigation between screens
+ * - Initialization of location permissions and network monitoring
+ * - Theme setup
  */
 class MainActivity : ComponentActivity() {
 
@@ -252,7 +257,12 @@ class MainActivity : ComponentActivity() {
 
 /**
  * Main composable for the authenticated part of the app.
- * Handles navigation between different screens.
+ *
+ * Handles navigation between dashboard, discussions, profile, and flood report screens.
+ *
+ * @param networkMonitor The network connectivity monitor.
+ * @param locationPermissionHandler The location permission handler.
+ * @param authViewModel The authentication ViewModel.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

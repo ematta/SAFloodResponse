@@ -5,6 +5,14 @@ import edu.utap.flood.model.DiscussionThread
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+/**
+ * Repository implementation that delegates discussion operations to [FirestoreDiscussionRepository].
+ *
+ * This class acts as a wrapper to abstract away the Firestore-specific implementation,
+ * allowing for easier testing and future replacement.
+ *
+ * @property firestoreDiscussionRepository The Firestore-backed repository implementation.
+ */
 class DiscussionRepository @Inject constructor(
     private val firestoreDiscussionRepository: FirestoreDiscussionRepository
 ) : DiscussionRepositoryInterface {

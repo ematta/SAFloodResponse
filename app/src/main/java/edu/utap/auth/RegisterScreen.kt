@@ -35,6 +35,17 @@ import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.utils.RoleUtils
 import edu.utap.utils.ValidationUtils
 
+/**
+ * Composable screen for user self-registration with email, password, and name.
+ *
+ * This screen provides input fields for user details, performs validation,
+ * displays error messages, and triggers registration via the provided ViewModel.
+ * It also provides navigation back to the login screen.
+ *
+ * @param authViewModel The authentication ViewModel interface used to perform registration.
+ * @param onNavigateToLogin Callback invoked to navigate back to the login screen.
+ * @param onRegisterSuccess Callback invoked when registration is successful.
+ */
 @Composable
 fun RegisterScreen(
     authViewModel: AuthViewModelInterface = viewModel<AuthViewModel>(),

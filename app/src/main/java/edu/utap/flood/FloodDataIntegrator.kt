@@ -4,6 +4,12 @@ import edu.utap.weather.FloodAlert
 import edu.utap.flood.model.FloodReport
 import kotlin.math.*
 
+/**
+ * Utility object for integrating internal Firestore flood reports with NOAA/NWS alerts.
+ *
+ * This class filters reports within Bexar County, converts them to a unified format,
+ * and merges overlapping reports based on location and time proximity.
+ */
 object FloodDataIntegrator {
 
     // Bexar County bounding box (approximate)
@@ -20,6 +26,18 @@ object FloodDataIntegrator {
         Pair(29.1, -98.8)
     )
 
+    /**
+     * Integrates Firestore flood reports with NOAA/NWS alerts into a unified list.
+     *
+     * This function:
+     * - Filters reports within Bexar County.
+     * - Converts Firestore and NWS reports into a common format.
+     * - Merges overlapping reports based on spatial and temporal proximity.
+     *
+     * @param firestoreReports List of internal Firestore flood reports.
+     * @param nwsAlerts List of NOAA/NWS flood alerts.
+     * @return List of merged [UnifiedFloodReport]s covering both sources.
+     */
     fun integrateData(
         firestoreReports: List<FloodReport>,
         nwsAlerts: List<FloodAlert>

@@ -14,6 +14,14 @@ import javax.inject.Inject
 
 private const val TAG = "FirestoreFloodReportRepo"
 
+/**
+ * Firestore-backed implementation of [FloodReportRepositoryInterface].
+ *
+ * This repository manages flood reports stored in Firestore,
+ * including real-time updates via snapshot listeners and geospatial queries.
+ *
+ * @property firestore The Firestore database instance.
+ */
 class FirestoreFloodReportRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : FloodReportRepositoryInterface {

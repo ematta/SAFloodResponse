@@ -11,8 +11,14 @@ import edu.utap.utils.LocationUtils
 import edu.utap.weather.repository.WeatherRepositoryImpl
 
 /**
- * Factory for creating FloodReportViewModel with dependencies.
- * This provides the necessary dependencies for the FloodReportViewModel constructor.
+ * Factory for creating [FloodReportViewModel] instances with required dependencies.
+ *
+ * This factory initializes the flood report repository, weather repository,
+ * authentication ViewModel, and location utilities.
+ *
+ * @param context Application context.
+ * @param floodReportRepository Repository for flood report data.
+ * @param weatherRepository Repository for weather data.
  */
 class FloodViewModelFactory(
     private val context: Context,
@@ -20,6 +26,13 @@ class FloodViewModelFactory(
     private val weatherRepository: WeatherRepositoryImpl
 ) : ViewModelProvider.Factory {
 
+    /**
+     * Creates a [FloodReportViewModel] with injected dependencies.
+     *
+     * @param modelClass The ViewModel class.
+     * @return The created ViewModel instance.
+     * @throws IllegalArgumentException if the ViewModel class is unknown.
+     */
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(FloodReportViewModel::class.java) -> {
