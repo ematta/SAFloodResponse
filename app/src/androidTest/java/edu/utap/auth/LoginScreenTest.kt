@@ -7,6 +7,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import android.util.Log
 
 @RunWith(AndroidJUnit4::class)
 class LoginScreenTest {
@@ -23,7 +24,7 @@ class LoginScreenTest {
         testViewModelFactory = TestViewModelFactory(mockViewModel)
         composeTestRule.setViewModelFactory(testViewModelFactory)
         assert(TestViewModelFactoryProvider.factory == testViewModelFactory) { "Factory not set correctly in LoginScreenTest" }
-        println("LoginScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
+        Log.d("LoginScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
     }
 
     @Test

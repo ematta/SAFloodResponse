@@ -7,6 +7,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import android.util.Log
 
 @RunWith(AndroidJUnit4::class)
 class RegisterScreenTest {
@@ -23,7 +24,7 @@ class RegisterScreenTest {
         testViewModelFactory = TestViewModelFactory(mockViewModel)
         composeTestRule.setViewModelFactory(testViewModelFactory)
 
-        println("RegisterScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
+        Log.d("RegisterScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
         assert(TestViewModelFactoryProvider.factory == testViewModelFactory) { "Factory not set correctly in RegisterScreenTest" }
         
         // Set initial auth state
@@ -109,7 +110,7 @@ class RegisterScreenTest {
     fun registerScreen_emptyPasswordShowsError() {
         // Given: Set up the register screen
         composeTestRule.setContent {
-            println("Setting up RegisterScreen content with mockViewModel: $mockViewModel")
+            Log.d("Setting up RegisterScreen content with mockViewModel: $mockViewModel")
             RegisterScreen(
                 authViewModel = mockViewModel,
                 onNavigateToLogin = {},
