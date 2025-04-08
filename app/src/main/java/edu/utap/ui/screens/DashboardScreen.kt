@@ -38,6 +38,8 @@ import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.flood.repository.FloodReportRepositoryInterface
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppBottomNavigation
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import edu.utap.ui.viewmodel.WeatherViewModel
 
 private const val TAG = "DashboardScreen"
@@ -67,6 +69,7 @@ fun DashboardScreen(
         factory = edu.utap.flood.di.FloodViewModelFactory(context,
             floodReportRepository as FloodReportRepository, weatherRepository)
     )
+    val activeFloodReports by floodReportViewModel.activeFloodReports.collectAsState()
 
     LaunchedEffect(Unit) {
         locationPermissionHandler.checkAndRequestLocationPermission(
@@ -120,8 +123,26 @@ fun DashboardScreen(
                             }
                         )
                     )
+                    // Add markers for user-submitted flood reports
+                    activeFloodReports.forEach { report ->
+                        Marker(
+                            state = MarkerState(position = LatLng(report.latitude, report.longitude)),
+                            title = "Flood Report",
+                            snippet = report.description,
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)
+                        )
+                    }
                 }
             }
+                // Flood report list view
+                LazyColumn(modifier = Modifier.weight(0.4f)) {
+                    items(activeFloodReports) { report ->
+                        Text(
+                            text = report.description,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }
 
             // Show loading indicator
             if (isLoading) {
