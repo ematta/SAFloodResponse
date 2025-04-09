@@ -49,40 +49,15 @@ class NavigationManager(
 
         val isAuthenticated by authFlowManager.isAuthenticated.collectAsState()
 
-        // Track if we've already navigated to dashboard after login
-        val hasNavigatedToDashboard = remember { mutableStateOf(false) }
-
-        LaunchedEffect(isAuthenticated, hasNavigatedToDashboard.value) {
-            if (isAuthenticated && !hasNavigatedToDashboard.value) {
-                try {
-                    // Navigate to dashboard only once after login
-                    navController.navigate(AuthenticatedRoutes.DASHBOARD) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                    hasNavigatedToDashboard.value = true
-                } catch (e: Exception) {
-                    Log.w("NavigationManager", "Navigation error: ${e.message}")
-                }
-            } else if (!isAuthenticated) {
-                // Reset flag on logout
-                hasNavigatedToDashboard.value = false
-            }
-        }
-
         LaunchedEffect(isAuthenticated) {
-            if (!isAuthenticated) {
-                try {
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
+            try {
+                navController.navigate("login") {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
                     }
-                } catch (e: Exception) {
-                    Log.w("NavigationManager", "Navigation error: ${e.message}")
                 }
+            } catch (e: Exception) {
+                Log.w("NavigationManager", "Navigation error: ${e.message}")
             }
         }
 
