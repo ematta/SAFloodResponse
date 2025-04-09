@@ -42,6 +42,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.platform.LocalContext
 import edu.utap.auth.model.AuthViewModel
+import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.auth.model.FirestoreUser
 import edu.utap.flood.di.FloodViewModelFactory
 import edu.utap.ui.screens.flood.LocalFloodListScreen
@@ -76,7 +77,8 @@ fun DashboardScreen(
     weatherViewModel: WeatherViewModel,
     floodReportRepository: FloodReportRepositoryInterface,
     networkUtils: NetworkUtils,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModelInterface
 ) {
     var isLocationPermissionGranted by remember { mutableStateOf(false) }
     val floodAlerts by weatherViewModel.floodAlerts.collectAsState()
@@ -231,8 +233,8 @@ fun DashboardScreen(
             }
         }
 
-        val authViewModel: AuthViewModel = viewModel()
-        val isAuthenticated = authViewModel.getCachedUser() != null && !authViewModel.isAuthExpired()
+        val concreteAuthViewModel = authViewModel as? edu.utap.auth.model.AuthViewModel
+        val isAuthenticated = concreteAuthViewModel?.getCachedUser() != null && !(concreteAuthViewModel?.isAuthExpired() ?: true)
         AppBottomNavigation(navController, "dashboard", isAuthenticated)
 
         // Floating Action Button for refreshing alerts

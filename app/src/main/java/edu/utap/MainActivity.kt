@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.utap.auth.model.AuthViewModelInterface
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -93,7 +94,7 @@ class MainActivity : ComponentActivity() {
         authFlowManager = AuthFlowManager(authViewModel)
 
         // Initialize NavigationManager
-        navigationManager = edu.utap.navigation.NavigationManager(
+        navigationManager = NavigationManager(
             authFlowManager = authFlowManager,
             networkUtils = NetworkUtils,
             networkMonitor = networkMonitor,
@@ -105,7 +106,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SAFloodResponseTheme {
-                navigationManager.NavigationHost()
+                navigationManager.NavigationHost(authViewModel)
             }
         }
     }
@@ -192,7 +193,7 @@ fun AuthenticatedApp(
     networkUtils: NetworkUtils,
     networkMonitor: NetworkMonitor,
     locationPermissionHandler: LocationPermissionHandler,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModelInterface
 ) {
     val navController = rememberNavController()
     val authState by authViewModel.authState.collectAsState()
@@ -249,7 +250,8 @@ fun AuthenticatedApp(
                     weatherViewModel = WeatherViewModel(),
                     floodReportRepository = floodReportRepository,
                     networkUtils = NetworkUtils,
-                    modifier = Modifier
+                    modifier = Modifier,
+                    authViewModel = authViewModel
                 )
             }
 
