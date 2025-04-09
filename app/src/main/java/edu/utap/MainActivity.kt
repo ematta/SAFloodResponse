@@ -45,7 +45,9 @@ import kotlinx.coroutines.launch
 
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.Timestamp
+import edu.utap.auth.AuthFlowManager
 import edu.utap.flood.model.FloodReport
+import edu.utap.navigation.NavigationManager
 import edu.utap.utils.NetworkUtils
 import java.util.UUID
 import kotlin.random.Random
@@ -70,8 +72,8 @@ class MainActivity : ComponentActivity() {
         ViewModelFactory(applicationContext)
     }
 
-    private lateinit var authFlowManager: edu.utap.auth.AuthFlowManager
-    private lateinit var navigationManager: edu.utap.navigation.NavigationManager
+    private lateinit var authFlowManager: AuthFlowManager
+    private lateinit var navigationManager: NavigationManager
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,7 +90,7 @@ class MainActivity : ComponentActivity() {
         networkMonitor = NetworkMonitor(applicationContext)
 
         // Initialize AuthFlowManager
-        authFlowManager = edu.utap.auth.AuthFlowManager(authViewModel)
+        authFlowManager = AuthFlowManager(authViewModel)
 
         // Initialize NavigationManager
         navigationManager = edu.utap.navigation.NavigationManager(
@@ -241,11 +243,10 @@ fun AuthenticatedApp(
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(AuthenticatedRoutes.DASHBOARD) {
-                val weatherViewModel = WeatherViewModel()
                 DashboardScreen(
                     navController = navController,
                     locationPermissionHandler = locationPermissionHandler,
-                    weatherViewModel = weatherViewModel,
+                    weatherViewModel = WeatherViewModel(),
                     floodReportRepository = floodReportRepository,
                     networkUtils = NetworkUtils,
                     modifier = Modifier
