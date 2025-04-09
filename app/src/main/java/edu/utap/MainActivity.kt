@@ -71,7 +71,6 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var locationPermissionHandler: LocationPermissionHandler
     private lateinit var networkMonitor: NetworkMonitor
-    private lateinit var networkUtils: NetworkUtils
 
     val authViewModel by viewModels<AuthViewModel> {
         ViewModelFactory(applicationContext)
@@ -93,7 +92,6 @@ class MainActivity : ComponentActivity() {
 
         // Initialize network monitor and utils
         networkMonitor = NetworkMonitor(applicationContext)
-        networkUtils = edu.utap.utils.NetworkUtilsImpl() as edu.utap.utils.NetworkUtils
 
         // Initialize AuthFlowManager
         authFlowManager = edu.utap.auth.AuthFlowManager(authViewModel)
@@ -101,7 +99,7 @@ class MainActivity : ComponentActivity() {
         // Initialize NavigationManager
         navigationManager = edu.utap.navigation.NavigationManager(
             authFlowManager = authFlowManager,
-            networkUtils = networkUtils,
+            networkUtils = NetworkUtils,
             networkMonitor = networkMonitor,
             locationPermissionHandler = locationPermissionHandler
         )
@@ -255,7 +253,7 @@ fun AuthenticatedApp(
                     locationPermissionHandler = locationPermissionHandler,
                     weatherViewModel = weatherViewModel,
                     floodReportRepository = floodReportRepository,
-                    networkUtils = networkUtils,
+                    networkUtils = NetworkUtils,
                     modifier = Modifier
                 )
             }
@@ -308,7 +306,7 @@ fun AuthenticatedApp(
                             context = LocalContext.current,
                             floodReportRepository = floodReportRepository,
                             weatherRepository = weatherRepository,
-                            networkUtils = networkUtils
+                            networkUtils = NetworkUtils
                         )
                     ),
                     onNavigateBack = {
