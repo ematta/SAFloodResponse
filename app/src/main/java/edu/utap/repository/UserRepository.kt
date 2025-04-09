@@ -21,7 +21,7 @@ interface UserRepository {
      * @param userProfile The user profile data to store
      * @return Result containing the created profile or an error
      */
-    suspend fun createUserProfile(userProfile: UserProfile): Result<UserProfile>
+    suspend fun createUserProfile(userProfile: UserProfile): edu.utap.utils.Result<UserProfile>
 
     /**
      * Retrieves a user profile by user ID.
@@ -29,7 +29,7 @@ interface UserRepository {
      * @param uid The unique identifier of the user
      * @return Result containing the user profile or an error if not found
      */
-    suspend fun getUserProfile(uid: String): Result<UserProfile>
+    suspend fun getUserProfile(uid: String): edu.utap.utils.Result<UserProfile>
 
     /**
      * Updates an existing user profile with new data.
@@ -37,7 +37,7 @@ interface UserRepository {
      * @param userProfile The updated user profile data
      * @return Result containing the updated profile or an error
      */
-    suspend fun updateUserProfile(userProfile: UserProfile): Result<UserProfile>
+    suspend fun updateUserProfile(userProfile: UserProfile): edu.utap.utils.Result<UserProfile>
 
     /**
      * Updates only the display name of a user.
@@ -46,7 +46,7 @@ interface UserRepository {
      * @param displayName The new display name
      * @return Result indicating success or failure
      */
-    suspend fun updateDisplayName(uid: String, displayName: String): Result<Unit>
+    suspend fun updateDisplayName(uid: String, displayName: String): edu.utap.utils.Result<Unit>
 
     /**
      * Updates only the photo URL of a user.
@@ -55,7 +55,7 @@ interface UserRepository {
      * @param photoUrl The new photo URL
      * @return Result indicating success or failure
      */
-    suspend fun updatePhotoUrl(uid: String, photoUrl: String): Result<Unit>
+    suspend fun updatePhotoUrl(uid: String, photoUrl: String): edu.utap.utils.Result<Unit>
 }
 
 /**
@@ -83,19 +83,19 @@ class FirebaseUserRepository(
      * @param userProfile The user profile to create
      * @return Result containing the created profile or an error
      */
-    override suspend fun createUserProfile(userProfile: UserProfile): Result<UserProfile> = safeFirestoreCall {
+    override suspend fun createUserProfile(userProfile: UserProfile): edu.utap.utils.Result<UserProfile> = edu.utap.utils.Result.runCatchingSuspend {
         usersCollection.document(userProfile.uid)
             .set(userProfile)
             .await()
-
+    
         if (userProfile.displayName.isNotEmpty()) {
             updateDisplayName(userProfile.uid, userProfile.displayName)
         }
-
+    
         if (userProfile.photoUrl.isNotEmpty()) {
             updatePhotoUrl(userProfile.uid, userProfile.photoUrl)
         }
-
+    
         userProfile
     }
 
@@ -108,7 +108,7 @@ class FirebaseUserRepository(
      * @param uid The unique identifier of the user to retrieve
      * @return Result containing the user profile or an error if not found or parsing fails
      */
-    override suspend fun getUserProfile(uid: String): Result<UserProfile> = safeFirestoreCall {
+    override suspend fun getUserProfile(uid: String): edu.utap.utils.Result<UserProfile> = edu.utap.utils.Result.runCatchingSuspend {
         val document = usersCollection.document(uid).get().await()
         if (document.exists()) {
             document.toDomainObject<UserProfile>() ?: throw Exception("Failed to parse user profile")
@@ -128,19 +128,19 @@ class FirebaseUserRepository(
      * @param userProfile The updated user profile data
      * @return Result containing the updated profile or an error
      */
-    override suspend fun updateUserProfile(userProfile: UserProfile): Result<UserProfile> = safeFirestoreCall {
+    override suspend fun updateUserProfile(userProfile: UserProfile): edu.utap.utils.Result<UserProfile> = edu.utap.utils.Result.runCatchingSuspend {
         usersCollection.document(userProfile.uid)
             .set(userProfile)
             .await()
-
+    
         if (userProfile.displayName.isNotEmpty()) {
             updateDisplayName(userProfile.uid, userProfile.displayName)
         }
-
+    
         if (userProfile.photoUrl.isNotEmpty()) {
             updatePhotoUrl(userProfile.uid, userProfile.photoUrl)
         }
-
+    
         userProfile
     }
 
@@ -155,7 +155,7 @@ class FirebaseUserRepository(
      * @param displayName The new display name
      * @return Result indicating success or failure
      */
-    override suspend fun updateDisplayName(uid: String, displayName: String): Result<Unit> = safeNetworkCall {
+    override suspend fun updateDisplayName(uid: String, displayName: String): edu.utap.utils.Result<Unit> = edu.utap.utils.Result.runCatchingSuspend {
         val currentUser = firebaseAuth.currentUser
         if (currentUser?.uid == uid) {
             val profileUpdates = userProfileChangeRequest {
@@ -179,7 +179,7 @@ class FirebaseUserRepository(
      * @param photoUrl The new photo URL
      * @return Result indicating success or failure
      */
-    override suspend fun updatePhotoUrl(uid: String, photoUrl: String): Result<Unit> = safeNetworkCall {
+    override suspend fun updatePhotoUrl(uid: String, photoUrl: String): edu.utap.utils.Result<Unit> = edu.utap.utils.Result.runCatchingSuspend {
         val currentUser = firebaseAuth.currentUser
         if (currentUser?.uid == uid) {
             val profileUpdates = userProfileChangeRequest {

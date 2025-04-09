@@ -72,17 +72,16 @@ class UserViewModel(
 
         viewModelScope.launch {
             val result = userRepository.createUserProfile(userProfile)
-            result.fold(
-                onSuccess = { profile ->
-                    _profileState.value = UserProfileState.Success(profile)
-                },
-                onFailure = { error ->
-                    _profileState.value =
-                        UserProfileState.Error.Generic(
-                            error.message ?: "Failed to create user profile"
-                        )
+            when (result) {
+                is edu.utap.utils.Result.Success -> {
+                    _profileState.value = UserProfileState.Success(result.data)
                 }
-            )
+                is edu.utap.utils.Result.Error -> {
+                    _profileState.value = UserProfileState.Error.Generic(
+                        result.message.ifEmpty { "Failed to create user profile" }
+                    )
+                }
+            }
         }
     }
 
@@ -106,17 +105,16 @@ class UserViewModel(
 
         viewModelScope.launch {
             val result = userRepository.getUserProfile(uid)
-            result.fold(
-                onSuccess = { profile ->
-                    _profileState.value = UserProfileState.Success(profile)
-                },
-                onFailure = { error ->
-                    _profileState.value =
-                        UserProfileState.Error.Generic(
-                            error.message ?: "Failed to get user profile"
-                        )
+            when (result) {
+                is edu.utap.utils.Result.Success -> {
+                    _profileState.value = UserProfileState.Success(result.data)
                 }
-            )
+                is edu.utap.utils.Result.Error -> {
+                    _profileState.value = UserProfileState.Error.Generic(
+                        result.message.ifEmpty { "Failed to get user profile" }
+                    )
+                }
+            }
         }
     }
 
@@ -140,17 +138,16 @@ class UserViewModel(
 
         viewModelScope.launch {
             val result = userRepository.updateUserProfile(userProfile)
-            result.fold(
-                onSuccess = { profile ->
-                    _profileState.value = UserProfileState.Success(profile)
-                },
-                onFailure = { error ->
-                    _profileState.value =
-                        UserProfileState.Error.Generic(
-                            error.message ?: "Failed to update user profile"
-                        )
+            when (result) {
+                is edu.utap.utils.Result.Success -> {
+                    _profileState.value = UserProfileState.Success(result.data)
                 }
-            )
+                is edu.utap.utils.Result.Error -> {
+                    _profileState.value = UserProfileState.Error.Generic(
+                        result.message.ifEmpty { "Failed to update user profile" }
+                    )
+                }
+            }
         }
     }
 
@@ -173,16 +170,16 @@ class UserViewModel(
 
         viewModelScope.launch {
             val result = userRepository.updateDisplayName(uid, displayName)
-            result.fold(
-                onSuccess = { getUserProfile(uid) },
-                onFailure = { error ->
-                    // Display name update failed, provide error message
-                    _profileState.value =
-                        UserProfileState.Error.Generic(
-                            error.message ?: "Failed to update display name"
-                        )
+            when (result) {
+                is edu.utap.utils.Result.Success -> {
+                    getUserProfile(uid)
                 }
-            )
+                is edu.utap.utils.Result.Error -> {
+                    _profileState.value = UserProfileState.Error.Generic(
+                        result.message.ifEmpty { "Failed to update display name" }
+                    )
+                }
+            }
         }
     }
 
@@ -208,16 +205,16 @@ class UserViewModel(
         _profileState.value = UserProfileState.Loading.Updating
         viewModelScope.launch {
             val result = userRepository.updatePhotoUrl(uid, photoUrl)
-            result.fold(
-                onSuccess = { getUserProfile(uid) },
-                onFailure = { error ->
-                    // Photo URL update failed, provide error message
-                    _profileState.value =
-                        UserProfileState.Error.Generic(
-                            error.message ?: "Failed to update photo URL"
-                        )
+            when (result) {
+                is edu.utap.utils.Result.Success -> {
+                    getUserProfile(uid)
                 }
-            )
+                is edu.utap.utils.Result.Error -> {
+                    _profileState.value = UserProfileState.Error.Generic(
+                        result.message.ifEmpty { "Failed to update photo URL" }
+                    )
+                }
+            }
         }
     }
 
@@ -245,20 +242,21 @@ class UserViewModel(
                 imageUri = imageUri,
                 userId = uid
             )
-            uploadResult.fold(
-                onSuccess = { downloadUrl ->
-                    // Step 2: Update the photo URL in the user profile
-                    // This will trigger another network operation to update the profile
-                    updatePhotoUrl(uid, downloadUrl)
-                },
-                onFailure = { error ->
-                    // Image upload failed, provide error message
-                    _profileState.value =
-                        UserProfileState.Error.Generic(
-                            error.message ?: "Failed to upload profile image"
-                        )
+            when (uploadResult) {
+                is edu.utap.utils.Result.Success<*> -> {
+                    val url = uploadResult.data as? String
+                    if (url != null) {
+                        updatePhotoUrl(uid, url)
+                    } else {
+                        _profileState.value = UserProfileState.Error.Generic("Failed to upload profile image")
+                    }
                 }
-            )
+                is edu.utap.utils.Result.Error -> {
+                    _profileState.value = UserProfileState.Error.Generic(
+                        uploadResult.message.ifEmpty { "Failed to upload profile image" }
+                    )
+                }
+            }
         }
     }
 }
