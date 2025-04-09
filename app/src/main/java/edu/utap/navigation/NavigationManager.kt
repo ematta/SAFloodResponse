@@ -27,8 +27,6 @@ import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.NetworkConnectivitySnackbar
 import edu.utap.utils.NetworkMonitor
 import edu.utap.utils.NetworkUtils
-import edu.utap.weather.NOAAService
-import edu.utap.weather.repository.WeatherRepositoryImpl
 import okhttp3.OkHttpClient
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -182,15 +180,11 @@ class NavigationManager(
         }
 
         composable(AuthenticatedRoutes.FLOOD_REPORT) {
-            val weatherRepository = WeatherRepositoryImpl(
-                NOAAService(OkHttpClient())
-            )
             FloodReportFormScreen(
                 viewModel = viewModel(
                     factory = edu.utap.flood.di.FloodViewModelFactory(
                         context = LocalContext.current,
                         floodReportRepository = floodReportRepository,
-                        weatherRepository = weatherRepository,
                         networkUtils = networkUtils
                     )
                 ),

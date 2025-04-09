@@ -50,8 +50,6 @@ import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.NetworkUtils
 import edu.utap.utils.NetworkUtilsInterface
-import edu.utap.weather.NOAAService
-import edu.utap.weather.repository.WeatherRepositoryImpl
 import okhttp3.OkHttpClient
 
 private const val TAG = "DashboardScreen"
@@ -81,23 +79,16 @@ fun DashboardScreen(
     authViewModel: AuthViewModelInterface
 ) {
     var isLocationPermissionGranted by remember { mutableStateOf(false) }
-    val floodAlerts by weatherViewModel.floodAlerts.collectAsState()
     val isLoading by weatherViewModel.isLoading.collectAsState()
     val weatherError by weatherViewModel.error.collectAsState()
 
     val context = LocalContext.current
 
-    val weatherRepository = WeatherRepositoryImpl(
-        NOAAService(
-            OkHttpClient()
-        )
-    )
 
     val floodReportViewModel: FloodReportViewModel = viewModel(
         factory = FloodViewModelFactory(
             context = context,
             floodReportRepository = floodReportRepository as FloodReportRepository,
-            weatherRepository = weatherRepository,
             networkUtils = networkUtils
         )
     )
@@ -142,30 +133,6 @@ fun DashboardScreen(
                 properties = MapProperties(isMyLocationEnabled = isLocationPermissionGranted)
             ) {
                 // Add markers for flood alerts
-                floodAlerts.forEach { alert ->
-                    Marker(
-                        state = MarkerState(position = LatLng(alert.latitude, alert.longitude)),
-                        title = alert.title,
-                        snippet = alert.description,
-                        icon = BitmapDescriptorFactory.defaultMarker(
-                            when (alert.severity.lowercase()) {
-                                "extreme" -> BitmapDescriptorFactory.HUE_RED
-                                "severe" -> BitmapDescriptorFactory.HUE_ORANGE
-                                "moderate" -> BitmapDescriptorFactory.HUE_YELLOW
-                                else -> BitmapDescriptorFactory.HUE_BLUE
-                            }
-                        )
-                    )
-                    // Add markers for user-submitted flood reports
-                    activeFloodReports.forEach { report ->
-                        Marker(
-                            state = MarkerState(position = LatLng(report.latitude, report.longitude)),
-                            title = "Flood Report",
-                            snippet = report.description,
-                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)
-                        )
-                    }
-                }
             }
                 // Flood report list view
                 LazyColumn(modifier = Modifier.weight(0.4f)) {
