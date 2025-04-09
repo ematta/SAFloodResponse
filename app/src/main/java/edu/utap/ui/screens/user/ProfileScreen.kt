@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import edu.utap.ui.components.*
 import edu.utap.ui.viewmodel.UserViewModel
@@ -33,6 +32,15 @@ import edu.utap.user.UserProfileState
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * User profile screen composable.
+ *
+ * Displays and allows editing of the user's profile information,
+ * including display name, email, phone number, address, and profile picture.
+ *
+ * @param userViewModel The [UserViewModel] managing profile data.
+ * @param onNavigateBack Callback invoked when navigating back.
+ */
 @Composable
 fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: () -> Unit = {}) {
     val profileState by userViewModel.profileState.collectAsStateWithLifecycle()
@@ -52,54 +60,16 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
 
     var isEditing by rememberSaveable { mutableStateOf(false) }
 
-    // Update local state when profile data changes
     LaunchedEffect(profileState) {
-        if (profileState is edu.utap.user.UserProfileState.Success) {
-            val profile = (profileState as edu.utap.user.UserProfileState.Success).profile
-            displayName = profile.displayName ?: ""
-            email = profile.email ?: ""
-            phoneNumber = profile.phoneNumber ?: ""
-            address = profile.address ?: ""
-            photoUrl = profile.photoUrl ?: ""
+        if (profileState is UserProfileState.Success) {
+            val profile = (profileState as UserProfileState.Success).profile
+            displayName = profile.displayName
+            email = profile.email
+            phoneNumber = profile.phoneNumber
+            address = profile.address
+            photoUrl = profile.photoUrl
         }
     }
-
-    // Setup image picker
-    val context = LocalContext.current
-    val photoFile = remember { File(context.cacheDir, "profile_photo.jpg") }
-    val photoUri = remember {
-        FileProvider.getUriForFile(
-            context,
-            "edu.utap.flood.fileprovider",
-            photoFile
-        )
-    }
-
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture(),
-        onResult = { success ->
-            if (success) {
-                userViewModel.uploadProfileImage(
-                    uploadContext = context,
-                    imageUri = photoUri,
-                    uid = currentUser!!.uid
-                )
-            }
-        }
-    )
-
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            uri?.let { it ->
-                userViewModel.uploadProfileImage(
-                    uploadContext = context,
-                    imageUri = it,
-                    uid = currentUser!!.uid
-                )
-            }
-        }
-    )
 
     Scaffold(
         topBar = {
@@ -107,224 +77,241 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel(), onNavigateBack: ()
                 title = { Text("Profile") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        // Back icon
+                        // Use your back icon here
                     }
                 },
                 actions = {
-                    // Edit button
-                    IconButton(onClick = { isEditing = !isEditing }) {
-                        Icon(
-                            imageVector = Icons.TwoTone.Edit,
-                            contentDescription = if (isEditing) "Save" else "Edit"
-                        )
+                    if (isEditing) {
+                        TextButton(onClick = { isEditing = false }) {
+                            Text("Cancel")
+                        }
+                    } else {
+                        TextButton(onClick = { isEditing = true }) {
+                            Text("Edit")
+                        }
                     }
                 }
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Profile loading state
             when (profileState) {
                 is UserProfileState.Loading -> {
-                    CircularProgressIndicator()
+                    LoadingIndicator()
                 }
                 is UserProfileState.Error -> {
-                    val error = (profileState as UserProfileState.Error).toString()
-                    Text(
-                        text = "Error: $error",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                is UserProfileState.Success -> {
-                    // Profile photo
-                    Box(
+                    Column(
                         modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Profile image
-                        if (photoUrl.isNotEmpty()) {
-                            AsyncImage(
-                                model = photoUrl,
-                                contentDescription = "Profile photo",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            // Placeholder
+                        ErrorMessage(message = "Holder")
+
+                        SpacerHeight(16)
+
+                        AppButton(
+                            text = "Create Profile",
+                            onClick = {
+                                currentUser?.uid?.let { uid ->
+                                    // Create a default profile if none exists
+                                    val newProfile = UserProfile(
+                                        uid = uid,
+                                        displayName = currentUser.displayName ?: "",
+                                        email = currentUser.email ?: ""
+                                    )
+                                    userViewModel.createUserProfile(newProfile)
+                                }
+                            }
+                        )
+                    }
+                }
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        if (isEditing) {
+                            // Edit mode
+                            val context = LocalContext.current
+
+                            // Profile image picker
                             Box(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = displayName.take(1).uppercase(),
-                                    style = MaterialTheme.typography.headlineLarge
+                                ProfileImagePicker(
+                                    photoUrl = photoUrl,
+                                    onImageSelected = { uri ->
+                                        currentUser?.uid?.let { uid ->
+                                            userViewModel.uploadProfileImage(
+                                                uploadContext = context,
+                                                imageUri = uri,
+                                                uid = uid
+                                            )
+                                        }
+                                    }
                                 )
                             }
+
+                            AppTextField(
+                                value = displayName,
+                                onValueChange = { displayName = it },
+                                label = "Display Name"
+                            )
+
+                            AppTextField(
+                                value = email,
+                                onValueChange = { email = it },
+                                label = "Email",
+                                enabled = false // Email changes require re-authentication
+                            )
+
+                            AppTextField(
+                                value = phoneNumber,
+                                onValueChange = { phoneNumber = it },
+                                label = "Phone Number",
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                            )
+
+                            AppTextField(
+                                value = address,
+                                onValueChange = { address = it },
+                                label = "Address"
+                            )
+
+                            AppButton(
+                                text = "Save",
+                                onClick = {
+                                    currentUser?.uid?.let { uid ->
+                                        val updatedProfile = UserProfile(
+                                            uid = uid,
+                                            displayName = displayName,
+                                            email = email,
+                                            photoUrl = photoUrl,
+                                            phoneNumber = phoneNumber,
+                                            address = address
+                                        )
+                                        userViewModel.updateUserProfile(updatedProfile)
+                                        isEditing = false
+                                    }
+                                },
+                                modifier = Modifier.align(Alignment.End)
+                            )
+                        } else {
+                            // View mode
+                            ProfileRow(
+                                label = "Display Name",
+                                value = displayName
+                            )
+
+                            ProfileRow(
+                                label = "Email",
+                                value = email
+                            )
+
+                            ProfileRow(
+                                label = "Phone Number",
+                                value = phoneNumber
+                            )
+
+                            ProfileRow(
+                                label = "Address",
+                                value = address
+                            )
                         }
-
-                        // Camera button (only visible in edit mode)
-                        if (isEditing) {
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .fillMaxWidth()
-                                    .background(
-                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-                                    )
-                                    .padding(4.dp),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                IconButton(
-                                    onClick = { cameraLauncher.launch(photoUri) },
-                                    modifier = Modifier.size(36.dp)
-                                ) {
-                                    Icon(Icons.TwoTone.PlayArrow, "Take photo")
-                                }
-
-                                IconButton(
-                                    onClick = { galleryLauncher.launch("image/*") },
-                                    modifier = Modifier.size(36.dp)
-                                ) {
-                                    Icon(Icons.TwoTone.PlayArrow, "Choose from gallery")
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Profile information fields
-                    ProfileField(
-                        label = "Name",
-                        value = displayName,
-                        onValueChange = { displayName = it },
-                        isEditing = isEditing
-                    )
-
-                    ProfileField(
-                        label = "Email",
-                        value = email,
-                        onValueChange = { email = it },
-                        isEditing = false, // Email should not be editable
-                        keyboardType = KeyboardType.Email
-                    )
-
-                    ProfileField(
-                        label = "Phone",
-                        value = phoneNumber,
-                        onValueChange = { phoneNumber = it },
-                        isEditing = isEditing,
-                        keyboardType = KeyboardType.Phone
-                    )
-
-                    ProfileField(
-                        label = "Address",
-                        value = address,
-                        onValueChange = { address = it },
-                        isEditing = isEditing
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Save button (only visible in edit mode)
-                    if (isEditing) {
-                        Button(
-                            onClick = {
-                                val profile = UserProfile(
-                                    displayName = displayName,
-                                    phoneNumber = phoneNumber,
-                                    address = address
-                                )
-                                userViewModel.updateUserProfile(profile)
-                                isEditing = false
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Save Changes")
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Sign out button
-                    OutlinedButton(
-                        onClick = {
-                            FirebaseAuth.getInstance().signOut()
-                            onNavigateBack()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Sign Out")
                     }
                 }
-
-                UserProfileState.Idle.Initial -> TODO()
-                is UserProfileState.Idle.Loaded -> TODO()
-                is UserProfileState.Idle.Updated -> TODO()
             }
         }
     }
 }
 
+/**
+ * Displays a labeled row of profile information with a divider.
+ *
+ * @param label The label for the information.
+ * @param value The value to display.
+ */
 @Composable
-private fun ProfileField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    isEditing: Boolean,
-    keyboardType: KeyboardType = KeyboardType.Text
-) {
+fun ProfileRow(label: String, value: String) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.bodySmall
         )
 
-        if (isEditing) {
-            OutlinedTextField(
-                value = value,
-                onValueChange = onValueChange,
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-                modifier = Modifier.fillMaxWidth()
-            )
-        } else {
-            Text(
-                text = value.ifEmpty { "Not set" },
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+        Text(
+            text = value.ifEmpty { "Not provided" },
+            style = MaterialTheme.typography.bodyLarge
+        )
 
-            Divider()
-        }
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
     }
 }
 
+/**
+ * Profile image picker composable with camera and gallery options.
+ *
+ * @param photoUrl URL of the current profile image.
+ * @param onImageSelected Callback invoked with the selected image URI.
+ */
 @Composable
-private fun Row(
-    modifier: Modifier = Modifier,
-    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
-    verticalAlignment: Alignment.Vertical = Alignment.Top,
-    content: @Composable RowScope.() -> Unit
-) {
-    androidx.compose.foundation.layout.Row(
-        modifier = modifier,
-        horizontalArrangement = horizontalArrangement,
-        verticalAlignment = verticalAlignment,
-        content = content
+fun ProfileImagePicker(photoUrl: String, onImageSelected: (Uri) -> Unit) {
+    val context = LocalContext.current
+    val file = remember { File.createTempFile("profile_", ".jpg", context.cacheDir) }
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) onImageSelected(uri)
+        }
     )
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let(onImageSelected)
+        }
+    )
+
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        if (photoUrl.isNotEmpty()) {
+            // Existing image loading logic
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                IconButton(onClick = { cameraLauncher.launch(uri) }) {
+                    Icon(Icons.TwoTone.PlayArrow, "Take Photo")
+                }
+                Text("OR", style = MaterialTheme.typography.bodySmall)
+                IconButton(onClick = { galleryLauncher.launch("image/*") }) {
+                    Icon(Icons.TwoTone.Edit, "Choose from Gallery")
+                }
+            }
+        }
+    }
 }

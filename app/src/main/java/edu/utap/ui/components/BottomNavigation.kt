@@ -22,15 +22,20 @@ import androidx.navigation.NavController
  * @param currentRoute The current navigation route to highlight the selected item.
  */
 @Composable
-fun AppBottomNavigation(navController: NavController, currentRoute: String) {
+fun AppBottomNavigation(navController: NavController, currentRoute: String, isAuthenticated: Boolean) {
     NavigationBar {
         NavigationBarItem(
             selected = currentRoute == AuthenticatedRoutes.DASHBOARD,
             onClick = {
-                if (currentRoute != AuthenticatedRoutes.DASHBOARD) {
-                    navController.navigate(AuthenticatedRoutes.DASHBOARD) {
-                        popUpTo(AuthenticatedRoutes.DASHBOARD)
+                if (isAuthenticated) {
+                    if (currentRoute != AuthenticatedRoutes.DASHBOARD) {
+                        navController.navigate(AuthenticatedRoutes.DASHBOARD) {
+                            popUpTo(AuthenticatedRoutes.DASHBOARD)
+                        }
                     }
+                } else {
+                    // Optionally, redirect to login or show a message
+                    // navController.navigate("login")
                 }
             },
             icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },

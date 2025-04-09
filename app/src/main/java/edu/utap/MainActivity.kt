@@ -5,7 +5,6 @@ import android.app.Activity
 import android.os.Bundle
 import android.os.DeadObjectException
 import android.util.Log
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,7 +12,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -24,9 +22,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.AuthState
-import edu.utap.auth.ForgotPasswordScreen
-import edu.utap.auth.LoginScreen
-import edu.utap.auth.RegisterScreen
 import edu.utap.auth.di.ViewModelFactory
 import edu.utap.auth.model.AuthViewModel
 import edu.utap.flood.di.FloodViewModelFactory
@@ -34,7 +29,7 @@ import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
-import edu.utap.ui.screens.ProfileScreen
+import edu.utap.ui.screens.user.ProfileScreen
 import edu.utap.ui.screens.discussion.DiscussionListScreen
 import edu.utap.ui.screens.discussion.DiscussionThreadScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
@@ -52,7 +47,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.firebase.Timestamp
 import edu.utap.flood.model.FloodReport
 import edu.utap.utils.NetworkUtils
-import edu.utap.utils.NetworkUtilsImpl
 import java.util.UUID
 import kotlin.random.Random
 
