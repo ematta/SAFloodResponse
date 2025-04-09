@@ -9,6 +9,7 @@ import edu.utap.auth.model.AuthViewModel
 import edu.utap.user.repository.FirebaseUserRepository
 import edu.utap.utils.NetworkUtils
 import edu.utap.utils.NetworkUtilsImpl
+import edu.utap.utils.NetworkUtilsInterface
 
 /**
  * Factory for creating ViewModels with dependencies.
@@ -37,7 +38,7 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(AuthViewModel::class.java) -> {
-            val networkUtils = NetworkUtilsImpl() as NetworkUtils
+            val networkUtils = NetworkUtils
             val authRepository = AuthModule(
                 FirebaseAuth.getInstance(),
                 FirebaseFirestore.getInstance()

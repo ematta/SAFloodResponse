@@ -1,8 +1,12 @@
 package edu.utap.auth.model
 
+import edu.utap.utils.NetworkUtilsInterface
+
 import android.content.Context
 import com.google.gson.Gson
 import edu.utap.utils.DefaultSecurePrefsProvider
+
+import edu.utap.FloodResponseApplication
 
 
 import androidx.lifecycle.ViewModel
@@ -43,7 +47,7 @@ open class AuthViewModel(
     
     private val networkHandler = NetworkOperationHandler(
         networkUtils,
-        context = context as ApplicationContextProviderInterface
+        context = (context.applicationContext as FloodResponseApplication).appContextProvider
     )
 
     override var authState: StateFlow<AuthState> = stateManager.authState
