@@ -50,14 +50,16 @@ class NavigationManager(
         val isAuthenticated by authFlowManager.isAuthenticated.collectAsState()
 
         LaunchedEffect(isAuthenticated) {
-            try {
-                navController.navigate("login") {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
+            if (!isAuthenticated) {
+                try {
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.w("NavigationManager", "Navigation error: ${e.message}")
                 }
-            } catch (e: Exception) {
-                Log.w("NavigationManager", "Navigation error: ${e.message}")
             }
         }
 
