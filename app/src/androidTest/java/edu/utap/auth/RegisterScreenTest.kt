@@ -24,7 +24,7 @@ class RegisterScreenTest {
         testViewModelFactory = TestViewModelFactory(mockViewModel)
         composeTestRule.setViewModelFactory(testViewModelFactory)
 
-        Log.d("RegisterScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
+        Log.d(TAG, "RegisterScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
         assert(TestViewModelFactoryProvider.factory == testViewModelFactory) { "Factory not set correctly in RegisterScreenTest" }
         
         // Set initial auth state
@@ -110,7 +110,7 @@ class RegisterScreenTest {
     fun registerScreen_emptyPasswordShowsError() {
         // Given: Set up the register screen
         composeTestRule.setContent {
-            Log.d("Setting up RegisterScreen content with mockViewModel: $mockViewModel")
+            Log.d(TAG, "Setting up RegisterScreen content with mockViewModel: $mockViewModel")
             RegisterScreen(
                 authViewModel = mockViewModel,
                 onNavigateToLogin = {},

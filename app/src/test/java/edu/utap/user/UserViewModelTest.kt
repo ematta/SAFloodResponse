@@ -10,7 +10,7 @@ import android.content.Context
 import android.net.Uri
 import edu.utap.models.UserProfile
 import edu.utap.ui.viewmodel.UserViewModel
-import edu.utap.user.repository.UserRepository
+import edu.utap.repository.UserRepository
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import edu.utap.utils.NetworkUtils
@@ -65,9 +65,8 @@ class UserViewModelTest {
         NetworkUtils.setImplementation(mockNetworkUtils)
         
         // Mock ApplicationContextProvider to return mockContext
-        TestApplicationContextProvider.mockApplicationContext(mockContext)
-        
-        userViewModel = UserViewModel(userRepository, storageUtil, mockNetworkUtils)
+
+        userViewModel = UserViewModel(userRepository)
     }
 
     @Test
@@ -193,7 +192,6 @@ class UserViewModelTest {
         NetworkUtils.setImplementation(NetworkUtilsImpl())
         
         // Reset ApplicationContextProvider mock
-        TestApplicationContextProvider.resetMock()
         unmockkAll()
     }
 

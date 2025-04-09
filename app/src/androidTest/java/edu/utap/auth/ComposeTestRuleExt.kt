@@ -13,6 +13,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import android.util.Log
 
+const val TAG = "AuthModule"
+
 /**
  * Extension function for ComposeContentTestRule to set a custom ViewModelFactory
  * for testing composables that use ViewModels.
@@ -20,7 +22,7 @@ import android.util.Log
 fun ComposeContentTestRule.setViewModelFactory(factory: ViewModelProvider.Factory) {
     // Store the factory for later use in setContent calls
     TestViewModelFactoryProvider.factory = factory
-    Log.d("setViewModelFactory called with factory: $factory")
+    Log.d(TAG, "setViewModelFactory called with factory: $factory")
 }
 
 /**
@@ -72,6 +74,6 @@ fun AndroidComposeTestRule<*, *>.setContentWithTestViewModelFactory(content: @Co
 inline fun <reified VM : ViewModel> createTestViewModel(): VM {
     val factory = TestViewModelFactoryProvider.factory
     requireNotNull(factory) { "TestViewModelFactoryProvider.factory is null" }
-    Log.d("createTestViewModel: Factory is being used to create ViewModel of type: ${VM::class.java}")
+    Log.d(TAG, "createTestViewModel: Factory is being used to create ViewModel of type: ${VM::class.java}")
     return viewModel(factory = factory)
 }
