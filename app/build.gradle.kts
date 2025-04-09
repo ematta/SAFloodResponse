@@ -49,6 +49,11 @@ android {
         unitTests.isReturnDefaultValues = true
         unitTests.isIncludeAndroidResources = true
     }
+    sourceSets {
+        getByName("test") {
+            java.srcDir("src/test/java")
+        }
+    }
     lint {
         baseline = file("lint-baseline.xml")
     }
@@ -88,8 +93,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation("androidx.fragment:fragment-ktx:1.6.2")
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.security.crypto)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -99,11 +104,13 @@ dependencies {
     
     // Test dependencies
     testImplementation(libs.mockk)
-    testImplementation(libs.mockk.agent)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.agent.jvm)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(kotlin("test"))
     testImplementation(libs.junit)
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.gson)
+    testRuntimeOnly(libs.junit.vintage.engine)
 }
