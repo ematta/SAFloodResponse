@@ -7,6 +7,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.CollectionReference
+import edu.utap.models.UserProfile
 import edu.utap.user.repository.FirebaseUserRepository
 import edu.utap.user.repository.UserRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi

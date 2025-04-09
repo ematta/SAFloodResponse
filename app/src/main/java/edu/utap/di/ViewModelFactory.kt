@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.auth.model.AuthViewModel
+import edu.utap.models.AuthViewModel
 import edu.utap.utils.NetworkUtils
 
 /**

@@ -1,4 +1,4 @@
-package edu.utap.flood.model
+package edu.utap.models
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId

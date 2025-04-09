@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.utap.user.FirebaseStorageUtil
 import edu.utap.user.FirebaseStorageUtilInterface
-import edu.utap.user.UserProfile
+import edu.utap.models.UserProfile
 import edu.utap.user.UserProfileState
 import edu.utap.repository.FirebaseUserRepository
 import edu.utap.repository.UserRepository

@@ -1,4 +1,4 @@
-package edu.utap.user
+package edu.utap.models
 
 /**
  * Data class representing a user profile in the application.

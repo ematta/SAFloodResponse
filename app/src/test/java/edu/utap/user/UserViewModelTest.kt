@@ -8,6 +8,7 @@ import org.junit.Rule
 import org.junit.Test
 import android.content.Context
 import android.net.Uri
+import edu.utap.models.UserProfile
 import edu.utap.ui.viewmodel.UserViewModel
 import edu.utap.user.repository.UserRepository
 import io.mockk.*
@@ -151,7 +152,12 @@ class UserViewModelTest {
         val testFile = mockk<File>(relaxed = true)
         coEvery { storageUtil.uploadProfileImage(any(), any(), any()) } returns Result.success("https://test.com/image.jpg")
         coEvery { userRepository.updatePhotoUrl(any(), any()) } returns Result.success(Unit)
-        coEvery { userRepository.getUserProfile(any()) } returns Result.success(UserProfile(uid = testUid, photoUrl = "https://test.com/image.jpg"))
+        coEvery { userRepository.getUserProfile(any()) } returns Result.success(
+            UserProfile(
+                uid = testUid,
+                photoUrl = "https://test.com/image.jpg"
+            )
+        )
 
         userViewModel.uploadProfileImage(mockContext, testUri, testUid)
         advanceUntilIdle()

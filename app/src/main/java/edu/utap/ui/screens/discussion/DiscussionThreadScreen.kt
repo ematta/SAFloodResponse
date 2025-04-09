@@ -37,7 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.di.DiscussionViewModelFactory
-import edu.utap.flood.model.DiscussionMessage
+import edu.utap.models.DiscussionMessage
 import edu.utap.ui.viewmodel.DiscussionViewModel
 
 

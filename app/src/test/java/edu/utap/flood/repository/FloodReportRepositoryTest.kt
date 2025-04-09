@@ -4,7 +4,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.*
-import edu.utap.flood.model.FloodReport
+import edu.utap.models.FloodReport
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
@@ -13,7 +13,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
-import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FloodReportRepositoryTest {

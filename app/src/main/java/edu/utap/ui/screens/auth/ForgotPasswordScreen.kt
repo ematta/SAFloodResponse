@@ -24,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.models.AuthViewModelInterface
 import edu.utap.utils.ValidationUtils
 
 /**

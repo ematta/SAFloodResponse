@@ -3,7 +3,6 @@ package edu.utap.ui.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -29,7 +28,6 @@ import androidx.navigation.NavController
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.play.core.integrity.d
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
@@ -42,16 +40,13 @@ import edu.utap.ui.components.AppBottomNavigation
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.platform.LocalContext
-import edu.utap.auth.model.AuthViewModel
-import edu.utap.auth.model.AuthViewModelInterface
-import edu.utap.auth.model.FirestoreUser
+import edu.utap.models.AuthViewModel
+import edu.utap.models.AuthViewModelInterface
 import edu.utap.di.FloodViewModelFactory
 import edu.utap.ui.screens.flood.LocalFloodListScreen
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.NetworkUtils
-import edu.utap.utils.NetworkUtilsInterface
-import okhttp3.OkHttpClient
 import android.util.Log
 
 private const val TAG = "DashboardScreen"
@@ -206,7 +201,7 @@ fun DashboardScreen(
             }
         }
 
-        val concreteAuthViewModel = authViewModel as? edu.utap.auth.model.AuthViewModel
+        val concreteAuthViewModel = authViewModel as? AuthViewModel
         val isAuthenticated = concreteAuthViewModel?.getCachedUser() != null && !(concreteAuthViewModel?.isAuthExpired() ?: true)
         AppBottomNavigation(navController, "dashboard", isAuthenticated)
 

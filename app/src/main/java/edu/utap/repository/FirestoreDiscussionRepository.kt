@@ -2,11 +2,9 @@ package edu.utap.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
-import edu.utap.flood.model.DiscussionMessage
-import edu.utap.flood.model.DiscussionThread
+import edu.utap.models.DiscussionMessage
+import edu.utap.models.DiscussionThread
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

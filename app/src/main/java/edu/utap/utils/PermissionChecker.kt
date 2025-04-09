@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.auth.model.AuthViewModel
-import edu.utap.auth.model.FirestoreUser
+import edu.utap.models.AuthViewModel
+import edu.utap.models.FirestoreUser
 
 /**
  * A composable that conditionally renders content based on the user's role permissions.

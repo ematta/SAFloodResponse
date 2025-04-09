@@ -1,17 +1,13 @@
 package edu.utap.ui.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.utap.auth.model.AuthViewModelInterface
-import edu.utap.flood.model.DiscussionMessage
-import edu.utap.flood.model.DiscussionThread
+import edu.utap.models.AuthViewModelInterface
+import edu.utap.models.DiscussionMessage
+import edu.utap.models.DiscussionThread
 import edu.utap.repository.DiscussionRepositoryInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**

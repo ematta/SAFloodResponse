@@ -1,7 +1,7 @@
 package edu.utap.repository
 
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.auth.model.FirestoreUser
+import edu.utap.models.FirestoreUser
 import kotlinx.coroutines.flow.Flow
 
 /**

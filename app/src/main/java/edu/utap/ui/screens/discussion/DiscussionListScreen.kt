@@ -38,8 +38,7 @@ import java.util.Locale
 import java.util.Date
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.di.DiscussionViewModelFactory
-import edu.utap.flood.model.DiscussionThread
-import edu.utap.ui.components.AppHeader
+import edu.utap.models.DiscussionThread
 import edu.utap.ui.viewmodel.DiscussionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

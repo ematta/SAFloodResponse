@@ -14,7 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import edu.utap.user.MainDispatcherRule
-import edu.utap.user.UserProfile
+import edu.utap.models.UserProfile
 import edu.utap.user.repository.UserRepository
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
