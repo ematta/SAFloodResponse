@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import edu.utap.flood.model.FloodReport
-import edu.utap.flood.repository.FloodReportRepositoryInterface
+import edu.utap.repository.FloodReportRepositoryInterface
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

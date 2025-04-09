@@ -1,14 +1,14 @@
-package edu.utap.flood.di
+package edu.utap.di
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.auth.di.AuthModule
+import edu.utap.di.AuthModule
 import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.model.FirestoreUser
-import edu.utap.flood.repository.FloodReportRepository
+import edu.utap.repository.FloodReportRepository
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.utils.LocationUtils
 import edu.utap.utils.NetworkUtils

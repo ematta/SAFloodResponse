@@ -9,8 +9,8 @@ import edu.utap.user.FirebaseStorageUtil
 import edu.utap.user.FirebaseStorageUtilInterface
 import edu.utap.user.UserProfile
 import edu.utap.user.UserProfileState
-import edu.utap.user.repository.FirebaseUserRepository
-import edu.utap.user.repository.UserRepository
+import edu.utap.repository.FirebaseUserRepository
+import edu.utap.repository.UserRepository
 import edu.utap.utils.DefaultApplicationContextProvider
 import edu.utap.utils.DefaultStorageUtilProvider
 import edu.utap.utils.NetworkUtilsInterface

@@ -37,7 +37,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.flood.di.DiscussionViewModelFactory
+import edu.utap.di.DiscussionViewModelFactory
 import edu.utap.flood.model.DiscussionThread
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.viewmodel.DiscussionViewModel

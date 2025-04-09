@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.flood.model.DiscussionMessage
 import edu.utap.flood.model.DiscussionThread
-import edu.utap.flood.repository.DiscussionRepositoryInterface
+import edu.utap.repository.DiscussionRepositoryInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect

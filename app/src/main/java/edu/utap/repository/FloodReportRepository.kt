@@ -1,4 +1,4 @@
-package edu.utap.flood.repository
+package edu.utap.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.flood.model.FloodReport

@@ -1,4 +1,4 @@
-package edu.utap.auth.di
+package edu.utap.di
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
@@ -6,10 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.model.AuthViewModel
-import edu.utap.user.repository.FirebaseUserRepository
 import edu.utap.utils.NetworkUtils
-import edu.utap.utils.NetworkUtilsImpl
-import edu.utap.utils.NetworkUtilsInterface
 
 /**
  * Factory for creating ViewModels with dependencies.

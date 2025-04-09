@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.flood.model.FloodReport
-import edu.utap.flood.repository.FloodReportRepositoryInterface
+import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -1,11 +1,11 @@
 package edu.utap.auth
 
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.repository.AuthRepositoryInterface
 // Removed import edu.utap.db.UserEntity
 import edu.utap.user.UserProfile
-import edu.utap.user.repository.FirebaseUserRepository
-import edu.utap.user.repository.UserRepository
+import edu.utap.repository.FirebaseUserRepository
+import edu.utap.repository.UserRepository
 import edu.utap.utils.FirebaseErrorMapper
 
 /**

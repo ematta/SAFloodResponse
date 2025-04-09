@@ -1,4 +1,4 @@
-package edu.utap.flood.repository
+package edu.utap.repository
 
 import edu.utap.flood.model.DiscussionMessage
 import edu.utap.flood.model.DiscussionThread

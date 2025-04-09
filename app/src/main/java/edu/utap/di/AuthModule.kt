@@ -1,10 +1,9 @@
-package edu.utap.auth.di
+package edu.utap.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.FirestoreAuthRepository
-import edu.utap.auth.model.FirestoreUser
-import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.repository.AuthRepositoryInterface
 
 /**
  * Factory class for providing AuthRepository instances.

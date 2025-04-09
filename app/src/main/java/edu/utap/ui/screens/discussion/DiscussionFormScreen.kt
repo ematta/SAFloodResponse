@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.flood.di.DiscussionViewModelFactory
+import edu.utap.di.DiscussionViewModelFactory
 import edu.utap.ui.viewmodel.DiscussionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
