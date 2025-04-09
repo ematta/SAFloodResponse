@@ -1,4 +1,4 @@
-package edu.utap.flood.di
+package edu.utap.di
 
 import android.util.Log
 import android.content.Context
@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.model.AuthViewModelInterface
-import edu.utap.flood.repository.DiscussionRepositoryInterface
+import edu.utap.repository.DiscussionRepositoryInterface
 import edu.utap.ui.viewmodel.DiscussionViewModel
 
 /**
@@ -56,7 +56,7 @@ class DiscussionViewModelFactory private constructor() : ViewModelProvider.Facto
                     }
 
                     val authViewModelAny: Any = try {
-                        edu.utap.auth.di.ViewModelFactory(context)
+                        ViewModelFactory(context)
                             .create(AuthViewModel::class.java)
                     } catch (e: Exception) {
                         Log.e("DiscussionVMFactory", "Failed to create AuthViewModel", e)

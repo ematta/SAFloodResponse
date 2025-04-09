@@ -1,4 +1,4 @@
-package edu.utap.flood.repository
+package edu.utap.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore

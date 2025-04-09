@@ -16,7 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.AuthFlowManager
-import edu.utap.flood.repository.FloodReportRepository
+import edu.utap.repository.FloodReportRepository
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
 import edu.utap.ui.screens.user.ProfileScreen
@@ -34,6 +34,7 @@ import edu.utap.auth.ForgotPasswordScreen
 import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
 import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.di.FloodViewModelFactory
 
 class NavigationManager(
     private val authFlowManager: AuthFlowManager,
@@ -182,7 +183,7 @@ class NavigationManager(
         composable(AuthenticatedRoutes.FLOOD_REPORT) {
             FloodReportFormScreen(
                 viewModel = viewModel(
-                    factory = edu.utap.flood.di.FloodViewModelFactory(
+                    factory = FloodViewModelFactory(
                         context = LocalContext.current,
                         floodReportRepository = floodReportRepository,
                         networkUtils = networkUtils

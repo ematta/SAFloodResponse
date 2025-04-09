@@ -1,8 +1,8 @@
-package edu.utap.flood.di
+package edu.utap.di
 
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.flood.repository.DiscussionRepositoryInterface
-import edu.utap.flood.repository.FirestoreDiscussionRepository
+import edu.utap.repository.DiscussionRepositoryInterface
+import edu.utap.repository.FirestoreDiscussionRepository
 
 /**
  * Simple singleton dependency provider for the discussion repository.

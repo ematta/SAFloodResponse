@@ -35,8 +35,8 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import edu.utap.flood.repository.FloodReportRepository
-import edu.utap.flood.repository.FloodReportRepositoryInterface
+import edu.utap.repository.FloodReportRepository
+import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppBottomNavigation
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,7 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.model.AuthViewModelInterface
 import edu.utap.auth.model.FirestoreUser
-import edu.utap.flood.di.FloodViewModelFactory
+import edu.utap.di.FloodViewModelFactory
 import edu.utap.ui.screens.flood.LocalFloodListScreen
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.WeatherViewModel

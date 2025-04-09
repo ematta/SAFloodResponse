@@ -14,7 +14,7 @@ import androidx.lifecycle.viewModelScope
 import edu.utap.auth.AuthState
 import edu.utap.auth.AuthStateManager
 import edu.utap.auth.NetworkOperationHandler
-import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.repository.AuthRepositoryInterface
 import edu.utap.utils.ApplicationContextProviderInterface
 import edu.utap.utils.FirebaseErrorMapper
 import edu.utap.utils.NetworkUtils

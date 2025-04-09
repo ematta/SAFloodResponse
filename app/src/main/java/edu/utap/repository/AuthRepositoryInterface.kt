@@ -1,4 +1,4 @@
-package edu.utap.auth.repository
+package edu.utap.repository
 
 import com.google.firebase.auth.FirebaseUser
 import edu.utap.auth.model.FirestoreUser

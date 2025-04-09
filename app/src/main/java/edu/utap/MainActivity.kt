@@ -23,10 +23,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.AuthState
-import edu.utap.auth.di.ViewModelFactory
+import edu.utap.di.ViewModelFactory
 import edu.utap.auth.model.AuthViewModel
-import edu.utap.flood.di.FloodViewModelFactory
-import edu.utap.flood.repository.FloodReportRepository
+import edu.utap.di.FloodViewModelFactory
+import edu.utap.repository.FloodReportRepository
 import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen

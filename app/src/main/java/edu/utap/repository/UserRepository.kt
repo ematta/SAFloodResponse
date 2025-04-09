@@ -1,4 +1,4 @@
-package edu.utap.user.repository
+package edu.utap.repository
 
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
