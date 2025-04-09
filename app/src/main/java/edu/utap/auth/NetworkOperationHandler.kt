@@ -18,7 +18,8 @@ class NetworkOperationHandler(
      * @return AuthState.Error.Network if network is not available, null otherwise
      */
     fun checkNetworkAvailability(): AuthState.Error.Network? {
-        val isAvailable = networkUtils.isNetworkAvailable(context as Context)
+        val appContext = context.getApplicationContext()
+        val isAvailable = networkUtils.isNetworkAvailable(appContext)
         Log.d("NetworkOperationHandler_checkNetworkAvailability",
             "Network available: $isAvailable [Thread: ${Thread.currentThread().name}]")
         
