@@ -68,7 +68,7 @@ interface UserRepository {
 class FirebaseUserRepository(
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
-) : UserRepository {
+) : BaseRepository(), UserRepository {
 
     private val usersCollection = firestore.collection("users")
 
@@ -83,25 +83,20 @@ class FirebaseUserRepository(
      * @param userProfile The user profile to create
      * @return Result containing the created profile or an error
      */
-    override suspend fun createUserProfile(userProfile: UserProfile): Result<UserProfile> = try {
-        // Store the user profile in Firestore
+    override suspend fun createUserProfile(userProfile: UserProfile): Result<UserProfile> = safeFirestoreCall {
         usersCollection.document(userProfile.uid)
             .set(userProfile)
             .await()
 
-        // Update display name in Firebase Auth if provided
         if (userProfile.displayName.isNotEmpty()) {
             updateDisplayName(userProfile.uid, userProfile.displayName)
         }
 
-        // Update photo URL in Firebase Auth if provided
         if (userProfile.photoUrl.isNotEmpty()) {
             updatePhotoUrl(userProfile.uid, userProfile.photoUrl)
         }
 
-        Result.success(userProfile)
-    } catch (e: Exception) {
-        Result.failure(e)
+        userProfile
     }
 
     /**
@@ -113,29 +108,13 @@ class FirebaseUserRepository(
      * @param uid The unique identifier of the user to retrieve
      * @return Result containing the user profile or an error if not found or parsing fails
      */
-    override suspend fun getUserProfile(uid: String): Result<UserProfile> {
-        var status: Result<UserProfile> = Result.failure(Exception("User profile not found"))
+    override suspend fun getUserProfile(uid: String): Result<UserProfile> = safeFirestoreCall {
         val document = usersCollection.document(uid).get().await()
-        if (document != null && document.exists()) {
-            // Manually construct UserProfile from document data to ensure proper field mapping
-            val data = document.data
-            if (data != null) {
-                val userProfile = UserProfile(
-                    uid = data["uid"] as? String ?: "",
-                    displayName = data["displayName"] as? String ?: "",
-                    email = data["email"] as? String ?: "",
-                    photoUrl = data["photoUrl"] as? String ?: "",
-                    phoneNumber = data["phoneNumber"] as? String ?: "",
-                    address = data["address"] as? String ?: "",
-                    createdAt = (data["createdAt"] as? Long) ?: System.currentTimeMillis()
-                )
-                status = Result.success(userProfile)
-            } else {
-                status =
-                    Result.failure(Exception("Failed to parse user profile: document data is null"))
-            }
+        if (document.exists()) {
+            document.toDomainObject<UserProfile>() ?: throw Exception("Failed to parse user profile")
+        } else {
+            throw Exception("User profile not found")
         }
-        return status
     }
 
     /**
@@ -149,25 +128,20 @@ class FirebaseUserRepository(
      * @param userProfile The updated user profile data
      * @return Result containing the updated profile or an error
      */
-    override suspend fun updateUserProfile(userProfile: UserProfile): Result<UserProfile> = try {
-        // Update the user profile in Firestore
+    override suspend fun updateUserProfile(userProfile: UserProfile): Result<UserProfile> = safeFirestoreCall {
         usersCollection.document(userProfile.uid)
             .set(userProfile)
             .await()
 
-        // Update display name in Firebase Auth if provided
         if (userProfile.displayName.isNotEmpty()) {
             updateDisplayName(userProfile.uid, userProfile.displayName)
         }
 
-        // Update photo URL in Firebase Auth if provided
         if (userProfile.photoUrl.isNotEmpty()) {
             updatePhotoUrl(userProfile.uid, userProfile.photoUrl)
         }
 
-        Result.success(userProfile)
-    } catch (e: Exception) {
-        Result.failure(e)
+        userProfile
     }
 
     /**
@@ -181,19 +155,17 @@ class FirebaseUserRepository(
      * @param displayName The new display name
      * @return Result indicating success or failure
      */
-    override suspend fun updateDisplayName(uid: String, displayName: String): Result<Unit> = try {
+    override suspend fun updateDisplayName(uid: String, displayName: String): Result<Unit> = safeNetworkCall {
         val currentUser = firebaseAuth.currentUser
         if (currentUser?.uid == uid) {
             val profileUpdates = userProfileChangeRequest {
                 this.displayName = displayName
             }
             currentUser.updateProfile(profileUpdates).await()
-            Result.success(Unit)
+            Unit
         } else {
-            Result.failure(Exception("Cannot update display name for another user"))
+            throw Exception("Cannot update display name for another user")
         }
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 
     /**
@@ -207,18 +179,16 @@ class FirebaseUserRepository(
      * @param photoUrl The new photo URL
      * @return Result indicating success or failure
      */
-    override suspend fun updatePhotoUrl(uid: String, photoUrl: String): Result<Unit> = try {
+    override suspend fun updatePhotoUrl(uid: String, photoUrl: String): Result<Unit> = safeNetworkCall {
         val currentUser = firebaseAuth.currentUser
         if (currentUser?.uid == uid) {
             val profileUpdates = userProfileChangeRequest {
                 this.photoUri = Uri.parse(photoUrl)
             }
             currentUser.updateProfile(profileUpdates).await()
-            Result.success(Unit)
+            Unit
         } else {
-            Result.failure(Exception("Cannot update photo URL for another user"))
+            throw Exception("Cannot update photo URL for another user")
         }
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 }

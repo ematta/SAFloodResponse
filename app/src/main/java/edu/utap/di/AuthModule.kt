@@ -2,7 +2,7 @@ package edu.utap.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.auth.FirestoreAuthRepository
+import edu.utap.repository.FirestoreAuthRepository
 import edu.utap.repository.AuthRepositoryInterface
 
 /**

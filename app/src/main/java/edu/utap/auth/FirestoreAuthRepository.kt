@@ -1,4 +1,4 @@
-package edu.utap.auth
+package edu.utap.repository
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.models.FirestoreUser
+import edu.utap.repository.BaseRepository
 import edu.utap.repository.AuthRepositoryInterface
 import edu.utap.utils.FirebaseErrorMapper
 import kotlinx.coroutines.channels.awaitClose
@@ -28,7 +29,7 @@ private const val TAG = "FirestoreAuthRepository"
 class FirestoreAuthRepository(
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
-) : AuthRepositoryInterface {
+) : BaseRepository(), AuthRepositoryInterface {
     private val usersCollection = firestore.collection("users")
 
     /**
@@ -50,12 +51,10 @@ class FirestoreAuthRepository(
         password: String,
         name: String,
         role: String
-    ): Result<FirebaseUser> = executeFirebaseAuthOperation {
-        // Step 1: Create Firebase Authentication account
+    ): Result<FirebaseUser> = safeNetworkCall {
         val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
         val user = authResult.user ?: throw Exception("Registration failed")
 
-        // Step 2: Update the display name in Firebase Auth
         val profileUpdates = UserProfileChangeRequest.Builder()
             .setDisplayName(name)
             .build()
@@ -65,7 +64,7 @@ class FirestoreAuthRepository(
         } catch (e: Exception) {
             Log.e(TAG, "Error updating display name", e)
         }
-        // Step 3: Create user profile in Firestore
+
         syncUser(user)
         user
     }
@@ -81,7 +80,7 @@ class FirestoreAuthRepository(
      * @return [Result] containing the authenticated [FirebaseUser] on success, or an exception on failure.
      */
     override suspend fun loginUser(email: String, password: String): Result<FirebaseUser> =
-        executeFirebaseAuthOperation {
+        safeNetworkCall {
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             val user = authResult.user ?: throw Exception("Login failed")
             syncUser(user)
@@ -110,11 +109,9 @@ class FirestoreAuthRepository(
      * @param email The email address to send the password reset link to.
      * @return [Result] containing [Unit] on success, or an exception on failure.
      */
-    override suspend fun resetPassword(email: String): Result<Unit> = try {
+    override suspend fun resetPassword(email: String): Result<Unit> = safeNetworkCall {
         firebaseAuth.sendPasswordResetEmail(email).await()
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
+        Unit
     }
 
     /**
@@ -123,13 +120,11 @@ class FirestoreAuthRepository(
      * @param user The user profile to be created.
      * @return [Result] containing the created [FirestoreUser] on success, or an exception on failure.
      */
-    override suspend fun createUser(user: FirestoreUser): Result<FirestoreUser> = try {
+    override suspend fun createUser(user: FirestoreUser): Result<FirestoreUser> = safeFirestoreCall {
         usersCollection.document(user.userId)
             .set(user)
             .await()
-        Result.success(user)
-    } catch (e: Exception) {
-        Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
+        user
     }
 
     /**
@@ -138,13 +133,11 @@ class FirestoreAuthRepository(
      * @param email The email of the user to retrieve.
      * @return [Result] containing the [FirestoreUser] on success, or an exception on failure.
      */
-    override suspend fun getUserByEmail(email: String): Result<FirestoreUser> = try {
+    override suspend fun getUserByEmail(email: String): Result<FirestoreUser> = safeFirestoreCall {
         val query = usersCollection.whereEqualTo("email", email).limit(1).get().await()
-        val user = query.documents.firstOrNull()?.toObject(FirestoreUser::class.java)
+        val user = query.documents.firstOrNull()?.toDomainObject<FirestoreUser>()
             ?: throw Exception("User not found")
-        Result.success(user)
-    } catch (e: Exception) {
-        Result.failure(e)
+        user
     }
 
     /**
@@ -153,13 +146,11 @@ class FirestoreAuthRepository(
      * @param userId The ID of the user to retrieve.
      * @return [Result] containing the [FirestoreUser] on success, or an exception on failure.
      */
-    override suspend fun getUserById(userId: String): Result<FirestoreUser> = try {
+    override suspend fun getUserById(userId: String): Result<FirestoreUser> = safeFirestoreCall {
         val document = usersCollection.document(userId).get().await()
-        val user = document.toObject(FirestoreUser::class.java)
+        val user = document.toDomainObject<FirestoreUser>()
             ?: throw Exception("User not found")
-        Result.success(user)
-    } catch (e: Exception) {
-        Result.failure(e)
+        user
     }
 
     /**
@@ -168,13 +159,11 @@ class FirestoreAuthRepository(
      * @param user The updated user profile.
      * @return [Result] containing the updated [FirestoreUser] on success, or an exception on failure.
      */
-    override suspend fun updateUser(user: FirestoreUser): Result<FirestoreUser> = try {
+    override suspend fun updateUser(user: FirestoreUser): Result<FirestoreUser> = safeFirestoreCall {
         usersCollection.document(user.userId)
             .set(user)
             .await()
-        Result.success(user)
-    } catch (e: Exception) {
-        Result.failure(e)
+        user
     }
 
     /**
@@ -185,14 +174,12 @@ class FirestoreAuthRepository(
      * @param remoteUser The Firebase user to synchronize.
      * @return [Result] containing the synchronized [FirestoreUser] on success, or an exception on failure.
      */
-    override suspend fun syncUser(remoteUser: FirebaseUser): Result<FirestoreUser> = try {
+    override suspend fun syncUser(remoteUser: FirebaseUser): Result<FirestoreUser> = safeFirestoreCall {
         val firestoreUser = FirestoreUser.fromFirebaseUser(remoteUser)
         usersCollection.document(firestoreUser.userId)
             .set(firestoreUser)
             .await()
-        Result.success(firestoreUser)
-    } catch (e: Exception) {
-        Result.failure(e)
+        firestoreUser
     }
 
     /**
@@ -215,7 +202,7 @@ class FirestoreAuthRepository(
             }
             
             val users = querySnapshot?.documents?.mapNotNull { document ->
-                document.toObject(FirestoreUser::class.java)
+                document.toDomainObject<FirestoreUser>()
             } ?: emptyList()
             
             trySend(users)
@@ -230,11 +217,4 @@ class FirestoreAuthRepository(
      * @param authOperation The authentication operation to be executed.
      * @return [Result] containing the result of the authentication operation on success,
      */
-    private suspend fun <T> executeFirebaseAuthOperation(
-        authOperation: suspend () -> T
-    ): Result<T> = try {
-        Result.success(authOperation())
-    } catch (e: Exception) {
-        Result.failure(Exception(FirebaseErrorMapper.getErrorMessage(e)))
-    }
 }

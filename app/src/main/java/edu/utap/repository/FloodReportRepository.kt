@@ -1,15 +1,10 @@
 package edu.utap.repository
-
 import com.google.firebase.firestore.FirebaseFirestore
+import edu.utap.repository.BaseRepository
+import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.models.FloodReport
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
-
-/**
- * Implementation of [FloodReportRepositoryInterface] that handles Firestore operations for flood reports.
- *
- * @property firestore The Firestore database instance.
- */
 import android.util.Log
 import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.channels.awaitClose
@@ -20,46 +15,38 @@ private const val TAG = "FloodReportRepository"
 
 class FloodReportRepository @Inject constructor(
     private val firestore: FirebaseFirestore
-) : FloodReportRepositoryInterface {
+) : BaseRepository(), FloodReportRepositoryInterface {
 
     private val reportsCollection = firestore.collection("flood_reports").also {
         Log.d(TAG, "Using Firestore collection: flood_reports")
     }
 
-    override suspend fun createReport(report: FloodReport): Result<FloodReport> = try {
+    override suspend fun createReport(report: FloodReport): Result<FloodReport> = safeFirestoreCall {
         reportsCollection.document(report.reportId)
             .set(report)
             .await()
-        Result.success(report)
-    } catch (e: Exception) {
-        Result.failure(e)
+        report
     }
 
-    override suspend fun getReportById(reportId: String): Result<FloodReport> = try {
-        val document = reportsCollection.document(reportId).get().await()
+    override suspend fun getReportById(id: String): Result<FloodReport> = safeFirestoreCall {
+        val document = reportsCollection.document(id).get().await()
         if (document.exists()) {
-            Result.success(document.toObject<FloodReport>()!!)
+            document.toDomainObject<FloodReport>() ?: throw Exception("Failed to parse report")
         } else {
-            Result.failure(Exception("Report not found"))
+            throw Exception("Report not found")
         }
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 
-    override suspend fun updateReport(report: FloodReport): Result<FloodReport> = try {
+    override suspend fun updateReport(report: FloodReport): Result<FloodReport> = safeFirestoreCall {
         reportsCollection.document(report.reportId)
             .set(report)
             .await()
-        Result.success(report)
-    } catch (e: Exception) {
-        Result.failure(e)
+        report
     }
 
-    override suspend fun deleteReport(reportId: String): Result<Unit> = try {
-        reportsCollection.document(reportId).delete().await()
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
+    override suspend fun deleteReport(id: String): Result<Unit> = safeFirestoreCall {
+        reportsCollection.document(id).delete().await()
+        Unit
     }
 
     override fun getReportsInRadius(
@@ -90,7 +77,7 @@ class FloodReportRepository @Inject constructor(
                 }
 
                 val reports = querySnapshot?.documents?.mapNotNull { document ->
-                    document.toObject<FloodReport>()
+                    document.toDomainObject<FloodReport>()
                 } ?: emptyList()
 
                 trySend(reports)
@@ -110,7 +97,7 @@ class FloodReportRepository @Inject constructor(
 
                 val reports = querySnapshot?.documents?.mapNotNull { document ->
                     try {
-                        val report = document.toObject<FloodReport>()
+                        val report = document.toDomainObject<FloodReport>()
                         Log.d(TAG, "Fetched report: ${report?.reportId} at (${report?.latitude}, ${report?.longitude})")
                         report
                     } catch (e: Exception) {
