@@ -66,7 +66,7 @@ class UserViewModelTest {
         
         // Mock ApplicationContextProvider to return mockContext
 
-        userViewModel = UserViewModel(userRepository)
+        userViewModel = UserViewModel(userRepository, storageUtil)
     }
 
     @Test
