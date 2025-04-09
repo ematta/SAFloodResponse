@@ -230,7 +230,9 @@ fun DashboardScreen(
             }
         }
 
-        AppBottomNavigation(navController, "dashboard")
+        val authViewModel: edu.utap.auth.model.AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        val isAuthenticated = authViewModel.getCachedUser() != null && !authViewModel.isAuthExpired()
+        AppBottomNavigation(navController, "dashboard", isAuthenticated)
 
         // Floating Action Button for refreshing alerts
         FloatingActionButton(
