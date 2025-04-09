@@ -77,119 +77,41 @@ class MainActivity : ComponentActivity() {
         ViewModelFactory(applicationContext)
     }
 
+    private lateinit var authFlowManager: edu.utap.auth.AuthFlowManager
+    private lateinit var navigationManager: edu.utap.navigation.NavigationManager
+
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.i("MainActivity_onCreate",
             "Creating activity [Thread: ${Thread.currentThread().name}]")
         super.onCreate(savedInstanceState)
 
-        // Restore auth state
-        authViewModel.restoreAuthState()
-
-        // Check cached authentication and expiration
-        val cachedUser = authViewModel.getCachedUser()
-        var initialIsAuthenticated = cachedUser != null && !authViewModel.isAuthExpired()
-        if (!initialIsAuthenticated) {
-            authViewModel.clearAuthCache()
-        }
-
-        // Initialize location permission handler first
+        // Initialize location permission handler
         locationPermissionHandler = LocationPermissionHandler(this)
         lifecycle.addObserver(locationPermissionHandler)
         Log.d("MainActivity_onCreate", "Initialized location permission handler")
 
-        // Initialize networkUtils after locationPermissionHandler
-        val networkMonitor = NetworkMonitor(applicationContext)
+        // Initialize network monitor and utils
+        networkMonitor = NetworkMonitor(applicationContext)
+        networkUtils = edu.utap.utils.NetworkUtilsImpl() as edu.utap.utils.NetworkUtils
+
+        // Initialize AuthFlowManager
+        authFlowManager = edu.utap.auth.AuthFlowManager(authViewModel)
+
+        // Initialize NavigationManager
+        navigationManager = edu.utap.navigation.NavigationManager(
+            authFlowManager = authFlowManager,
+            networkUtils = networkUtils,
+            networkMonitor = networkMonitor,
+            locationPermissionHandler = locationPermissionHandler
+        )
 
         enableEdgeToEdge()
         Log.d("MainActivity_onCreate", "Enabled edge-to-edge mode")
 
         setContent {
-            var showRegisterScreen by rememberSaveable { mutableStateOf(false) }
-            var showForgotPasswordScreen by rememberSaveable { mutableStateOf(false) }
-            var isAuthenticated by rememberSaveable { mutableStateOf(initialIsAuthenticated) }
-
-            // Observe authentication state
-            LaunchedEffect(Unit) {
-                authViewModel.authState.collect { state ->
-                    val newAuthState = state is AuthState.Idle.Authenticated
-                    if (newAuthState != isAuthenticated) {
-                        Log.i("MainActivity_authState",
-                            "Authentication state changed to: $newAuthState [Thread: ${Thread.currentThread().name}]")
-                    }
-                    isAuthenticated = newAuthState
-                }
-            }
-
-            if (isAuthenticated) {
-                SAFloodResponseTheme {
-                    AuthenticatedApp(
-                        networkUtils = networkUtils,
-                        networkMonitor = networkMonitor,
-                        locationPermissionHandler = locationPermissionHandler,
-                        authViewModel = authViewModel
-                    )
-                }
-            } else if (showRegisterScreen) {
-                SAFloodResponseTheme {
-                    val context = LocalContext.current
-                    Scaffold(
-                        topBar = {
-                            AppHeader(
-                                onTestScreenClick = {
-                                    (context as? MainActivity)?.onTestScreenClick()
-                                }
-                            )
-                        }
-                    ) {
-                        RegisterScreen(
-                            authViewModel = authViewModel,
-                            onNavigateToLogin = { showRegisterScreen = false },
-                            onRegisterSuccess = { isAuthenticated = true }
-                        )
-                    }
-                }
-            } else if (showForgotPasswordScreen) {
-                SAFloodResponseTheme {
-                    val context = LocalContext.current
-                    Scaffold(
-                        topBar = {
-                            AppHeader(
-                                onTestScreenClick = {
-                                    (context as? MainActivity)?.onTestScreenClick()
-                                }
-                            )
-                        },
-                        content = {
-                            ForgotPasswordScreen(
-                                viewModel = authViewModel,
-                                onNavigateToLogin = { showForgotPasswordScreen = false }
-                            )
-                        }
-                    )
-                }
-            } else {
-                SAFloodResponseTheme {
-                    val context = LocalContext.current
-                    Scaffold(
-                        topBar = {
-                            AppHeader(
-                                onTestScreenClick = {
-                                    (context as? MainActivity)?.onTestScreenClick()
-                                }
-                            )
-                        },
-                        content = { padding: PaddingValues ->
-                            LoginScreen(
-                                authViewModel = authViewModel,
-                                onNavigateToRegister = { showRegisterScreen = true },
-                                onNavigateToForgotPassword = { showForgotPasswordScreen = true },
-                                onLoginSuccess = { isAuthenticated = true }
-                            )
-                        }
-                    
-                    )
-                }
+            SAFloodResponseTheme {
+                navigationManager.NavigationHost()
             }
         }
     }
@@ -202,7 +124,6 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         Log.i("MainActivity_onResume", "Resuming activity [Thread: ${Thread.currentThread().name}]")
-        // Validate session on resume
         authViewModel.checkAuthState()
     }
 
@@ -225,15 +146,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        // No need to explicitly save state - ViewModel handles it
     }
+
     fun onTestScreenClick() {
         lifecycleScope.launch {
             repeat(5) { index ->
                 val dummyReport = FloodReport(
                     reportId = UUID.randomUUID().toString(),
                     userId = "testUser${(1..1000).random()}",
-                    latitude = 29.2 + Random.nextDouble() * 0.4, // San Antonio approx
+                    latitude = 29.2 + Random.nextDouble() * 0.4,
                     longitude = -98.8 + Random.nextDouble() * 0.5,
                     description = "Test flood report #$index",
                     photoUrls = emptyList(),
