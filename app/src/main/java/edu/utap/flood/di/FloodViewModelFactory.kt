@@ -3,11 +3,15 @@ package edu.utap.flood.di
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.di.AuthModule
 import edu.utap.auth.model.AuthViewModel
+import edu.utap.auth.model.FirestoreUser
 import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.utils.LocationUtils
+import edu.utap.utils.NetworkUtils
 import edu.utap.weather.repository.WeatherRepositoryImpl
 
 /**
@@ -23,7 +27,8 @@ import edu.utap.weather.repository.WeatherRepositoryImpl
 class FloodViewModelFactory(
     private val context: Context,
     private val floodReportRepository: FloodReportRepository,
-    private val weatherRepository: WeatherRepositoryImpl
+    private val weatherRepository: WeatherRepositoryImpl,
+    private val networkUtils: NetworkUtils,
 ) : ViewModelProvider.Factory {
 
     /**
@@ -37,8 +42,15 @@ class FloodViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(FloodReportViewModel::class.java) -> {
             // Get the AuthViewModel from the existing factory
-            val authViewModel = AuthModule.provideAuthRepository().let { repo ->
-                AuthViewModel(repo)
+            val authViewModel = AuthModule(
+                firebaseAuth = FirebaseAuth.getInstance(),
+                firestore = FirebaseFirestore.getInstance(),
+            ).provideAuthRepository().let { repo ->
+                AuthViewModel(
+                    repo,
+                    networkUtils = networkUtils,
+                    context = context
+                )
             }
 
             // Create the LocationUtils

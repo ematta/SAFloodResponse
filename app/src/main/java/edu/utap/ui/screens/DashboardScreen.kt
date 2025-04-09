@@ -40,7 +40,17 @@ import edu.utap.location.LocationPermissionHandler
 import edu.utap.ui.components.AppBottomNavigation
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.platform.LocalContext
+import edu.utap.auth.model.FirestoreUser
+import edu.utap.flood.di.FloodViewModelFactory
+import edu.utap.ui.screens.flood.LocalFloodListScreen
+import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.WeatherViewModel
+import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsInterface
+import edu.utap.weather.NOAAService
+import edu.utap.weather.repository.WeatherRepositoryImpl
+import okhttp3.OkHttpClient
 
 private const val TAG = "DashboardScreen"
 
@@ -64,6 +74,7 @@ fun DashboardScreen(
     locationPermissionHandler: LocationPermissionHandler,
     weatherViewModel: WeatherViewModel,
     floodReportRepository: FloodReportRepositoryInterface,
+    networkUtils: NetworkUtils,
     modifier: Modifier = Modifier
 ) {
     var isLocationPermissionGranted by remember { mutableStateOf(false) }
@@ -71,17 +82,21 @@ fun DashboardScreen(
     val isLoading by weatherViewModel.isLoading.collectAsState()
     val weatherError by weatherViewModel.error.collectAsState()
 
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
 
-    val weatherRepository = edu.utap.weather.repository.WeatherRepositoryImpl(
-        edu.utap.weather.NOAAService(
-            okhttp3.OkHttpClient()
+    val weatherRepository = WeatherRepositoryImpl(
+        NOAAService(
+            OkHttpClient()
         )
     )
 
-    val floodReportViewModel: edu.utap.ui.viewmodel.FloodReportViewModel = viewModel(
-        factory = edu.utap.flood.di.FloodViewModelFactory(context,
-            floodReportRepository as FloodReportRepository, weatherRepository)
+    val floodReportViewModel: FloodReportViewModel = viewModel(
+        factory = FloodViewModelFactory(
+            context = context,
+            floodReportRepository = floodReportRepository as FloodReportRepository,
+            weatherRepository = weatherRepository,
+            networkUtils = networkUtils
+        )
     )
     val activeFloodReports by floodReportViewModel.activeFloodReports.collectAsState()
 
@@ -208,7 +223,7 @@ fun DashboardScreen(
 
             // Local Flood Reports List - takes 40% of screen
             Box(modifier = Modifier.weight(0.4f)) {
-                edu.utap.ui.screens.flood.LocalFloodListScreen(
+                LocalFloodListScreen(
                     viewModel = floodReportViewModel,
                     modifier = Modifier.fillMaxSize()
                 )

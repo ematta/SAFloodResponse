@@ -54,5 +54,6 @@ object NetworkUtils {
         implementation = impl
     }
 
+    //
     fun isNetworkAvailable(context: Context): Boolean = implementation.isNetworkAvailable(context)
 }

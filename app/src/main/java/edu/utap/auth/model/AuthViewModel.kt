@@ -1,7 +1,8 @@
 package edu.utap.auth.model
-import android.os.SystemClock
+
+import android.content.Context
 import com.google.gson.Gson
-import edu.utap.utils.SecurePrefsProvider
+import edu.utap.utils.DefaultSecurePrefsProvider
 
 
 import androidx.lifecycle.ViewModel
@@ -10,9 +11,9 @@ import edu.utap.auth.AuthState
 import edu.utap.auth.AuthStateManager
 import edu.utap.auth.NetworkOperationHandler
 import edu.utap.auth.repository.AuthRepositoryInterface
+import edu.utap.utils.ApplicationContextProviderInterface
 import edu.utap.utils.FirebaseErrorMapper
-import edu.utap.utils.NetworkUtilsInterface
-import edu.utap.utils.NetworkUtilsProvider
+import edu.utap.utils.NetworkUtils
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -33,12 +34,17 @@ import kotlinx.coroutines.launch
  */
 open class AuthViewModel(
     private val authRepository: AuthRepositoryInterface,
-    private val networkUtils: NetworkUtilsInterface = NetworkUtilsProvider.getNetworkUtils()
+    private val networkUtils: NetworkUtils,
+    private val context: Context
 ) : ViewModel(),
     AuthViewModelInterface {
 
     private val stateManager = AuthStateManager()
-    private val networkHandler = NetworkOperationHandler(networkUtils)
+    
+    private val networkHandler = NetworkOperationHandler(
+        networkUtils,
+        context = context as ApplicationContextProviderInterface
+    )
 
     override var authState: StateFlow<AuthState> = stateManager.authState
 
@@ -335,8 +341,11 @@ open class AuthViewModel(
     override fun updateAuthState(sent: AuthState) {
         stateManager.updateState(sent)
     }
+
     fun getCachedUser(): FirestoreUser? {
-        val json = SecurePrefsProvider.getCachedUserData()
+        val json = DefaultSecurePrefsProvider(
+            context = context
+        ).getCachedUserData()
         return if (json != null) {
             try {
                 Gson().fromJson(json, FirestoreUser::class.java)
@@ -349,7 +358,9 @@ open class AuthViewModel(
     }
 
     fun isAuthExpired(): Boolean {
-        val loginTime = SecurePrefsProvider.getInitialLoginTime()
+        val loginTime = DefaultSecurePrefsProvider(
+            context = context
+        ).getInitialLoginTime()
         val now = System.currentTimeMillis()
         val ninetyDaysMillis = 90L * 24 * 60 * 60 * 1000
         return (now - loginTime) > ninetyDaysMillis
@@ -358,10 +369,10 @@ open class AuthViewModel(
     fun cacheUser(user: FirestoreUser) {
         val now = System.currentTimeMillis()
         val json = Gson().toJson(user)
-        SecurePrefsProvider.cacheUserData(json, now)
+        DefaultSecurePrefsProvider(context).cacheUserData(json, now)
     }
 
     fun clearAuthCache() {
-        SecurePrefsProvider.clearAuthCache()
+        DefaultSecurePrefsProvider(context).clearAuthCache()
     }
 }

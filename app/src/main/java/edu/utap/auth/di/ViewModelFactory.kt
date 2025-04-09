@@ -3,7 +3,12 @@ package edu.utap.auth.di
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.model.AuthViewModel
+import edu.utap.user.repository.FirebaseUserRepository
+import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsImpl
 
 /**
  * Factory for creating ViewModels with dependencies.
@@ -32,9 +37,15 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(AuthViewModel::class.java) -> {
-            val authRepository = AuthModule.provideAuthRepository()
+            val networkUtils = NetworkUtilsImpl() as NetworkUtils
+            val authRepository = AuthModule(
+                FirebaseAuth.getInstance(),
+                FirebaseFirestore.getInstance()
+            ).provideAuthRepository()
             AuthViewModel(
-                authRepository
+                authRepository,
+                networkUtils = networkUtils,
+                context = context
             ) as T
         }
         else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
