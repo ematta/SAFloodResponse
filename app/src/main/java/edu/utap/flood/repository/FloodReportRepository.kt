@@ -11,57 +11,53 @@ import kotlinx.coroutines.tasks.await
  *
  * @property firestore The Firestore database instance.
  */
-class FloodReportRepository(
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
+import android.util.Log
+import com.google.firebase.firestore.ktx.toObject
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import javax.inject.Inject
+
+private const val TAG = "FloodReportRepository"
+
+class FloodReportRepository @Inject constructor(
+    private val firestore: FirebaseFirestore
 ) : FloodReportRepositoryInterface {
 
-    private val reportsCollection = firestore.collection("flood_reports")
+    private val reportsCollection = firestore.collection("flood_reports").also {
+        Log.d(TAG, "Using Firestore collection: flood_reports")
+    }
 
     override suspend fun createReport(report: FloodReport): Result<FloodReport> = try {
-        // Create report in Firestore
         reportsCollection.document(report.reportId)
             .set(report)
             .await()
-
         Result.success(report)
     } catch (e: Exception) {
         Result.failure(e)
     }
 
-    override suspend fun getReportById(reportId: String): Result<FloodReport> {
-        return try {
-            // Get from Firestore
-            val document = reportsCollection.document(reportId).get().await()
-            if (!document.exists()) {
-                return Result.failure(Exception("Report not found"))
-            }
-
-            val report = document.toObject(FloodReport::class.java)
-                ?: throw Exception("Failed to parse report data")
-
-            Result.success(report)
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun getReportById(reportId: String): Result<FloodReport> = try {
+        val document = reportsCollection.document(reportId).get().await()
+        if (document.exists()) {
+            Result.success(document.toObject<FloodReport>()!!)
+        } else {
+            Result.failure(Exception("Report not found"))
         }
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 
     override suspend fun updateReport(report: FloodReport): Result<FloodReport> = try {
-        // Update in Firestore
         reportsCollection.document(report.reportId)
             .set(report)
             .await()
-
         Result.success(report)
     } catch (e: Exception) {
         Result.failure(e)
     }
 
     override suspend fun deleteReport(reportId: String): Result<Unit> = try {
-        // Delete from Firestore
-        reportsCollection.document(reportId)
-            .delete()
-            .await()
-
+        reportsCollection.document(reportId).delete().await()
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e)
@@ -71,30 +67,64 @@ class FloodReportRepository(
         latitude: Double,
         longitude: Double,
         radius: Double
-    ): Flow<List<FloodReport>> {
-        // TODO: Implement Firestore query for reports in radius
-        return flowOf(emptyList())
+    ): Flow<List<FloodReport>> = callbackFlow {
+        val radiusInDegrees = radius / 111.0
+
+        Log.d(TAG, "Querying reports within $radius km of ($latitude, $longitude)")
+        Log.d(TAG, "Radius in degrees: $radiusInDegrees")
+        Log.d(TAG, "Latitude range: [${latitude - radiusInDegrees}, ${latitude + radiusInDegrees}]")
+        Log.d(TAG, "Longitude range: [${longitude - radiusInDegrees}, ${longitude + radiusInDegrees}]")
+
+        val listener = reportsCollection
+            .whereGreaterThanOrEqualTo("latitude", latitude - radiusInDegrees)
+            .whereLessThanOrEqualTo("latitude", latitude + radiusInDegrees)
+            .whereGreaterThanOrEqualTo("longitude", longitude - radiusInDegrees)
+            .whereLessThanOrEqualTo("longitude", longitude + radiusInDegrees)
+            .also { query ->
+                Log.d(TAG, "Firestore query: ${query.toString()}")
+            }
+            .addSnapshotListener { querySnapshot, error ->
+                Log.d(TAG, "Firestore query executed - error: ${error?.message}, docs: ${querySnapshot?.documents?.size}")
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val reports = querySnapshot?.documents?.mapNotNull { document ->
+                    document.toObject<FloodReport>()
+                } ?: emptyList()
+
+                trySend(reports)
+            }
+
+        awaitClose { listener.remove() }
     }
 
-    override fun observeAllReports(): Flow<List<FloodReport>> {
-        // TODO: Implement Firestore real-time updates
-        return flowOf(emptyList())
+    override fun observeAllReports(): Flow<List<FloodReport>> = callbackFlow {
+        val listener = reportsCollection
+            .orderBy("created_at")
+            .addSnapshotListener { querySnapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val reports = querySnapshot?.documents?.mapNotNull { document ->
+                    try {
+                        val report = document.toObject<FloodReport>()
+                        Log.d(TAG, "Fetched report: ${report?.reportId} at (${report?.latitude}, ${report?.longitude})")
+                        report
+                    } catch (e: Exception) {
+                        Log.d(TAG, "Error parsing document ${document.id}: ${e.message}")
+                        null
+                    }
+                } ?: emptyList<FloodReport>().also {
+                    Log.d(TAG, "No reports found in query snapshot")
+                }
+
+                trySend(reports)
+            }
+
+        awaitClose { listener.remove() }
     }
-
-
-    private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val r = 3959.0 // Earth's radius in miles
-        val lat1Rad = Math.toRadians(lat1)
-        val lat2Rad = Math.toRadians(lat2)
-        val deltaLat = Math.toRadians(lat2 - lat1)
-        val deltaLon = Math.toRadians(lon2 - lon1)
-
-        val a = kotlin.math.sin(deltaLat / 2) * kotlin.math.sin(deltaLat / 2) +
-            kotlin.math.cos(lat1Rad) * kotlin.math.cos(lat2Rad) *
-            kotlin.math.sin(deltaLon / 2) * kotlin.math.sin(deltaLon / 2)
-
-        val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(a), kotlin.math.sqrt(1 - a))
-        return r * c
-    }
-
 }
