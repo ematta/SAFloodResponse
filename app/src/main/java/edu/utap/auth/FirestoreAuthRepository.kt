@@ -5,9 +5,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.auth.model.FirestoreUser
+import edu.utap.models.FirestoreUser
 import edu.utap.repository.AuthRepositoryInterface
-import edu.utap.user.UserProfile
 import edu.utap.utils.FirebaseErrorMapper
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

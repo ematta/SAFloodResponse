@@ -1,7 +1,7 @@
 package edu.utap.repository
 
-import edu.utap.flood.model.DiscussionMessage
-import edu.utap.flood.model.DiscussionThread
+import edu.utap.models.DiscussionMessage
+import edu.utap.models.DiscussionThread
 import kotlinx.coroutines.flow.Flow
 
 /**

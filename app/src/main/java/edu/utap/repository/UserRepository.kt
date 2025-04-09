@@ -4,7 +4,7 @@ import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.user.UserProfile
+import edu.utap.models.UserProfile
 import kotlinx.coroutines.tasks.await
 
 /**

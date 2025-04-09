@@ -5,9 +5,9 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseUser
-import edu.utap.auth.model.AuthViewModel
+import edu.utap.models.AuthViewModel
 import edu.utap.auth.repository.AuthRepositoryInterface
-import edu.utap.auth.model.FirestoreUser
+import edu.utap.models.FirestoreUser
 import edu.utap.utils.NetworkUtils
 import edu.utap.utils.NetworkUtilsInterface
 import edu.utap.utils.ApplicationContextProvider

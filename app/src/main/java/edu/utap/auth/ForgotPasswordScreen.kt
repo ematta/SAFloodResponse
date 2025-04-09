@@ -15,7 +15,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.models.AuthViewModelInterface
 
 /**
  * Composable screen for initiating a password reset via email.

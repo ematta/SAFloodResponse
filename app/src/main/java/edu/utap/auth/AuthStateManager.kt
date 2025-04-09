@@ -1,7 +1,6 @@
 package edu.utap.auth
 
-import com.google.firebase.auth.FirebaseUser
-import edu.utap.auth.model.FirestoreUser // Keep existing import, might be needed elsewhere
+import edu.utap.models.FirestoreUser // Keep existing import, might be needed elsewhere
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

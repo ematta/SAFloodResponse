@@ -1,7 +1,6 @@
-package edu.utap.auth.model
+package edu.utap.models
 
 import edu.utap.auth.AuthState
-import edu.utap.auth.model.FirestoreUser
 import edu.utap.utils.RoleUtils
 import kotlinx.coroutines.flow.StateFlow
 

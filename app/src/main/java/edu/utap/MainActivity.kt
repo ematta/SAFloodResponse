@@ -15,7 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.models.AuthViewModelInterface
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,7 +24,7 @@ import androidx.navigation.navArgument
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.AuthState
 import edu.utap.di.ViewModelFactory
-import edu.utap.auth.model.AuthViewModel
+import edu.utap.models.AuthViewModel
 import edu.utap.di.FloodViewModelFactory
 import edu.utap.repository.FloodReportRepository
 import edu.utap.location.LocationPermissionHandler
@@ -38,14 +38,13 @@ import edu.utap.ui.theme.SAFloodResponseTheme
 import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.NetworkConnectivitySnackbar
 import edu.utap.utils.NetworkMonitor
-import okhttp3.OkHttpClient
 import kotlin.getValue
 import kotlinx.coroutines.launch
 
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.Timestamp
 import edu.utap.auth.AuthFlowManager
-import edu.utap.flood.model.FloodReport
+import edu.utap.models.FloodReport
 import edu.utap.navigation.NavigationManager
 import edu.utap.utils.NetworkUtils
 import java.util.UUID

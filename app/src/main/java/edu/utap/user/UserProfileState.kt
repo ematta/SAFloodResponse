@@ -1,5 +1,7 @@
 package edu.utap.user
 
+import edu.utap.models.UserProfile
+
 /**
  * Sealed class representing the different states of user profile operations.
  *

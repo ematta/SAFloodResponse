@@ -1,5 +1,6 @@
-package edu.utap.auth.model
+package edu.utap.models
 
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.PropertyName
 
@@ -34,7 +35,7 @@ data class FirestoreUser(
          * @param firebaseUser The Firebase Authentication user.
          * @return A corresponding [FirestoreUser].
          */
-        fun fromFirebaseUser(firebaseUser: com.google.firebase.auth.FirebaseUser): FirestoreUser {
+        fun fromFirebaseUser(firebaseUser: FirebaseUser): FirestoreUser {
             return FirestoreUser(
                 userId = firebaseUser.uid,
                 name = firebaseUser.displayName ?: "",

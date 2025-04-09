@@ -27,13 +27,12 @@ import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.NetworkConnectivitySnackbar
 import edu.utap.utils.NetworkMonitor
 import edu.utap.utils.NetworkUtils
-import okhttp3.OkHttpClient
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import edu.utap.auth.ForgotPasswordScreen
 import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
-import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.models.AuthViewModelInterface
 import edu.utap.di.FloodViewModelFactory
 
 class NavigationManager(
@@ -43,7 +42,7 @@ class NavigationManager(
     private val locationPermissionHandler: edu.utap.location.LocationPermissionHandler
 ) {
     @Composable
-    fun NavigationHost(authViewModel: edu.utap.auth.model.AuthViewModelInterface) {
+    fun NavigationHost(authViewModel: AuthViewModelInterface) {
         val navController = rememberNavController()
         val context = LocalContext.current
 

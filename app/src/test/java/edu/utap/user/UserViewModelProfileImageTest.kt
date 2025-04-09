@@ -3,6 +3,7 @@ package edu.utap.user
 import android.content.Context
 import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import edu.utap.models.UserProfile
 import edu.utap.ui.viewmodel.UserViewModel
 import edu.utap.user.repository.UserRepository
 import edu.utap.utils.NetworkUtils

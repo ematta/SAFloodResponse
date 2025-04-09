@@ -4,10 +4,9 @@ package edu.utap.flood
 
 import android.location.Location
 import com.google.android.gms.tasks.Task
-import edu.utap.auth.model.AuthViewModelInterface
-import com.google.firebase.auth.FirebaseUser
-import edu.utap.auth.model.FirestoreUser
-import edu.utap.flood.model.FloodReport
+import edu.utap.models.AuthViewModelInterface
+import edu.utap.models.FirestoreUser
+import edu.utap.models.FloodReport
 import edu.utap.flood.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationUtils
 import edu.utap.ui.viewmodel.FloodReportViewModel

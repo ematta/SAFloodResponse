@@ -28,8 +28,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import edu.utap.auth.model.AuthViewModel
-import edu.utap.auth.model.AuthViewModelInterface
+import edu.utap.models.AuthViewModelInterface
 import edu.utap.utils.ValidationUtils
 
 /**

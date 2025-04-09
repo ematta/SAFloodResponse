@@ -13,8 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import edu.utap.flood.model.FloodReport
-import edu.utap.ui.components.AppBottomNavigation
+import edu.utap.models.FloodReport
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.ReportState
 import edu.utap.utils.LocationUtils

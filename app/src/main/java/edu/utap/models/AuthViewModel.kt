@@ -1,21 +1,15 @@
-package edu.utap.auth.model
-
-import edu.utap.utils.NetworkUtilsInterface
+package edu.utap.models
 
 import android.content.Context
 import com.google.gson.Gson
 import edu.utap.utils.DefaultSecurePrefsProvider
-
-import edu.utap.FloodResponseApplication
 
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.utap.auth.AuthState
 import edu.utap.auth.AuthStateManager
-import edu.utap.auth.NetworkOperationHandler
 import edu.utap.repository.AuthRepositoryInterface
-import edu.utap.utils.ApplicationContextProviderInterface
 import edu.utap.utils.FirebaseErrorMapper
 import edu.utap.utils.NetworkUtils
 import kotlinx.coroutines.flow.StateFlow

@@ -1,19 +1,14 @@
 package edu.utap.ui.viewmodel
 
 import android.location.Location
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.Timestamp
-import edu.utap.auth.model.AuthViewModelInterface
-import edu.utap.flood.model.FloodReport
+import edu.utap.models.AuthViewModelInterface
+import edu.utap.models.FloodReport
 import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlinx.coroutines.flow.first

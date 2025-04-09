@@ -1,7 +1,6 @@
 package edu.utap.repository
 
-import com.google.type.LatLng
-import edu.utap.flood.model.FloodReport
+import edu.utap.models.FloodReport
 import kotlinx.coroutines.flow.Flow
 
 interface FloodReportRepositoryInterface {

@@ -1,9 +1,8 @@
 package edu.utap.auth
 
 import androidx.lifecycle.ViewModel
-import edu.utap.auth.AuthState
-import edu.utap.auth.model.AuthViewModelInterface
-import edu.utap.auth.model.FirestoreUser
+import edu.utap.models.AuthViewModelInterface
+import edu.utap.models.FirestoreUser
 import edu.utap.utils.RoleUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

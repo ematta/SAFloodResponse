@@ -27,7 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import edu.utap.ui.components.*
 import edu.utap.ui.viewmodel.UserViewModel
-import edu.utap.user.UserProfile
+import edu.utap.models.UserProfile
 import edu.utap.user.UserProfileState
 import java.io.File
 

@@ -2,7 +2,7 @@ package edu.utap.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import edu.utap.auth.model.AuthViewModel
+import edu.utap.models.AuthViewModel
 
 /**
  * A test-specific ViewModelFactory that provides mock implementations

@@ -1,9 +1,8 @@
 package edu.utap.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.flood.model.FloodReport
+import edu.utap.models.FloodReport
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
 
 /**
