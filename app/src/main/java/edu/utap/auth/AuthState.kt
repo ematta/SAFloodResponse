@@ -27,7 +27,7 @@ sealed class AuthState {
         /**
          * State when user is authenticated with Firebase
          */
-        data class Authenticated(val user: FirebaseUser) : Idle()
+        data object Authenticated : Idle()
 
         /**
          * State when password reset email has been sent successfully

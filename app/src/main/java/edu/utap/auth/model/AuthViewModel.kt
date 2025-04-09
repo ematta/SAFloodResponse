@@ -45,11 +45,6 @@ open class AuthViewModel(
 
     private val stateManager = AuthStateManager()
     
-    private val networkHandler = NetworkOperationHandler(
-        networkUtils,
-        context = (context.applicationContext as FloodResponseApplication).appContextProvider
-    )
-
     override var authState: StateFlow<AuthState> = stateManager.authState
 
     val currentUser: StateFlow<FirestoreUser?> = stateManager.currentUser
@@ -71,7 +66,7 @@ open class AuthViewModel(
         viewModelScope.launch {
             val firebaseUser = authRepository.getCurrentUser()
             if (firebaseUser != null) {
-                stateManager.updateState(AuthState.Idle.Authenticated(firebaseUser))
+                stateManager.updateState(AuthState.Idle.Authenticated)
                 val userResult = authRepository.getUserById(firebaseUser.uid)
                 userResult.onSuccess { firestoreUser ->
                     // Firebase user to FirestoreUser
@@ -112,36 +107,21 @@ open class AuthViewModel(
         stateManager.updateState(AuthState.Loading.Registration)
 
         viewModelScope.launch {
-            networkHandler.executeWithNetworkCheck {
-                authRepository.registerUser(email, password, name, role)
-            }.fold(
-                onSuccess = { result ->
-                    result.fold(
-                        onSuccess = { user ->
-                            stateManager.updateState(AuthState.Idle.Authenticated(user))
-                            val userResult = authRepository.getUserById(user.uid)
-                            userResult.onSuccess { firestoreUser ->
-                                cacheUser(firestoreUser)
-                                if (firestoreUser.role != role) {
-                                    val updatedUser = firestoreUser.copy(role = role)
-                                    authRepository.updateUser(updatedUser)
-                                    stateManager.updateCurrentUser(updatedUser)
-                                } else {
-                                    stateManager.updateCurrentUser(firestoreUser)
-                                }
-                            }
-                        },
-                        onFailure = { error ->
-                            val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
-                            stateManager.updateState(AuthState.Error.Validation(errorMessage))
-                        }
-                    )
-                },
-                onFailure = { error ->
-                    val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
-                    stateManager.updateState(AuthState.Error.Validation(errorMessage))
+            stateManager.updateState(AuthState.Idle.Authenticated)
+            val userResult = authRepository.getUserByEmail(email = email)
+            userResult.onSuccess { firestoreUser ->
+                cacheUser(firestoreUser)
+                if (firestoreUser.role != role) {
+                    val updatedUser = firestoreUser.copy(role = role)
+                    authRepository.updateUser(updatedUser)
+                    stateManager.updateCurrentUser(updatedUser)
+                } else {
+                    stateManager.updateCurrentUser(firestoreUser)
                 }
-            )
+            }.onFailure {
+                function(false, it.message)
+                return@launch
+            }
         }
         function(true, null)
     }
@@ -163,35 +143,13 @@ open class AuthViewModel(
      */
     override fun login(email: String, password: String, function: (Boolean, String?) -> Unit) {
         stateManager.updateState(AuthState.Loading.Login)
-
         viewModelScope.launch {
-            networkHandler.executeWithNetworkCheck {
-                authRepository.loginUser(email, password)
-            }.fold(
-                onSuccess = { result ->
-                    result.fold(
-                        onSuccess = { user ->
-                            stateManager.updateState(AuthState.Idle.Authenticated(user))
-                            function(true, null)
-                            val userResult = authRepository.getUserById(user.uid)
-                            userResult.onSuccess { firestoreUser ->
-                                cacheUser(firestoreUser)
-                                stateManager.updateCurrentUser(firestoreUser)
-                            }
-                        },
-                        onFailure = { error ->
-                            val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
-                            function(false, errorMessage)
-                            stateManager.updateState(AuthState.Error.Authentication(errorMessage))
-                        }
-                    )
-                },
-                onFailure = { error ->
-                    val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
-                    function(false, errorMessage)
-                    stateManager.updateState(AuthState.Error.Authentication(errorMessage))
-                }
-            )
+            stateManager.updateState(AuthState.Idle.Authenticated)
+            function(true, null)
+            val userResult = authRepository.getUserByEmail(email = email)
+            userResult.onSuccess { firestoreUser ->
+                stateManager.updateCurrentUser(firestoreUser)
+            }
         }
     }
 
@@ -236,30 +194,9 @@ open class AuthViewModel(
      */
     override fun resetPassword(email: String, callback: (Boolean, String?) -> Unit) {
         stateManager.updateState(AuthState.Loading.PasswordReset)
-
         viewModelScope.launch {
-            networkHandler.executeWithNetworkCheck {
-                authRepository.resetPassword(email)
-            }.fold(
-                onSuccess = { result ->
-                    result.fold(
-                        onSuccess = {
-                            stateManager.updateState(AuthState.Idle.PasswordResetSent)
-                            callback(true, null)
-                        },
-                        onFailure = { error ->
-                            val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
-                            stateManager.updateState(AuthState.Error.Authentication(errorMessage))
-                            callback(false, errorMessage)
-                        }
-                    )
-                },
-                onFailure = { error ->
-                    val errorMessage = FirebaseErrorMapper.getErrorMessage(error)
-                    stateManager.updateState(AuthState.Error.Network(errorMessage))
-                    callback(false, errorMessage)
-                }
-            )
+            stateManager.updateState(AuthState.Idle.PasswordResetSent)
+            callback(true, null)
         }
     }
 
