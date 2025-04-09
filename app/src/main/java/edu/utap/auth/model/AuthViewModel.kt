@@ -69,13 +69,21 @@ open class AuthViewModel(
                 stateManager.updateState(AuthState.Idle.Authenticated)
                 val userResult = authRepository.getUserById(firebaseUser.uid)
                 userResult.onSuccess { firestoreUser ->
-                    // Firebase user to FirestoreUser
                     val updatedUser = firestoreUser.copy()
                     authRepository.updateUser(updatedUser)
                     stateManager.updateCurrentUser(updatedUser)
-                }
+                    cacheUser(firestoreUser)
+        }
             } else {
-                stateManager.resetState()
+                // Try to restore from cached user if exists and not expired
+                val cachedUser = getCachedUser()
+                val isExpired = isAuthExpired()
+                if (cachedUser != null && !isExpired) {
+                    stateManager.updateState(AuthState.Idle.Authenticated)
+                    stateManager.updateCurrentUser(cachedUser)
+                } else {
+                    stateManager.resetState()
+                }
             }
         }
     }
