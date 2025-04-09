@@ -12,7 +12,6 @@ import edu.utap.flood.repository.FloodReportRepository
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.utils.LocationUtils
 import edu.utap.utils.NetworkUtils
-import edu.utap.weather.repository.WeatherRepositoryImpl
 
 /**
  * Factory for creating [FloodReportViewModel] instances with required dependencies.
@@ -27,7 +26,6 @@ import edu.utap.weather.repository.WeatherRepositoryImpl
 class FloodViewModelFactory(
     private val context: Context,
     private val floodReportRepository: FloodReportRepository,
-    private val weatherRepository: WeatherRepositoryImpl,
     private val networkUtils: NetworkUtils,
 ) : ViewModelProvider.Factory {
 
@@ -61,7 +59,6 @@ class FloodViewModelFactory(
                 floodReportRepository = floodReportRepository,
                 authViewModel = authViewModel,
                 locationUtils = locationUtils,
-                weatherRepository = weatherRepository
             ) as T
         }
         else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

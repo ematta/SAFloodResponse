@@ -2,8 +2,6 @@ package edu.utap.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.utap.weather.FloodAlert
-import edu.utap.weather.NOAAService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,11 +15,8 @@ import okhttp3.OkHttpClient
  *
  * @param noaaService The NOAA service used to fetch flood alerts.
  */
-class WeatherViewModel(private val noaaService: NOAAService = NOAAService(OkHttpClient())) :
+class WeatherViewModel() :
     ViewModel() {
-
-    private val _floodAlerts = MutableStateFlow<List<FloodAlert>>(emptyList())
-    val floodAlerts: StateFlow<List<FloodAlert>> = _floodAlerts.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -34,10 +29,8 @@ class WeatherViewModel(private val noaaService: NOAAService = NOAAService(OkHttp
             _isLoading.value = true
             try {
                 _error.value = null
-                _floodAlerts.value = noaaService.getFloodAlerts(lat, lon)
             } catch (e: Exception) {
                 _error.value = "Failed to fetch flood alerts: ${e.message}"
-                _floodAlerts.value = emptyList()
             } finally {
                 _isLoading.value = false
             }

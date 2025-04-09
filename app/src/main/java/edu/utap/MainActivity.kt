@@ -38,8 +38,6 @@ import edu.utap.ui.theme.SAFloodResponseTheme
 import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.NetworkConnectivitySnackbar
 import edu.utap.utils.NetworkMonitor
-import edu.utap.weather.NOAAService
-import edu.utap.weather.repository.WeatherRepositoryImpl
 import okhttp3.OkHttpClient
 import kotlin.getValue
 import kotlinx.coroutines.launch
@@ -294,15 +292,11 @@ fun AuthenticatedApp(
 
             composable(AuthenticatedRoutes.FLOOD_REPORT) {
                 val floodReportRepository = FloodReportRepository(firestore)
-                val weatherRepository = WeatherRepositoryImpl(
-                    NOAAService(OkHttpClient())
-                )
                 FloodReportFormScreen(
                     viewModel = viewModel(
                         factory = FloodViewModelFactory(
                             context = LocalContext.current,
                             floodReportRepository = floodReportRepository,
-                            weatherRepository = weatherRepository,
                             networkUtils = NetworkUtils
                         )
                     ),
