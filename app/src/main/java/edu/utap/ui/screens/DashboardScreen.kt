@@ -41,6 +41,7 @@ import edu.utap.ui.components.AppBottomNavigation
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.platform.LocalContext
+import edu.utap.auth.model.AuthViewModel
 import edu.utap.auth.model.FirestoreUser
 import edu.utap.flood.di.FloodViewModelFactory
 import edu.utap.ui.screens.flood.LocalFloodListScreen
@@ -230,7 +231,7 @@ fun DashboardScreen(
             }
         }
 
-        val authViewModel: edu.utap.auth.model.AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        val authViewModel: AuthViewModel = viewModel()
         val isAuthenticated = authViewModel.getCachedUser() != null && !authViewModel.isAuthExpired()
         AppBottomNavigation(navController, "dashboard", isAuthenticated)
 

@@ -49,6 +49,29 @@ class NavigationManager(
 
         val isAuthenticated by authFlowManager.isAuthenticated.collectAsState()
 
+        // Track if we've already navigated to dashboard after login
+        val hasNavigatedToDashboard = remember { mutableStateOf(false) }
+
+        LaunchedEffect(isAuthenticated, hasNavigatedToDashboard.value) {
+            if (isAuthenticated && !hasNavigatedToDashboard.value) {
+                try {
+                    // Navigate to dashboard only once after login
+                    navController.navigate(AuthenticatedRoutes.DASHBOARD) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                    hasNavigatedToDashboard.value = true
+                } catch (e: Exception) {
+                    Log.w("NavigationManager", "Navigation error: ${e.message}")
+                }
+            } else if (!isAuthenticated) {
+                // Reset flag on logout
+                hasNavigatedToDashboard.value = false
+            }
+        }
+
         LaunchedEffect(isAuthenticated) {
             if (!isAuthenticated) {
                 try {
@@ -84,16 +107,15 @@ class NavigationManager(
                 startDestination = if (isAuthenticated) AuthenticatedRoutes.DASHBOARD else "login",
                 modifier = Modifier.padding(paddingValues)
             ) {
-                if (isAuthenticated) {
-                    addAuthenticatedGraph(navController)
-                } else {
-                    addOpenGraph(navController)
-                }
+                addAuthGraph(navController)
             }
         }
     }
 
-    private fun NavGraphBuilder.addOpenGraph(navController: NavHostController) {
+    private fun NavGraphBuilder.addAuthGraph(navController: NavHostController) {
+        val firestore = FirebaseFirestore.getInstance()
+        val floodReportRepository = FloodReportRepository(firestore)
+
         composable(OpenRoutes.LOGIN) {
             LoginScreen(
                 authViewModel = authFlowManager.authViewModel,
@@ -133,12 +155,6 @@ class NavigationManager(
                 }
             )
         }
-    }
-
-    private fun NavGraphBuilder.addAuthenticatedGraph(navController: NavHostController) {
-        val firestore = FirebaseFirestore.getInstance()
-        val floodReportRepository = FloodReportRepository(firestore)
-
         composable(AuthenticatedRoutes.DASHBOARD) {
             DashboardScreen(
                 navController = navController,
