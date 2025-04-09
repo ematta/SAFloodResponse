@@ -1,20 +1,24 @@
 package edu.utap.auth
 
+import android.content.Context
 import android.util.Log
-import edu.utap.utils.ApplicationContextProvider
-import edu.utap.utils.NetworkUtilsInterface
+import edu.utap.utils.ApplicationContextProviderInterface
+import edu.utap.utils.NetworkUtils
 
 /**
  * Handles network-related operations for authentication.
  * This class provides methods to check network connectivity and handle network-dependent operations.
  */
-class NetworkOperationHandler(private val networkUtils: NetworkUtilsInterface) {
+class NetworkOperationHandler(
+    private val networkUtils: NetworkUtils,
+    private val context: ApplicationContextProviderInterface
+) {
     /**
      * Checks if network is available and returns an error state if not.
      * @return AuthState.Error.Network if network is not available, null otherwise
      */
     fun checkNetworkAvailability(): AuthState.Error.Network? {
-        val isAvailable = networkUtils.isNetworkAvailable(ApplicationContextProvider.getApplicationContext())
+        val isAvailable = networkUtils.isNetworkAvailable(context as Context)
         Log.d("NetworkOperationHandler_checkNetworkAvailability",
             "Network available: $isAvailable [Thread: ${Thread.currentThread().name}]")
         

@@ -49,6 +49,12 @@ import kotlin.getValue
 import kotlinx.coroutines.launch
 
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.Timestamp
+import edu.utap.flood.model.FloodReport
+import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsImpl
+import java.util.UUID
+import kotlin.random.Random
 
 /**
  * Main [ComponentActivity] for the Flood Response application.
@@ -65,6 +71,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var locationPermissionHandler: LocationPermissionHandler
     private lateinit var networkMonitor: NetworkMonitor
+    private lateinit var networkUtils: NetworkUtils
 
     val authViewModel by viewModels<AuthViewModel> {
         ViewModelFactory(applicationContext)
@@ -91,9 +98,8 @@ class MainActivity : ComponentActivity() {
         lifecycle.addObserver(locationPermissionHandler)
         Log.d("MainActivity_onCreate", "Initialized location permission handler")
 
-        // Initialize network monitor
-        networkMonitor = NetworkMonitor(applicationContext)
-        Log.d("MainActivity_onCreate", "Initialized network monitor")
+        // Initialize networkUtils after locationPermissionHandler
+        val networkMonitor = NetworkMonitor(applicationContext)
 
         enableEdgeToEdge()
         Log.d("MainActivity_onCreate", "Enabled edge-to-edge mode")
@@ -118,6 +124,7 @@ class MainActivity : ComponentActivity() {
             if (isAuthenticated) {
                 SAFloodResponseTheme {
                     AuthenticatedApp(
+                        networkUtils = networkUtils,
                         networkMonitor = networkMonitor,
                         locationPermissionHandler = locationPermissionHandler,
                         authViewModel = authViewModel
@@ -223,22 +230,22 @@ class MainActivity : ComponentActivity() {
     fun onTestScreenClick() {
         lifecycleScope.launch {
             repeat(5) { index ->
-                val dummyReport = edu.utap.flood.model.FloodReport(
-                    reportId = java.util.UUID.randomUUID().toString(),
+                val dummyReport = FloodReport(
+                    reportId = UUID.randomUUID().toString(),
                     userId = "testUser${(1..1000).random()}",
-                    latitude = 29.2 + kotlin.random.Random.nextDouble() * 0.4, // San Antonio approx
-                    longitude = -98.8 + kotlin.random.Random.nextDouble() * 0.5,
+                    latitude = 29.2 + Random.nextDouble() * 0.4, // San Antonio approx
+                    longitude = -98.8 + Random.nextDouble() * 0.5,
                     description = "Test flood report #$index",
                     photoUrls = emptyList(),
                     status = "active",
-                    createdAt = com.google.firebase.Timestamp.now(),
-                    updatedAt = com.google.firebase.Timestamp.now(),
-                    isManualLocation = kotlin.random.Random.nextBoolean(),
-                    confirmedCount = kotlin.random.Random.nextInt(0, 5),
-                    deniedCount = kotlin.random.Random.nextInt(0, 5),
+                    createdAt = Timestamp.now(),
+                    updatedAt = Timestamp.now(),
+                    isManualLocation = Random.nextBoolean(),
+                    confirmedCount = Random.nextInt(0, 5),
+                    deniedCount = Random.nextInt(0, 5),
                     severity = listOf("low", "medium", "high").random(),
-                    waterDepthInches = kotlin.random.Random.nextDouble(0.0, 36.0),
-                    isRoadClosed = kotlin.random.Random.nextBoolean()
+                    waterDepthInches = Random.nextDouble(0.0, 36.0),
+                    isRoadClosed = Random.nextBoolean()
                 )
                 try {
                     Log.d("MainActivity", "Inserting dummy report: $dummyReport")
@@ -267,6 +274,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthenticatedApp(
+    networkUtils: NetworkUtils,
     networkMonitor: NetworkMonitor,
     locationPermissionHandler: LocationPermissionHandler,
     authViewModel: AuthViewModel = viewModel()
@@ -326,6 +334,7 @@ fun AuthenticatedApp(
                     locationPermissionHandler = locationPermissionHandler,
                     weatherViewModel = weatherViewModel,
                     floodReportRepository = floodReportRepository,
+                    networkUtils = networkUtils,
                     modifier = Modifier
                 )
             }
@@ -377,7 +386,8 @@ fun AuthenticatedApp(
                         factory = FloodViewModelFactory(
                             context = LocalContext.current,
                             floodReportRepository = floodReportRepository,
-                            weatherRepository = weatherRepository
+                            weatherRepository = weatherRepository,
+                            networkUtils = networkUtils
                         )
                     ),
                     onNavigateBack = {
