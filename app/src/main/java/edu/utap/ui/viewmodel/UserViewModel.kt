@@ -41,6 +41,7 @@ import kotlinx.coroutines.launch
  */
 class UserViewModel(
     private val userRepository: UserRepository = FirebaseUserRepository(),
+    private val storageUtil: FirebaseStorageUtil = FirebaseStorageUtil(),
 ) : ViewModel() {
 
     /**
@@ -239,7 +240,6 @@ class UserViewModel(
         _profileState.value = UserProfileState.Loading.Creating
         viewModelScope.launch {
             // Step 1: Upload the image to Firebase Storage
-            val storageUtil = FirebaseStorageUtil()
             val uploadResult = storageUtil.uploadProfileImage(
                 context = uploadContext,
                 imageUri = imageUri,

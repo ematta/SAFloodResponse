@@ -70,7 +70,7 @@ class UserViewModelProfileImageTest {
         // Set the mock implementation
         NetworkUtils.setImplementation(mockNetworkUtils)
         
-        userViewModel = UserViewModel(mockUserRepository)
+        userViewModel = UserViewModel(mockUserRepository, mockStorageUtil)
     }
     
     @After
@@ -85,7 +85,7 @@ class UserViewModelProfileImageTest {
     fun `uploadProfileImage updates state to Loading then calls storageUtil`() = runTest {
         // Arrange
         val initialState = UserProfileState.Idle.Initial
-        userViewModel = UserViewModel(mockUserRepository)
+        userViewModel = UserViewModel(mockUserRepository, mockStorageUtil)
         assertTrue(userViewModel.profileState.value is UserProfileState.Idle, "Initial state should be Idle")
         
         coEvery { mockStorageUtil.uploadProfileImage(any(), any(), any()) } returns Result.success(testDownloadUrl)
