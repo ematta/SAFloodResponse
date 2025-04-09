@@ -113,8 +113,8 @@ class FirebaseStorageUtilTest {
         val result = storageUtil.uploadProfileImage(mockContext, mockUri, testUserId)
         
         // Assert
-        assertTrue(result.isSuccess)
-        assertEquals(testDownloadUrl, result.getOrNull())
+        assertTrue(result is edu.utap.utils.Result.Success)
+        assertEquals(testDownloadUrl, (result as edu.utap.utils.Result.Success).data)
         verify { mockProfileImagesRef.putFile(mockUri) }
         verify { mockProfileImagesRef.downloadUrl }
         
@@ -134,8 +134,8 @@ class FirebaseStorageUtilTest {
         val result = storageUtil.uploadProfileImage(mockContext, mockUri, testUserId)
         
         // Assert
-        assertTrue(result.isFailure)
-        assertEquals(testException, result.exceptionOrNull())
+        assertTrue(result is edu.utap.utils.Result.Error)
+        assertEquals(testException, (result as edu.utap.utils.Result.Error).cause)
         verify { mockProfileImagesRef.putFile(mockUri) }
         
         unmockkStatic("kotlinx.coroutines.tasks.TasksKt")
@@ -161,8 +161,8 @@ class FirebaseStorageUtilTest {
         val result = storageUtil.uploadProfileImage(mockContext, mockUri, testUserId)
         
         // Assert
-        assertTrue(result.isFailure)
-        assertEquals(testException, result.exceptionOrNull())
+        assertTrue(result is edu.utap.utils.Result.Error)
+        assertEquals(testException, (result as edu.utap.utils.Result.Error).cause)
         verify { mockProfileImagesRef.putFile(mockUri) }
         verify { mockProfileImagesRef.downloadUrl }
         
@@ -190,7 +190,7 @@ class FirebaseStorageUtilTest {
         val result = storageUtil.uploadProfileImage(mockContext, mockUri, testUserId)
         
         // Assert
-        assertTrue(result.isSuccess)
+        assertTrue(result is edu.utap.utils.Result.Success)
         verify { mockStorageRef.child(match { it.contains(".jpg") }) }
         
         unmockkStatic("kotlinx.coroutines.tasks.TasksKt")

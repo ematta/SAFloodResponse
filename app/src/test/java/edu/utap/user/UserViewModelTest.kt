@@ -72,7 +72,7 @@ class UserViewModelTest {
     @Test
     fun `getUserProfile should update state to Success with profile on successful repository call`() = runTest {
         // Given
-        coEvery { userRepository.getUserProfile(testUid) } returns Result.success(testUserProfile)
+        coEvery { userRepository.getUserProfile(testUid) } returns edu.utap.utils.Result.Success(testUserProfile)
 
         // When
         userViewModel.getUserProfile(testUid)
@@ -88,7 +88,7 @@ class UserViewModelTest {
     fun `getUserProfile should update state to Error on repository failure`() = runTest {
         // Given
         val errorMessage = "Profile not found"
-        coEvery { userRepository.getUserProfile(testUid) } returns Result.failure(Exception(errorMessage))
+        coEvery { userRepository.getUserProfile(testUid) } returns edu.utap.utils.Result.Error(errorMessage, Exception(errorMessage))
 
         // When
         userViewModel.getUserProfile(testUid)
@@ -103,7 +103,7 @@ class UserViewModelTest {
     @Test
     fun `createUserProfile should update state to Success with profile on successful repository call`() = runTest {
         // Given
-        coEvery { userRepository.createUserProfile(testUserProfile) } returns Result.success(testUserProfile)
+        coEvery { userRepository.createUserProfile(testUserProfile) } returns edu.utap.utils.Result.Success(testUserProfile)
 
         // When
         userViewModel.createUserProfile(testUserProfile)
@@ -118,7 +118,7 @@ class UserViewModelTest {
     @Test
     fun `updateUserProfile should update state to Success with profile on successful repository call`() = runTest {
         // Given
-        coEvery { userRepository.updateUserProfile(testUserProfile) } returns Result.success(testUserProfile)
+        coEvery { userRepository.updateUserProfile(testUserProfile) } returns edu.utap.utils.Result.Success(testUserProfile)
 
         // When
         userViewModel.updateUserProfile(testUserProfile)
@@ -134,8 +134,8 @@ class UserViewModelTest {
     fun `updateDisplayName should call repository and then refresh profile on success`() = runTest {
         // Given
         val displayName = "Updated Name"
-        coEvery { userRepository.updateDisplayName(testUid, displayName) } returns Result.success(Unit)
-        coEvery { userRepository.getUserProfile(testUid) } returns Result.success(testUserProfile)
+        coEvery { userRepository.updateDisplayName(testUid, displayName) } returns edu.utap.utils.Result.Success(Unit)
+        coEvery { userRepository.getUserProfile(testUid) } returns edu.utap.utils.Result.Success(testUserProfile)
 
         // When
         userViewModel.updateDisplayName(testUid, displayName)
@@ -149,9 +149,9 @@ class UserViewModelTest {
     fun `uploadProfileImage should call repository and then refresh profile on success updatesState`() = runTest {
         val testUri = mockk<Uri>(relaxed = true)
         val testFile = mockk<File>(relaxed = true)
-        coEvery { storageUtil.uploadProfileImage(any(), any(), any()) } returns Result.success("https://test.com/image.jpg")
-        coEvery { userRepository.updatePhotoUrl(any(), any()) } returns Result.success(Unit)
-        coEvery { userRepository.getUserProfile(any()) } returns Result.success(
+        coEvery { storageUtil.uploadProfileImage(any(), any(), any()) } returns edu.utap.utils.Result.Success("https://test.com/image.jpg")
+        coEvery { userRepository.updatePhotoUrl(any(), any()) } returns edu.utap.utils.Result.Success(Unit)
+        coEvery { userRepository.getUserProfile(any()) } returns edu.utap.utils.Result.Success(
             UserProfile(
                 uid = testUid,
                 photoUrl = "https://test.com/image.jpg"
@@ -173,7 +173,7 @@ class UserViewModelTest {
     @Test
     fun `uploadProfileImage with failure setsError`() = runTest {
         val testUri = mockk<Uri>(relaxed = true)
-        coEvery { storageUtil.uploadProfileImage(any(), any(), any()) } returns Result.failure(IOException("Upload failed"))
+        coEvery { storageUtil.uploadProfileImage(any(), any(), any()) } returns edu.utap.utils.Result.Error("Upload failed", IOException("Upload failed"))
 
         userViewModel.uploadProfileImage(mockContext, testUri, testUid)
         advanceUntilIdle()
@@ -199,8 +199,8 @@ class UserViewModelTest {
     fun `updatePhotoUrl should call repository and then refresh profile on success`() = runTest {
         // Given
         val photoUrl = "https://example.com/photo.jpg"
-        coEvery { userRepository.updatePhotoUrl(testUid, photoUrl) } returns Result.success(Unit)
-        coEvery { userRepository.getUserProfile(testUid) } returns Result.success(testUserProfile)
+        coEvery { userRepository.updatePhotoUrl(testUid, photoUrl) } returns edu.utap.utils.Result.Success(Unit)
+        coEvery { userRepository.getUserProfile(testUid) } returns edu.utap.utils.Result.Success(testUserProfile)
 
         // When
         userViewModel.updatePhotoUrl(testUid, photoUrl)

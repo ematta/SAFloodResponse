@@ -95,8 +95,8 @@ class UserRepositoryTest {
         val result = userRepository.createUserProfile(testUserProfile)
         
         // Then
-        assertTrue(result.isSuccess)
-        assertEquals(testUserProfile, result.getOrNull())
+        assertTrue(result is edu.utap.utils.Result.Success)
+        assertEquals(testUserProfile, (result as edu.utap.utils.Result.Success).data)
         verify { documentReference.set(testUserProfile) }
     }
 
@@ -106,8 +106,8 @@ class UserRepositoryTest {
         val result = userRepository.getUserProfile(testUid)
         
         // Then
-        assertTrue(result.isSuccess)
-        assertEquals(testUserProfile, result.getOrNull())
+        assertTrue(result is edu.utap.utils.Result.Success)
+        assertEquals(testUserProfile, (result as edu.utap.utils.Result.Success).data)
         verify { documentReference.get() }
     }
 
@@ -120,7 +120,7 @@ class UserRepositoryTest {
         val result = userRepository.getUserProfile(testUid)
         
         // Then
-        assertTrue(result.isFailure)
+        assertTrue(result is edu.utap.utils.Result.Error)
         verify { documentReference.get() }
     }
 
@@ -130,8 +130,8 @@ class UserRepositoryTest {
         val result = userRepository.updateUserProfile(testUserProfile)
         
         // Then
-        assertTrue(result.isSuccess)
-        assertEquals(testUserProfile, result.getOrNull())
+        assertTrue(result is edu.utap.utils.Result.Success)
+        assertEquals(testUserProfile, (result as edu.utap.utils.Result.Success).data)
         verify { documentReference.set(testUserProfile) }
     }
 
@@ -151,7 +151,7 @@ class UserRepositoryTest {
         val result = userRepository.updateDisplayName(differentUid, displayName)
         
         // Then
-        assertTrue(result.isFailure)
+        assertTrue(result is edu.utap.utils.Result.Error)
         verify(exactly = 0) { firebaseUser.updateProfile(any()) }
     }
 
@@ -171,7 +171,7 @@ class UserRepositoryTest {
         val result = userRepository.updatePhotoUrl(differentUid, photoUrl)
         
         // Then
-        assertTrue(result.isFailure)
+        assertTrue(result is edu.utap.utils.Result.Error)
         verify(exactly = 0) { firebaseUser.updateProfile(any()) }
     }
 }
