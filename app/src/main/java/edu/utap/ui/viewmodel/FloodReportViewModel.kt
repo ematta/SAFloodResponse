@@ -205,7 +205,7 @@ class FloodReportViewModel(
                 floodReportRepository.observeAllReports()
                     .collect { reports ->
                         _allReports.value = reports
-                        _activeFloodReports.value = reports.filter { it.status == "active" }
+                        _activeFloodReports.value = reports
                         _reportsLoading.value = false
                     }
             } catch (e: Exception) {

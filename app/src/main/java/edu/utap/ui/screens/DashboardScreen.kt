@@ -29,6 +29,7 @@ import androidx.navigation.NavController
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.play.core.integrity.d
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
@@ -51,6 +52,7 @@ import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.NetworkUtils
 import edu.utap.utils.NetworkUtilsInterface
 import okhttp3.OkHttpClient
+import android.util.Log
 
 private const val TAG = "DashboardScreen"
 
@@ -93,6 +95,7 @@ fun DashboardScreen(
         )
     )
     val activeFloodReports by floodReportViewModel.activeFloodReports.collectAsState()
+    val allReports by floodReportViewModel.allReports.collectAsState()
 
     LaunchedEffect(Unit) {
         locationPermissionHandler.checkAndRequestLocationPermission(
@@ -133,6 +136,22 @@ fun DashboardScreen(
                 properties = MapProperties(isMyLocationEnabled = isLocationPermissionGranted)
             ) {
                 // Add markers for flood alerts
+                allReports.forEach { report ->
+                    Log.d(TAG, "Adding marker for report: $report")
+                    Marker(
+                        state = MarkerState(position = LatLng(report.latitude, report.longitude)),
+                        title = report.description,
+                        snippet = "Severity: ${report.severity}",
+                        icon = BitmapDescriptorFactory.defaultMarker(
+                            when (report.severity) {
+                                "low" -> BitmapDescriptorFactory.HUE_GREEN
+                                "medium" -> BitmapDescriptorFactory.HUE_YELLOW
+                                "high" -> BitmapDescriptorFactory.HUE_RED
+                                else -> BitmapDescriptorFactory.HUE_BLUE
+                            }
+                        )
+                    )
+                }
             }
                 // Flood report list view
                 LazyColumn(modifier = Modifier.weight(0.4f)) {
@@ -150,19 +169,6 @@ fun DashboardScreen(
                     contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                }
-            }
-
-            // Show error message if any
-            weatherError?.let { errorMessage ->
-                Box(
-                    contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxWidth()
-                ) {
-                    Snackbar(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(errorMessage)
-                    }
                 }
             }
 
