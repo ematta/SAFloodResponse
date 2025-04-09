@@ -62,7 +62,9 @@ import kotlin.random.Random
  */
 class MainActivity : ComponentActivity() {
 
-    private val floodReportRepository = FloodReportRepository()
+    private val firestore = FirebaseFirestore.getInstance()
+
+    private val floodReportRepository = FloodReportRepository(firestore)
 
     private lateinit var locationPermissionHandler: LocationPermissionHandler
     private lateinit var networkMonitor: NetworkMonitor
