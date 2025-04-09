@@ -23,48 +23,40 @@ private const val TAG = "FirestoreDiscussionRepo"
  */
 class FirestoreDiscussionRepository @Inject constructor(
     private val firestore: FirebaseFirestore
-) : DiscussionRepositoryInterface {
+) : BaseRepository(), DiscussionRepositoryInterface {
     private val threadsCollection = firestore.collection("discussions").also {
         Log.d(TAG, "Using Firestore collection: discussions")
     }
 
-    override suspend fun createThread(thread: DiscussionThread): Result<DiscussionThread> = try {
+    override suspend fun createThread(thread: DiscussionThread): Result<DiscussionThread> = safeFirestoreCall {
         threadsCollection.document(thread.threadId)
             .set(thread)
             .await()
-        Result.success(thread)
-    } catch (e: Exception) {
-        Result.failure(e)
+        thread
     }
 
-    override suspend fun getThreadById(threadId: String): Result<DiscussionThread> = try {
+    override suspend fun getThreadById(threadId: String): Result<DiscussionThread> = safeFirestoreCall {
         val document = threadsCollection.document(threadId).get().await()
         if (document.exists()) {
-            Result.success(document.toObject<DiscussionThread>()!!)
+            document.toDomainObject<DiscussionThread>() ?: throw Exception("Failed to parse thread")
         } else {
-            Result.failure(Exception("Thread not found"))
+            throw Exception("Thread not found")
         }
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 
-    override suspend fun updateThread(thread: DiscussionThread): Result<DiscussionThread> = try {
+    override suspend fun updateThread(thread: DiscussionThread): Result<DiscussionThread> = safeFirestoreCall {
         threadsCollection.document(thread.threadId)
             .set(thread)
             .await()
-        Result.success(thread)
-    } catch (e: Exception) {
-        Result.failure(e)
+        thread
     }
 
-    override suspend fun deleteThread(threadId: String): Result<Unit> = try {
+    override suspend fun deleteThread(threadId: String): Result<Unit> = safeFirestoreCall {
         threadsCollection.document(threadId).delete().await()
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
+        Unit
     }
 
-    override suspend fun addMessage(threadId: String, message: DiscussionMessage): Result<DiscussionMessage> = try {
+    override suspend fun addMessage(threadId: String, message: DiscussionMessage): Result<DiscussionMessage> = safeFirestoreCall {
         val threadRef = threadsCollection.document(threadId)
         val messagesCollection = threadRef.collection("messages")
         
@@ -72,32 +64,24 @@ class FirestoreDiscussionRepository @Inject constructor(
             .set(message)
             .await()
         
-        // The message is added to the subcollection above.
-        // No need to update the main thread document's message list here.
-        Result.success(message)
-    } catch (e: Exception) {
-        Result.failure(e)
+        message
     }
 
-    override suspend fun updateMessage(threadId: String, message: DiscussionMessage): Result<DiscussionMessage> = try {
+    override suspend fun updateMessage(threadId: String, message: DiscussionMessage): Result<DiscussionMessage> = safeFirestoreCall {
         val messagesCollection = threadsCollection.document(threadId).collection("messages")
         messagesCollection.document(message.messageId)
             .set(message)
             .await()
-        Result.success(message)
-    } catch (e: Exception) {
-        Result.failure(e)
+        message
     }
 
-    override suspend fun deleteMessage(threadId: String, messageId: String): Result<Unit> = try {
+    override suspend fun deleteMessage(threadId: String, messageId: String): Result<Unit> = safeFirestoreCall {
         threadsCollection.document(threadId)
             .collection("messages")
             .document(messageId)
             .delete()
             .await()
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
+        Unit
     }
 
     override fun observeThreadMessages(threadId: String): Flow<List<DiscussionMessage>> = callbackFlow {
@@ -111,7 +95,7 @@ class FirestoreDiscussionRepository @Inject constructor(
                 }
                 
                 val messages = querySnapshot?.documents?.mapNotNull { document ->
-                    document.toObject<DiscussionMessage>()
+                    document.toDomainObject<DiscussionMessage>()
                 } ?: emptyList()
                 
                 trySend(messages)
@@ -130,7 +114,7 @@ class FirestoreDiscussionRepository @Inject constructor(
                 }
                 
                 val threads = querySnapshot?.documents?.mapNotNull { document ->
-                    document.toObject<DiscussionThread>()
+                    document.toDomainObject<DiscussionThread>()
                 } ?: emptyList()
                 
                 trySend(threads)
