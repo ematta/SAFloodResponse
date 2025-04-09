@@ -15,7 +15,8 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import edu.utap.user.MainDispatcherRule
 import edu.utap.models.UserProfile
-import edu.utap.user.repository.UserRepository
+import edu.utap.repository.AuthRepositoryImpl
+import edu.utap.repository.UserRepository
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every
@@ -71,7 +72,7 @@ class AuthRepositoryTest {
     @MockK
     private lateinit var querySnapshot: QuerySnapshot
 
-    private lateinit var authRepository: FirestoreAuthRepository
+    private lateinit var authRepository: AuthRepositoryImpl
      
     @Before
     fun setup() {
@@ -115,7 +116,7 @@ class AuthRepositoryTest {
         every { mockUser.updateProfile(any()) } returns profileUpdateTask
 
         // Setup repository with mocked dependencies
-        authRepository = FirestoreAuthRepository(firebaseAuth = firebaseAuth, firestore = firestore, userRepository = userRepository)
+        authRepository = AuthRepositoryImpl(firebaseAuth = firebaseAuth, firestore = firestore)
     }
     
     @Test

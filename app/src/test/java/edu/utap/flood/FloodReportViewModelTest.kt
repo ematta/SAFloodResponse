@@ -7,7 +7,7 @@ import com.google.android.gms.tasks.Task
 import edu.utap.models.AuthViewModelInterface
 import edu.utap.models.FirestoreUser
 import edu.utap.models.FloodReport
-import edu.utap.flood.repository.FloodReportRepositoryInterface
+import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationUtils
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.ReportState

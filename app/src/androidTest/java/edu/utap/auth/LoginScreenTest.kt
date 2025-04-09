@@ -24,7 +24,7 @@ class LoginScreenTest {
         testViewModelFactory = TestViewModelFactory(mockViewModel)
         composeTestRule.setViewModelFactory(testViewModelFactory)
         assert(TestViewModelFactoryProvider.factory == testViewModelFactory) { "Factory not set correctly in LoginScreenTest" }
-        Log.d("LoginScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
+        Log.d(TAG, "LoginScreenTest: Test setup complete. Factory: ${TestViewModelFactoryProvider.factory}")
     }
 
     @Test
