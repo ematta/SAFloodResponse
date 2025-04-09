@@ -35,6 +35,7 @@ import androidx.navigation.NavHostController
 import edu.utap.auth.ForgotPasswordScreen
 import edu.utap.auth.LoginScreen
 import edu.utap.auth.RegisterScreen
+import edu.utap.auth.model.AuthViewModelInterface
 
 class NavigationManager(
     private val authFlowManager: AuthFlowManager,
@@ -43,7 +44,7 @@ class NavigationManager(
     private val locationPermissionHandler: edu.utap.location.LocationPermissionHandler
 ) {
     @Composable
-    fun NavigationHost() {
+    fun NavigationHost(authViewModel: edu.utap.auth.model.AuthViewModelInterface) {
         val navController = rememberNavController()
         val context = LocalContext.current
 
@@ -84,12 +85,12 @@ class NavigationManager(
                 startDestination = if (isAuthenticated) AuthenticatedRoutes.DASHBOARD else "login",
                 modifier = Modifier.padding(paddingValues)
             ) {
-                addAuthGraph(navController)
+                addAuthGraph(navController, authViewModel)
             }
         }
     }
 
-    private fun NavGraphBuilder.addAuthGraph(navController: NavHostController) {
+    private fun NavGraphBuilder.addAuthGraph(navController: NavHostController, authViewModel: AuthViewModelInterface) {
         val firestore = FirebaseFirestore.getInstance()
         val floodReportRepository = FloodReportRepository(firestore)
 
@@ -139,6 +140,7 @@ class NavigationManager(
                 weatherViewModel = WeatherViewModel(),
                 floodReportRepository = floodReportRepository,
                 networkUtils = networkUtils,
+                authViewModel = authViewModel,
                 modifier = Modifier
             )
         }
