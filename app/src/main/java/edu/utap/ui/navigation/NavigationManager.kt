@@ -1,4 +1,4 @@
-package edu.utap.navigation
+package edu.utap.ui.navigation
 
 import android.app.Activity
 import android.util.Log
@@ -29,17 +29,19 @@ import edu.utap.utils.NetworkMonitor
 import edu.utap.utils.NetworkUtils
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import edu.utap.MainActivity
 import edu.utap.ui.screens.auth.ForgotPasswordScreen
 import edu.utap.ui.screens.auth.LoginScreen
 import edu.utap.ui.screens.auth.RegisterScreen
 import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.di.FloodViewModelFactory
+import edu.utap.utils.LocationPermissionHandler
 
 class NavigationManager(
     private val authFlowManager: AuthFlowManager,
     private val networkUtils: NetworkUtils,
     private val networkMonitor: NetworkMonitor,
-    private val locationPermissionHandler: edu.utap.location.LocationPermissionHandler
+    private val locationPermissionHandler: LocationPermissionHandler
 ) {
     @Composable
     fun NavigationHost(authViewModel: AuthViewModelInterface) {
@@ -67,7 +69,7 @@ class NavigationManager(
                 AppHeader(
                     onTestScreenClick = {
                         (context as? Activity)?.let { activity: Activity ->
-                            if (activity is edu.utap.MainActivity) {
+                            if (activity is MainActivity) {
                                 activity.onTestScreenClick()
                             }
                         }

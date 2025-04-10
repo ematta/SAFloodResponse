@@ -1,6 +1,6 @@
 package edu.utap.auth
 
-import edu.utap.models.FirestoreUser // Keep existing import, might be needed elsewhere
+import edu.utap.models.FirestoreUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

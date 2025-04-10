@@ -1,4 +1,4 @@
-package edu.utap.location
+package edu.utap.utils
 
 import android.Manifest
 import android.content.pm.PackageManager

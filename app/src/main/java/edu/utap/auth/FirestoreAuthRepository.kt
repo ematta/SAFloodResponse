@@ -1,4 +1,4 @@
-package edu.utap.repository
+package edu.utap.auth
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
@@ -8,7 +8,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.models.FirestoreUser
 import edu.utap.repository.BaseRepository
 import edu.utap.repository.AuthRepositoryInterface
-import edu.utap.utils.FirebaseErrorMapper
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -210,11 +209,4 @@ class FirestoreAuthRepository(
         
         awaitClose { listener.remove() }
     }
-
-    /**
-     * Executes an authentication operation using Firebase Authentication.
-     *
-     * @param authOperation The authentication operation to be executed.
-     * @return [Result] containing the result of the authentication operation on success,
-     */
 }
