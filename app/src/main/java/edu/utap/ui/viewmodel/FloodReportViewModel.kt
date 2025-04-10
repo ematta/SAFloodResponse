@@ -3,7 +3,6 @@ package edu.utap.ui.viewmodel
 import android.location.Location
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.utap.models.AuthViewModelInterface
 import edu.utap.models.FloodReport
 import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationUtils

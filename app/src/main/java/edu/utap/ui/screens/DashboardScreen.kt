@@ -40,8 +40,8 @@ import edu.utap.ui.components.AppBottomNavigation
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.platform.LocalContext
-import edu.utap.models.AuthViewModel
-import edu.utap.models.AuthViewModelInterface
+import edu.utap.ui.viewmodel.AuthViewModel
+import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.di.FloodViewModelFactory
 import edu.utap.ui.screens.flood.LocalFloodListScreen
 import edu.utap.ui.viewmodel.FloodReportViewModel

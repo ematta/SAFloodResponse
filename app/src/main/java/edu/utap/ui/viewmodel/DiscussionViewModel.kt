@@ -2,7 +2,6 @@ package edu.utap.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.utap.models.AuthViewModelInterface
 import edu.utap.models.DiscussionMessage
 import edu.utap.models.DiscussionThread
 import edu.utap.repository.DiscussionRepositoryInterface

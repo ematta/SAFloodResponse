@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import edu.utap.ui.screens.auth.LoginScreen
+import edu.utap.ui.viewmodel.AuthViewModelInterface
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,7 +24,7 @@ class LoginTest {
     private val loadingSpinner = hasTestTag("loadingSpinner")
     private val errorMessage = hasTestTag("errorMessage")
 
-    private class FakeAuthViewModel : edu.utap.models.AuthViewModelInterface {
+    private class FakeAuthViewModel : AuthViewModelInterface {
         override val authState = kotlinx.coroutines.flow.MutableStateFlow<edu.utap.auth.AuthState>(edu.utap.auth.AuthState.Idle.Unauthenticated)
 
         override fun login(email: String, password: String, callback: (Boolean, String?) -> Unit) {

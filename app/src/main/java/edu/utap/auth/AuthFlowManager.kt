@@ -1,6 +1,6 @@
 package edu.utap.auth
 
-import edu.utap.models.AuthViewModel
+import edu.utap.ui.viewmodel.AuthViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

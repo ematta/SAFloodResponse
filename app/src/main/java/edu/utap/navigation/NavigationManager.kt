@@ -32,7 +32,7 @@ import androidx.navigation.NavHostController
 import edu.utap.ui.screens.auth.ForgotPasswordScreen
 import edu.utap.ui.screens.auth.LoginScreen
 import edu.utap.ui.screens.auth.RegisterScreen
-import edu.utap.models.AuthViewModelInterface
+import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.di.FloodViewModelFactory
 
 class NavigationManager(

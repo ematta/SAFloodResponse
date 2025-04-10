@@ -5,6 +5,7 @@ package edu.utap.models
 import android.location.Location
 import com.google.android.gms.tasks.Task
 import edu.utap.repository.FloodReportRepositoryInterface
+import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.utils.LocationUtils
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.ReportState

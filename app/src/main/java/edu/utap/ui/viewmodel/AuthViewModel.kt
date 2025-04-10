@@ -1,4 +1,4 @@
-package edu.utap.models
+package edu.utap.ui.viewmodel
 
 import android.content.Context
 import com.google.gson.Gson
@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.utap.auth.AuthState
 import edu.utap.auth.AuthStateManager
+import edu.utap.models.FirestoreUser
 import edu.utap.repository.AuthRepositoryInterface
 import edu.utap.utils.FirebaseErrorMapper
 import edu.utap.utils.NetworkUtils

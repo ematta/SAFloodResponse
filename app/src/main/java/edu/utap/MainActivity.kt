@@ -15,7 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.models.AuthViewModelInterface
+import edu.utap.ui.viewmodel.AuthViewModelInterface
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,7 +24,7 @@ import androidx.navigation.navArgument
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.AuthState
 import edu.utap.di.ViewModelFactory
-import edu.utap.models.AuthViewModel
+import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.di.FloodViewModelFactory
 import edu.utap.repository.FloodReportRepository
 import edu.utap.location.LocationPermissionHandler
