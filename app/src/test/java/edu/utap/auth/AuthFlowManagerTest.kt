@@ -1,5 +1,5 @@
 package edu.utap.auth
-import edu.utap.models.AuthViewModel
+import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.models.FirestoreUser
 import edu.utap.user.MainDispatcherRule
 import io.mockk.MockKAnnotations

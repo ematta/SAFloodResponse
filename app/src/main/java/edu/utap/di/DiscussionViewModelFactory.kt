@@ -4,8 +4,8 @@ import android.util.Log
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import edu.utap.models.AuthViewModel
-import edu.utap.models.AuthViewModelInterface
+import edu.utap.ui.viewmodel.AuthViewModel
+import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.repository.DiscussionRepositoryInterface
 import edu.utap.ui.viewmodel.DiscussionViewModel
 

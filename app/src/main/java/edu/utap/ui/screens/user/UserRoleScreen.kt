@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.models.AuthViewModel
+import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.models.FirestoreUser
 import edu.utap.utils.PermissionCheck
 import edu.utap.utils.RoleUtils

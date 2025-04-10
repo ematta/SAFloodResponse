@@ -1,6 +1,7 @@
-package edu.utap.models
+package edu.utap.ui.viewmodel
 
 import edu.utap.auth.AuthState
+import edu.utap.models.FirestoreUser
 import edu.utap.utils.RoleUtils
 import kotlinx.coroutines.flow.StateFlow
 
@@ -62,7 +63,7 @@ interface AuthViewModelInterface {
     /**
      * Gets the current authenticated user profile, if any.
      *
-     * @return The [FirestoreUser] or null if not authenticated.
+     * @return The [edu.utap.models.FirestoreUser] or null if not authenticated.
      */
     fun getCurrentUser(): FirestoreUser?
     /**

@@ -30,8 +30,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.AuthState
-import edu.utap.models.AuthViewModel
-import edu.utap.models.AuthViewModelInterface
+import edu.utap.ui.viewmodel.AuthViewModel
+import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.utils.RoleUtils
 import edu.utap.utils.ValidationUtils
 import android.util.Log

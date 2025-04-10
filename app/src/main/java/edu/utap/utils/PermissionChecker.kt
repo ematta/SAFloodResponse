@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.models.AuthViewModel
+import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.models.FirestoreUser
 
 /**
