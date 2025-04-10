@@ -27,7 +27,7 @@ import edu.utap.di.ViewModelFactory
 import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.di.FloodViewModelFactory
 import edu.utap.repository.FloodReportRepository
-import edu.utap.location.LocationPermissionHandler
+import edu.utap.utils.LocationPermissionHandler
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
 import edu.utap.ui.screens.user.ProfileScreen
@@ -45,7 +45,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.firebase.Timestamp
 import edu.utap.auth.AuthFlowManager
 import edu.utap.models.FloodReport
-import edu.utap.navigation.NavigationManager
+import edu.utap.ui.navigation.NavigationManager
 import edu.utap.utils.NetworkUtils
 import java.util.UUID
 import kotlin.random.Random
