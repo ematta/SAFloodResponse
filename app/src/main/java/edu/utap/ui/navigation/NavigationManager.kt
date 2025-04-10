@@ -24,7 +24,7 @@ import edu.utap.ui.screens.discussion.DiscussionListScreen
 import edu.utap.ui.screens.discussion.DiscussionThreadScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
 import edu.utap.ui.viewmodel.WeatherViewModel
-import edu.utap.utils.NetworkConnectivitySnackbar
+import edu.utap.ui.NetworkConnectivitySnackbar
 import edu.utap.utils.NetworkMonitor
 import edu.utap.utils.NetworkUtils
 import androidx.navigation.NavGraphBuilder

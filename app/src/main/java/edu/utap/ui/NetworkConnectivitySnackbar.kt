@@ -1,4 +1,4 @@
-package edu.utap.utils
+package edu.utap.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Snackbar
@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import edu.utap.utils.NetworkMonitor
+import edu.utap.utils.NetworkState
 
 /**
  * A composable that displays a snackbar when network connectivity changes
