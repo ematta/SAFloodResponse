@@ -1,4 +1,4 @@
-package edu.utap.user
+package edu.utap.auth
 
 import edu.utap.models.UserProfile
 

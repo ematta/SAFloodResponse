@@ -1,7 +1,5 @@
 package edu.utap.utils
 
-import edu.utap.user.FirebaseStorageUtilInterface
-
 interface StorageUtilProviderInterface {
     fun getStorageUtil(): FirebaseStorageUtilInterface
 }
