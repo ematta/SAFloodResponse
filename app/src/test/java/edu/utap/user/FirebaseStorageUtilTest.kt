@@ -194,4 +194,56 @@ class FirebaseStorageUtilTest {
         
         unmockkStatic("kotlinx.coroutines.tasks.TasksKt")
     }
-} 
+    @Test
+    fun `deleteProfileImage should delete file and return success on success`() = runTest {
+        // Arrange
+        val imageUrl = "https://example.com/test-image.jpg"
+        val mockDeleteRef = mockk<StorageReference>()
+        val mockDeleteTask = mockk<Task<Void>>()
+
+        mockkStatic("kotlinx.coroutines.tasks.TasksKt")
+
+        every { mockStorage.getReferenceFromUrl(imageUrl) } returns mockDeleteRef
+        every { mockDeleteRef.delete() } returns mockDeleteTask
+        coEvery { mockDeleteTask.await() } returns mockk()
+
+        // Act
+        val result = storageUtil.deleteProfileImage(imageUrl)
+
+        // Assert
+        assertTrue(result is edu.utap.utils.Result.Success)
+        assertEquals(Unit, (result as edu.utap.utils.Result.Success).data)
+
+        verify { mockStorage.getReferenceFromUrl(imageUrl) }
+        verify { mockDeleteRef.delete() }
+
+        unmockkStatic("kotlinx.coroutines.tasks.TasksKt")
+    }
+
+    @Test
+    fun `deleteProfileImage should return failure when delete fails`() = runTest {
+        // Arrange
+        val imageUrl = "https://example.com/test-image.jpg"
+        val testException = Exception("Delete failed")
+        val mockDeleteRef = mockk<StorageReference>()
+        val mockDeleteTask = mockk<Task<Void>>()
+
+        mockkStatic("kotlinx.coroutines.tasks.TasksKt")
+
+        every { mockStorage.getReferenceFromUrl(imageUrl) } returns mockDeleteRef
+        every { mockDeleteRef.delete() } returns mockDeleteTask
+        coEvery { mockDeleteTask.await() } throws testException
+
+        // Act
+        val result = storageUtil.deleteProfileImage(imageUrl)
+
+        // Assert
+        assertTrue(result is edu.utap.utils.Result.Error)
+        assertEquals(testException, (result as edu.utap.utils.Result.Error).cause)
+
+        verify { mockStorage.getReferenceFromUrl(imageUrl) }
+        verify { mockDeleteRef.delete() }
+
+        unmockkStatic("kotlinx.coroutines.tasks.TasksKt")
+    }
+}
