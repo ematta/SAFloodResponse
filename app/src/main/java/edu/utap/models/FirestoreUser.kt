@@ -9,6 +9,16 @@ import com.google.firebase.firestore.PropertyName
  *
  * Includes user ID, name, email, profile picture URL, role, location info,
  * and timestamps for creation and update.
+ *
+ * @property userId Unique identifier for the user.
+ * @property name Display name of the user.
+ * @property email Email address of the user.
+ * @property profilePic URL of the user's profile picture.
+ * @property role Role of the user (e.g., "user", "admin").
+ * @property city City where the user resides.
+ * @property county County where the user resides.
+ * @property createdAt Timestamp when the user was created.
+ * @property updatedAt Timestamp when the user was last updated.
  */
 data class FirestoreUser(
     @DocumentId
