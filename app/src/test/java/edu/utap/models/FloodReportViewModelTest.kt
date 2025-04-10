@@ -1,12 +1,9 @@
-@file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
-package edu.utap.flood
+package edu.utap.models
 
 import android.location.Location
 import com.google.android.gms.tasks.Task
-import edu.utap.models.AuthViewModelInterface
-import edu.utap.models.FirestoreUser
-import edu.utap.models.FloodReport
 import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationUtils
 import edu.utap.ui.viewmodel.FloodReportViewModel
@@ -19,6 +16,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -29,6 +28,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
 
 class FloodReportViewModelTest {
     
@@ -251,14 +252,14 @@ class FloodReportViewModelTest {
 
 class TestDispatcherRule : TestRule {
     private val testDispatcher = StandardTestDispatcher()
-    override fun apply(base: org.junit.runners.model.Statement, description: org.junit.runner.Description) =
-        object : org.junit.runners.model.Statement() {
+    override fun apply(base: Statement, description: Description) =
+        object : Statement() {
             override fun evaluate() {
-                kotlinx.coroutines.Dispatchers.setMain(testDispatcher)
+                Dispatchers.setMain(testDispatcher)
                 try {
                     base.evaluate()
                 } finally {
-                    kotlinx.coroutines.Dispatchers.resetMain()
+                    Dispatchers.resetMain()
                 }
             }
         }

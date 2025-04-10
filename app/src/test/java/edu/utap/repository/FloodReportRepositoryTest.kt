@@ -1,12 +1,12 @@
-package edu.utap.flood.repository
+package edu.utap.repository
 
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.*
 import edu.utap.models.FloodReport
-import edu.utap.repository.FloodReportRepository
 import io.mockk.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import org.junit.Assert.*
@@ -14,6 +14,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FloodReportRepositoryTest {
@@ -148,14 +150,14 @@ class FloodReportRepositoryTest {
 
 class TestDispatcherRule : TestRule {
     private val testDispatcher = StandardTestDispatcher()
-    override fun apply(base: org.junit.runners.model.Statement, description: org.junit.runner.Description) =
-        object : org.junit.runners.model.Statement() {
+    override fun apply(base: Statement, description: Description) =
+        object : Statement() {
             override fun evaluate() {
-                kotlinx.coroutines.Dispatchers.setMain(testDispatcher)
+                Dispatchers.setMain(testDispatcher)
                 try {
                     base.evaluate()
                 } finally {
-                    kotlinx.coroutines.Dispatchers.resetMain()
+                    Dispatchers.resetMain()
                 }
             }
         }
