@@ -2,7 +2,6 @@ package edu.utap.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
 import edu.utap.models.DiscussionMessage
 import edu.utap.models.DiscussionThread
 import kotlinx.coroutines.channels.awaitClose

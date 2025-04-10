@@ -5,7 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.di.AuthModule
 import edu.utap.repository.FirebaseUserRepository
-import edu.utap.user.FirebaseStorageUtil
+import edu.utap.utils.FirebaseStorageUtil
 import edu.utap.utils.*
 
 /**

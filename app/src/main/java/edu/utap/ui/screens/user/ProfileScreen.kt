@@ -28,7 +28,7 @@ import com.google.firebase.auth.FirebaseAuth
 import edu.utap.ui.components.*
 import edu.utap.ui.viewmodel.UserViewModel
 import edu.utap.models.UserProfile
-import edu.utap.user.UserProfileState
+import edu.utap.auth.UserProfileState
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)

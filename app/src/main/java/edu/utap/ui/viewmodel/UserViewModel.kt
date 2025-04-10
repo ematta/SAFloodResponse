@@ -2,20 +2,13 @@ package edu.utap.ui.viewmodel
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.utap.user.FirebaseStorageUtil
-import edu.utap.user.FirebaseStorageUtilInterface
+import edu.utap.utils.FirebaseStorageUtil
 import edu.utap.models.UserProfile
-import edu.utap.user.UserProfileState
+import edu.utap.auth.UserProfileState
 import edu.utap.repository.FirebaseUserRepository
 import edu.utap.repository.UserRepository
-import edu.utap.utils.DefaultApplicationContextProvider
-import edu.utap.utils.DefaultStorageUtilProvider
-import edu.utap.utils.NetworkUtilsInterface
-import edu.utap.utils.NetworkUtilsProvider
-import edu.utap.utils.StorageUtilProviderInterface
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

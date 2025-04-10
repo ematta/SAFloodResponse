@@ -5,10 +5,10 @@ import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
 import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import edu.utap.utils.FirebaseStorageUtil
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -16,7 +16,6 @@ import org.junit.Rule
 import org.junit.Test
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
-import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.tasks.await

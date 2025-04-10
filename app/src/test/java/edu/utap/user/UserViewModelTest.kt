@@ -8,9 +8,11 @@ import org.junit.Rule
 import org.junit.Test
 import android.content.Context
 import android.net.Uri
+import edu.utap.auth.UserProfileState
 import edu.utap.models.UserProfile
 import edu.utap.ui.viewmodel.UserViewModel
 import edu.utap.repository.UserRepository
+import edu.utap.utils.FirebaseStorageUtil
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import edu.utap.utils.NetworkUtils

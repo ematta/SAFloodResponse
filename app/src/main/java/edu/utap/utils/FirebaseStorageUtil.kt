@@ -1,4 +1,4 @@
-package edu.utap.user
+package edu.utap.utils
 
 import android.content.Context
 import android.net.Uri
@@ -23,7 +23,7 @@ interface FirebaseStorageUtilInterface {
      * @param userId The user ID to use in the storage path
      * @return Result containing the download URL of the uploaded image or an error
      */
-    suspend fun uploadProfileImage(context: Context, imageUri: Uri, userId: String): edu.utap.utils.Result<String>
+    suspend fun uploadProfileImage(context: Context, imageUri: Uri, userId: String): Result<String>
 
     /**
      * Deletes a profile image from Firebase Storage.
@@ -31,7 +31,7 @@ interface FirebaseStorageUtilInterface {
      * @param imageUrl The URL of the image to delete
      * @return Result indicating success or failure
      */
-    suspend fun deleteProfileImage(imageUrl: String): edu.utap.utils.Result<Unit>
+    suspend fun deleteProfileImage(imageUrl: String): Result<Unit>
 }
 
 /**
@@ -57,7 +57,7 @@ class FirebaseStorageUtil(
         context: Context,
         imageUri: Uri,
         userId: String
-    ): edu.utap.utils.Result<String> = edu.utap.utils.Result.runCatchingSuspend {
+    ): Result<String> = Result.runCatchingSuspend {
         val profileImagesRef = storageRef.child(
             "profile_images/$userId/${UUID.randomUUID()}.${getFileExtension(context, imageUri)}"
         )
@@ -72,7 +72,7 @@ class FirebaseStorageUtil(
      * @param imageUrl URL of the image to delete
      * @return Result containing Unit if successful, or an exception if failed
      */
-    override suspend fun deleteProfileImage(imageUrl: String): edu.utap.utils.Result<Unit> = edu.utap.utils.Result.runCatchingSuspend {
+    override suspend fun deleteProfileImage(imageUrl: String): Result<Unit> = Result.runCatchingSuspend {
         val imageRef = firebaseStorage.getReferenceFromUrl(imageUrl)
         imageRef.delete().await()
         Unit
