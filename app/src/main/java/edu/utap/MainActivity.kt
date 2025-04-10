@@ -1,5 +1,12 @@
 package edu.utap
 
+import edu.utap.utils.NetworkUtilsInterface
+import edu.utap.utils.LocationPermissionHandler
+import edu.utap.ui.viewmodel.AuthViewModelInterface
+import edu.utap.ui.viewmodel.AuthViewModel
+import edu.utap.ui.navigation.NavigationManager
+import edu.utap.ui.NetworkConnectivitySnackbar
+
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
@@ -15,7 +22,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.ui.viewmodel.AuthViewModelInterface
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -24,10 +30,8 @@ import androidx.navigation.navArgument
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.AuthState
 import edu.utap.di.ViewModelFactory
-import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.di.FloodViewModelFactory
 import edu.utap.repository.FloodReportRepository
-import edu.utap.utils.LocationPermissionHandler
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.screens.DashboardScreen
 import edu.utap.ui.screens.user.ProfileScreen
@@ -36,7 +40,6 @@ import edu.utap.ui.screens.discussion.DiscussionThreadScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
 import edu.utap.ui.viewmodel.WeatherViewModel
-import edu.utap.ui.NetworkConnectivitySnackbar
 import edu.utap.utils.NetworkMonitor
 import kotlin.getValue
 import kotlinx.coroutines.launch
@@ -45,7 +48,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.firebase.Timestamp
 import edu.utap.auth.AuthFlowManager
 import edu.utap.models.FloodReport
-import edu.utap.ui.navigation.NavigationManager
 import edu.utap.utils.NetworkUtils
 import java.util.UUID
 import kotlin.random.Random
@@ -87,7 +89,7 @@ class MainActivity : ComponentActivity() {
         Log.d("MainActivity_onCreate", "Initialized location permission handler")
 
         // Initialize network monitor and utils
-        networkMonitor = NetworkMonitor(applicationContext)
+        networkMonitor = NetworkMonitor(applicationContext, NetworkUtils as NetworkUtilsInterface)
 
         // Initialize AuthFlowManager
         authFlowManager = AuthFlowManager(authViewModel)

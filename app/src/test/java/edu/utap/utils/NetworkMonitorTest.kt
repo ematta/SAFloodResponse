@@ -13,22 +13,45 @@ import io.mockk.mockk
 import io.mockk.every
 import io.mockk.spyk
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class NetworkMonitorTest {
+    private val testDispatcher = StandardTestDispatcher()
+
+    @Before
+    fun setUp() {
+        kotlinx.coroutines.Dispatchers.setMain(testDispatcher)
+    }
+
+    @After
+    fun tearDown() {
+        kotlinx.coroutines.Dispatchers.resetMain()
+    }
 
     @Test
     fun `networkState initial AVAILABLE`() {
-        // Verify that when the network is initially available,
-        // the flow emits NetworkState.AVAILABLE.
         io.mockk.mockkStatic("androidx.core.content.ContextCompat")
+
         val connectivityManager = mockk<android.net.ConnectivityManager>(relaxed = true)
         val context = mockk<android.content.Context>(relaxed = true)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+
+        every { context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) } returns connectivityManager
+        every { networkUtils.isNetworkAvailable(context) } returns true
+
         val network = mockk<android.net.Network>()
         val networkCapabilities = mockk<android.net.NetworkCapabilities>()
         every { connectivityManager.activeNetwork } returns network
         every { connectivityManager.getNetworkCapabilities(network) } returns networkCapabilities
         every { networkCapabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) } returns true
 
-        val monitor = NetworkMonitor(context)
+        val monitor = NetworkMonitor(context, networkUtils)
         runTest {
             val state = monitor.networkState().first()
             assertEquals(NetworkState.AVAILABLE, state)
@@ -37,14 +60,18 @@ class NetworkMonitorTest {
 
     @Test
     fun `networkState initial UNAVAILABLE`() {
-        // Verify that when the network is initially unavailable,
-        // the flow emits NetworkState.UNAVAILABLE.
         io.mockk.mockkStatic("androidx.core.content.ContextCompat")
-        val context = mockk<android.content.Context>(relaxed = true)
+
         val connectivityManager = mockk<android.net.ConnectivityManager>(relaxed = true)
+        val context = mockk<android.content.Context>(relaxed = true)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+
+        every { context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) } returns connectivityManager
+        every { networkUtils.isNetworkAvailable(context) } returns false
+
         every { connectivityManager.activeNetwork } returns null
 
-        val monitor = NetworkMonitor(context)
+        val monitor = NetworkMonitor(context, networkUtils)
         runTest {
             val state = monitor.networkState().first()
             assertEquals(NetworkState.UNAVAILABLE, state)
@@ -66,7 +93,8 @@ class NetworkMonitorTest {
         val callbackSlot = io.mockk.slot<android.net.ConnectivityManager.NetworkCallback>()
         every { connectivityManager.registerNetworkCallback(any(), capture(callbackSlot)) } returns Unit
 
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         runTest {
             val states = mutableListOf<NetworkState>()
             val job = launch {
@@ -89,7 +117,8 @@ class NetworkMonitorTest {
         val callbackSlot = io.mockk.slot<android.net.ConnectivityManager.NetworkCallback>()
         every { connectivityManager.registerNetworkCallback(any(), capture(callbackSlot)) } returns Unit
 
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         runTest {
             val states = mutableListOf<NetworkState>()
             val job = launch {
@@ -113,7 +142,8 @@ class NetworkMonitorTest {
         val callbackSlot = io.mockk.slot<android.net.ConnectivityManager.NetworkCallback>()
         every { connectivityManager.registerNetworkCallback(any(), capture(callbackSlot)) } returns Unit
 
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         runTest {
             val states = mutableListOf<NetworkState>()
             val job = launch {
@@ -137,7 +167,8 @@ class NetworkMonitorTest {
         val callbackSlot = io.mockk.slot<android.net.ConnectivityManager.NetworkCallback>()
         every { connectivityManager.registerNetworkCallback(any(), capture(callbackSlot)) } returns Unit
 
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         runTest {
             val states = mutableListOf<NetworkState>()
             val job = launch {
@@ -160,7 +191,8 @@ class NetworkMonitorTest {
         val connectivityManager = mockk<android.net.ConnectivityManager>(relaxed = true)
         val context = mockk<android.content.Context>(relaxed = true)
         every { connectivityManager.activeNetwork } returns null
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         runTest {
             val state = monitor.networkState().first()
             assertEquals(NetworkState.UNAVAILABLE, state)
@@ -176,7 +208,8 @@ class NetworkMonitorTest {
         val callbackSlot = io.mockk.slot<android.net.ConnectivityManager.NetworkCallback>()
         every { connectivityManager.registerNetworkCallback(any(), capture(callbackSlot)) } returns Unit
 
-        NetworkMonitor(context).networkState()
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        NetworkMonitor(context, networkUtils).networkState()
         assertTrue(callbackSlot.isCaptured)
     }
 
@@ -189,7 +222,8 @@ class NetworkMonitorTest {
         val context = mockk<android.content.Context>(relaxed = true)
         every { connectivityManager.registerNetworkCallback(capture(requestSlot), any<android.net.ConnectivityManager.NetworkCallback>()) } returns Unit
 
-        NetworkMonitor(context).networkState()
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        NetworkMonitor(context, networkUtils).networkState()
 
         // Cannot verify NetworkRequest capabilities directly as they are not exposed
         // So this test assertion is removed
@@ -203,7 +237,8 @@ class NetworkMonitorTest {
         val callback = mockk<android.net.ConnectivityManager.NetworkCallback>(relaxed = true)
         val context = mockk<android.content.Context>(relaxed = true)
         every { context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) } returns connectivityManager
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
 
         val callbackField = NetworkMonitor::class.java.getDeclaredField("networkCallback")
         callbackField.isAccessible = true
@@ -222,7 +257,8 @@ class NetworkMonitorTest {
         val callback = mockk<android.net.ConnectivityManager.NetworkCallback>(relaxed = true)
         val context = mockk<android.content.Context>(relaxed = true)
         every { context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) } returns connectivityManager
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
 
         val callbackField = NetworkMonitor::class.java.getDeclaredField("networkCallback")
         callbackField.isAccessible = true
@@ -240,7 +276,8 @@ class NetworkMonitorTest {
         val connectivityManager = mockk<android.net.ConnectivityManager>(relaxed = true)
         val context = mockk<android.content.Context>(relaxed = true)
         every { context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) } returns connectivityManager
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         val callbackField = NetworkMonitor::class.java.getDeclaredField("networkCallback")
         callbackField.isAccessible = true
         callbackField.set(monitor, mockk(relaxed = true))
@@ -256,7 +293,8 @@ class NetworkMonitorTest {
         val connectivityManager = mockk<android.net.ConnectivityManager>(relaxed = true)
         val context = mockk<android.content.Context>(relaxed = true)
         every { context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) } returns connectivityManager
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         val cmField = NetworkMonitor::class.java.getDeclaredField("connectivityManager")
         cmField.isAccessible = true
         cmField.set(monitor, connectivityManager)
@@ -273,7 +311,8 @@ class NetworkMonitorTest {
         val connectivityManager = mockk<android.net.ConnectivityManager>(relaxed = true)
         val context = mockk<android.content.Context>(relaxed = true)
         every { context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) } returns connectivityManager
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         val callbackField = NetworkMonitor::class.java.getDeclaredField("networkCallback")
         callbackField.isAccessible = true
         callbackField.set(monitor, null)
@@ -290,7 +329,8 @@ class NetworkMonitorTest {
         val connectivityManager = mockk<android.net.ConnectivityManager>(relaxed = true)
         val context = mockk<android.content.Context>(relaxed = true)
         every { context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) } returns connectivityManager
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         val cmField = NetworkMonitor::class.java.getDeclaredField("connectivityManager")
         cmField.isAccessible = true
         cmField.set(monitor, null)
@@ -307,7 +347,8 @@ class NetworkMonitorTest {
         val connectivityManager = mockk<android.net.ConnectivityManager>(relaxed = true)
         val context = mockk<android.content.Context>(relaxed = true)
         every { context.getSystemService(android.content.Context.CONNECTIVITY_SERVICE) } returns connectivityManager
-        val monitor = spyk(NetworkMonitor(context), recordPrivateCalls = true)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = spyk(NetworkMonitor(context, networkUtils), recordPrivateCalls = true)
 
         runTest {
             val job = launch {
@@ -327,7 +368,8 @@ class NetworkMonitorTest {
         every { connectivityManager.registerNetworkCallback(any(), capture(callbackSlot)) } returns Unit
 
         val context = mockk<android.content.Context>(relaxed = true)
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         runTest {
             val states = mutableListOf<NetworkState>()
             val job = launch {
@@ -348,7 +390,8 @@ class NetworkMonitorTest {
         every { connectivityManager.activeNetwork } returns null
 
         val context = mockk<android.content.Context>(relaxed = true)
-        val monitor = NetworkMonitor(context)
+        val networkUtils = mockk<NetworkUtilsInterface>()
+        val monitor = NetworkMonitor(context, networkUtils)
         runTest {
             val state = monitor.networkState().first()
             assertEquals(NetworkState.UNAVAILABLE, state)

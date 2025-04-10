@@ -22,7 +22,10 @@ enum class NetworkState {
 /**
  * A utility class that monitors network connectivity changes and provides a Flow of NetworkState
  */
-class NetworkMonitor(private val context: Context) {
+class NetworkMonitor(
+    private val context: Context,
+    private val networkUtils: NetworkUtilsInterface
+) {
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var connectivityManager: ConnectivityManager? = null
 
@@ -39,7 +42,7 @@ class NetworkMonitor(private val context: Context) {
         }
 
         // Check initial state
-        val isConnected = NetworkUtils.isNetworkAvailable(context)
+        val isConnected = networkUtils.isNetworkAvailable(context)
         trySend(if (isConnected) NetworkState.AVAILABLE else NetworkState.UNAVAILABLE)
 
         // Create network callback
