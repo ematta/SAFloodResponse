@@ -29,9 +29,9 @@ import edu.utap.utils.NetworkMonitor
 import edu.utap.utils.NetworkUtils
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import edu.utap.auth.ForgotPasswordScreen
-import edu.utap.auth.LoginScreen
-import edu.utap.auth.RegisterScreen
+import edu.utap.ui.screens.auth.ForgotPasswordScreen
+import edu.utap.ui.screens.auth.LoginScreen
+import edu.utap.ui.screens.auth.RegisterScreen
 import edu.utap.models.AuthViewModelInterface
 import edu.utap.di.FloodViewModelFactory
 
