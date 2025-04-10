@@ -1,113 +1,231 @@
 package edu.utap.utils
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import io.mockk.*
+import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class LocationPermissionHandlerTest {
 
+    private lateinit var activity: ComponentActivity
+    private lateinit var launcher: ActivityResultLauncher<Array<String>>
+    private lateinit var handler: LocationPermissionHandler
+
+    @Before
+    fun setUp() {
+        activity = mockk(relaxed = true)
+        launcher = mockk(relaxed = true)
+
+        mockkStatic(ContextCompat::class)
+
+        every {
+            activity.registerForActivityResult(
+                any<ActivityResultContracts.RequestMultiplePermissions>(),
+                capture(permissionCallbackSlot)
+            )
+        } returns launcher
+
+        handler = LocationPermissionHandler(activity)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
+    }
+
+    private val permissionCallbackSlot = slot<ActivityResultCallback<Map<String, Boolean>>>()
+
     @Test
-    fun `onCreate lifecycle call`() {
-        // Verify that onCreate correctly calls the super.onCreate and re-registers the locationPermissionRequest. 
-        // This ensures that the activity result launcher is ready upon activity creation.
-        // TODO implement test
+    fun `checkAndRequestLocationPermission granted`() = runTest {
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        var grantedCalled = false
+        var deniedCalled = false
+
+        handler.checkAndRequestLocationPermission(
+            onGranted = { grantedCalled = true },
+            onDenied = { deniedCalled = true }
+        )
+
+        assertTrue(grantedCalled)
+        assertFalse(deniedCalled)
+        verify(exactly = 0) { launcher.launch(any()) }
     }
 
     @Test
-    fun `onCreate register for permission multiple call`() {
-        // Check that calling onCreate multiple times does not create multiple instances of the 
-        // permission request launcher.
-        // TODO implement test
+    fun `checkAndRequestLocationPermission denied triggers launcher`() = runTest {
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
+
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
+
+        var grantedCalled = false
+        var deniedCalled = false
+
+        handler.checkAndRequestLocationPermission(
+            onGranted = { grantedCalled = true },
+            onDenied = { deniedCalled = true }
+        )
+
+        assertFalse(grantedCalled)
+        assertFalse(deniedCalled)
+        verify {
+            launcher.launch(
+                match {
+                    it.toList().containsAll(
+                        listOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        )
+                    )
+                }
+            )
+        }
     }
 
     @Test
-    fun `checkAndRequestLocationPermission granted`() {
-        // Verify that if location permission is already granted, onGranted callback is executed immediately 
-        // and permission is not requested again.
-        // TODO implement test
+    fun `permission callback grants permission calls onGranted`() = runTest {
+        var grantedCalled = false
+        var deniedCalled = false
+
+        handler.checkAndRequestLocationPermission(
+            onGranted = { grantedCalled = true },
+            onDenied = { deniedCalled = true }
+        )
+
+        permissionCallbackSlot.captured.onActivityResult(
+            mapOf(
+                Manifest.permission.ACCESS_FINE_LOCATION to true,
+                Manifest.permission.ACCESS_COARSE_LOCATION to false
+            )
+        )
+
+        assertTrue(grantedCalled)
+        assertFalse(deniedCalled)
     }
 
     @Test
-    fun `checkAndRequestLocationPermission denied`() {
-        // Verify that if location permission is not granted, it requests the permissions using 
-        // locationPermissionRequest.launch.
-        // TODO implement test
+    fun `permission callback denies permission calls onDenied`() = runTest {
+        var grantedCalled = false
+        var deniedCalled = false
+
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
+
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
+
+        handler.checkAndRequestLocationPermission(
+            onGranted = { grantedCalled = true },
+            onDenied = { deniedCalled = true }
+        )
+
+        permissionCallbackSlot.captured.onActivityResult(
+            mapOf(
+                Manifest.permission.ACCESS_FINE_LOCATION to false,
+                Manifest.permission.ACCESS_COARSE_LOCATION to false
+            )
+        )
+
+        assertFalse(grantedCalled)
+        assertTrue(deniedCalled)
     }
 
     @Test
-    fun `checkAndRequestLocationPermission fine location permission`() {
-        // Verify that if only ACCESS_FINE_LOCATION is granted, the onGranted callback is executed.
-        // TODO implement test
+    fun `checkAndRequestLocationPermission fine location permission granted`() = runTest {
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
+
+        var grantedCalled = false
+
+        handler.checkAndRequestLocationPermission(
+            onGranted = { grantedCalled = true }
+        )
+
+        assertTrue(grantedCalled)
+        verify(exactly = 0) { launcher.launch(any()) }
     }
 
     @Test
-    fun `checkAndRequestLocationPermission coarse location permission`() {
-        // Verify that if only ACCESS_COARSE_LOCATION is granted, the onGranted callback is executed.
-        // TODO implement test
+    fun `checkAndRequestLocationPermission coarse location permission granted`() = runTest {
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
+
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        var grantedCalled = false
+
+        handler.checkAndRequestLocationPermission(
+            onGranted = { grantedCalled = true }
+        )
+
+        assertTrue(grantedCalled)
+        verify(exactly = 0) { launcher.launch(any()) }
     }
 
     @Test
-    fun `checkAndRequestLocationPermission no location permission`() {
-        // Verify that if neither ACCESS_FINE_LOCATION nor ACCESS_COARSE_LOCATION is granted, 
-        // the onDenied callback is executed.
-        // TODO implement test
+    fun `checkAndRequestLocationPermission no location permission triggers launcher`() = runTest {
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
+
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
+
+        handler.checkAndRequestLocationPermission()
+
+        verify {
+            launcher.launch(match {
+                it.toList().containsAll(
+                    listOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            })
+        }
     }
 
     @Test
-    fun `checkAndRequestLocationPermission onGranted callback execution`() {
-        // Verify that onGranted callback function in checkAndRequestLocationPermission is called when permissions are granted.
-        // TODO implement test
-    }
+    fun `checkAndRequestLocationPermission empty callbacks do not crash`() = runTest {
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
 
-    @Test
-    fun `checkAndRequestLocationPermission onDenied callback execution`() {
-        // Verify that onDenied callback function in checkAndRequestLocationPermission is called when 
-        // permissions are denied.
-        // TODO implement test
-    }
+        every {
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+        } returns PackageManager.PERMISSION_DENIED
 
-    @Test
-    fun `checkAndRequestLocationPermission empty callbacks`() {
-        // Verify that the function correctly handles empty lambdas when no callbacks are passed to 
-        // checkAndRequestLocationPermission. The test should not crash or error if default callbacks are empty.
-        // TODO implement test
+        handler.checkAndRequestLocationPermission()
     }
-
-    @Test
-    fun `hasLocationPermission fine location permission granted`() {
-        // Verify that hasLocationPermission returns true when ACCESS_FINE_LOCATION is granted.
-        // TODO implement test
-    }
-
-    @Test
-    fun `hasLocationPermission coarse location permission granted`() {
-        // Verify that hasLocationPermission returns true when ACCESS_COARSE_LOCATION is granted.
-        // TODO implement test
-    }
-
-    @Test
-    fun `hasLocationPermission no location permission granted`() {
-        // Verify that hasLocationPermission returns false when neither ACCESS_FINE_LOCATION nor 
-        // ACCESS_COARSE_LOCATION is granted.
-        // TODO implement test
-    }
-
-    @Test
-    fun `requestLocationPermission request type`() {
-        // Check that the requestLocationPermission() is requesting for both fine and coarse location permissions
-        // TODO implement test
-    }
-
-    @Test
-    fun `requestLocationPermission launch parameter`() {
-        // Ensure that the launch function is invoked with the correct parameter, which is an array containing 
-        // ACCESS_FINE_LOCATION and ACCESS_COARSE_LOCATION.
-        // TODO implement test
-    }
-
-    @Test
-    fun `checkAndRequestLocationPermission both permission granted`() {
-        // Verify that if both location permissions are already granted, onGranted callback is executed immediately. 
-        //and no request is triggered.
-        // TODO implement test
-    }
-
 }
