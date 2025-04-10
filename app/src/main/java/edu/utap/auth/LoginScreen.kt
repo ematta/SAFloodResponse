@@ -115,7 +115,9 @@ fun LoginScreen(
                 emailError = null
             },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("emailField"),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             isError = emailError != null,
             supportingText = emailError?.let {
@@ -133,7 +135,9 @@ fun LoginScreen(
                 passwordError = null
             },
             label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("passwordField"),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             isError = passwordError != null,
@@ -215,7 +219,9 @@ fun LoginScreen(
 
         TextButton(
             onClick = onNavigateToRegister,
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .testTag("registerButton")
         ) {
             Text("Don't have an account? Register")
         }
