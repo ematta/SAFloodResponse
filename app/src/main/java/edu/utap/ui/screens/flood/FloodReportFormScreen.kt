@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
 import edu.utap.R
 import edu.utap.ui.viewmodel.FloodReportViewModel
@@ -59,6 +60,51 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
         }
     }
 
+    FloodReportFormScreenContent(
+        email = email,
+        phoneNumber = phoneNumber,
+        selectedPhotos = selectedPhotos,
+        severity = severity,
+        waterDepth = waterDepth,
+        isRoadClosed = isRoadClosed,
+        canAccessOffice = canAccessOffice,
+        selectedImage = selectedImage,
+        onEmailChange = { viewModel.updateEmail(it) },
+        onPhoneNumberChange = { viewModel.updatePhoneNumber(it) },
+        onSeverityChange = { viewModel.updateSeverity(it) },
+        onWaterDepthChange = { viewModel.updateWaterDepth(it) },
+        onRoadClosedChange = { viewModel.updateRoadClosed(it) },
+        onOfficeAccessChange = { viewModel.updateOfficeAccess(it) },
+        onImageRemove = { selectedImage = null },
+        onSubmit = {
+            viewModel.submitReport()
+            onNavigateBack()
+        },
+        onNavigateBack = onNavigateBack
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FloodReportFormScreenContent(
+    email: String,
+    phoneNumber: String,
+    selectedPhotos: List<String>,
+    severity: String,
+    waterDepth: Double,
+    isRoadClosed: Boolean?,
+    canAccessOffice: Boolean?,
+    selectedImage: String?,
+    onEmailChange: (String) -> Unit,
+    onPhoneNumberChange: (String) -> Unit,
+    onSeverityChange: (String) -> Unit,
+    onWaterDepthChange: (Double) -> Unit,
+    onRoadClosedChange: (Boolean) -> Unit,
+    onOfficeAccessChange: (Boolean) -> Unit,
+    onImageRemove: () -> Unit,
+    onSubmit: () -> Unit,
+    onNavigateBack: () -> Unit
+) {
     Scaffold(
         topBar = {
             Surface(
@@ -144,7 +190,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
             // Email Input
             OutlinedTextField(
                 value = email,
-                onValueChange = { viewModel.updateEmail(it) },
+                onValueChange = onEmailChange,
                 label = { Text("Enter your email*") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
@@ -157,7 +203,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
             // Phone Number Input
             OutlinedTextField(
                 value = phoneNumber,
-                onValueChange = { viewModel.updatePhoneNumber(it) },
+                onValueChange = onPhoneNumberChange,
                 label = { Text("Enter your phone number*") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
@@ -221,7 +267,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
 
                             // Close button
                             IconButton(
-                                onClick = { selectedImage = null }
+                                onClick = onImageRemove
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
@@ -275,7 +321,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                 ) {
                     RadioButton(
                         selected = severity == "low",
-                        onClick = { viewModel.updateSeverity("low") },
+                        onClick = { onSeverityChange("low") },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF8C9EFF)
                         )
@@ -290,7 +336,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                 ) {
                     RadioButton(
                         selected = severity == "medium",
-                        onClick = { viewModel.updateSeverity("medium") },
+                        onClick = { onSeverityChange("medium") },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF8C9EFF)
                         )
@@ -305,7 +351,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                 ) {
                     RadioButton(
                         selected = severity == "high",
-                        onClick = { viewModel.updateSeverity("high") },
+                        onClick = { onSeverityChange("high") },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF8C9EFF)
                         )
@@ -317,7 +363,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
             // Water Depth Input
             OutlinedTextField(
                 value = waterDepth.toString(),
-                onValueChange = { text -> viewModel.updateWaterDepth(text.toDoubleOrNull() ?: 0.0) },
+                onValueChange = { text -> onWaterDepthChange(text.toDoubleOrNull() ?: 0.0) },
                 label = { Text("Water Depth (inches)*") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
@@ -346,7 +392,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                 ) {
                     RadioButton(
                         selected = isRoadClosed == true,
-                        onClick = { viewModel.updateRoadClosed(true) },
+                        onClick = { onRoadClosedChange(true) },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF8C9EFF)
                         )
@@ -361,7 +407,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                 ) {
                     RadioButton(
                         selected = isRoadClosed == false,
-                        onClick = { viewModel.updateRoadClosed(false) },
+                        onClick = { onRoadClosedChange(false) },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF8C9EFF)
                         )
@@ -390,7 +436,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                 ) {
                     RadioButton(
                         selected = canAccessOffice == true,
-                        onClick = { viewModel.updateOfficeAccess(true) },
+                        onClick = { onOfficeAccessChange(true) },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF8C9EFF)
                         )
@@ -405,7 +451,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
                 ) {
                     RadioButton(
                         selected = canAccessOffice == false,
-                        onClick = { viewModel.updateOfficeAccess(false) },
+                        onClick = { onOfficeAccessChange(false) },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = Color(0xFF8C9EFF)
                         )
@@ -418,11 +464,7 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
 
             // Submit Button
             Button(
-                onClick = {
-                    // Submit the report and navigate back on success
-                    viewModel.submitReport()
-                    onNavigateBack()
-                },
+                onClick = onSubmit,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -447,3 +489,36 @@ fun FloodReportFormScreen(viewModel: FloodReportViewModel, onNavigateBack: () ->
         }
     }
 }
+
+/**
+ * Preview of FloodReportFormScreen for Compose tooling.
+ * Uses sample data and no-op callbacks to comply with @Preview requirements.
+ */
+@Preview(
+    name = "Flood Report Form",
+    showBackground = true,
+    showSystemUi = true
+)
+@Composable
+fun PreviewFloodReportFormScreen() {
+    FloodReportFormScreenContent(
+        email = "test@example.com",
+        phoneNumber = "123-456-7890",
+        selectedPhotos = listOf(),
+        severity = "medium",
+        waterDepth = 12.0,
+        isRoadClosed = false,
+        canAccessOffice = true,
+        selectedImage = null,
+        onEmailChange = {},
+        onPhoneNumberChange = {},
+        onSeverityChange = {},
+        onWaterDepthChange = {},
+        onRoadClosedChange = {},
+        onOfficeAccessChange = {},
+        onImageRemove = {},
+        onSubmit = {},
+        onNavigateBack = {}
+    )
+}
+
