@@ -38,13 +38,13 @@ import edu.utap.ui.screens.discussion.DiscussionThreadScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
 import edu.utap.ui.screens.user.ProfileScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
+import edu.utap.utils.NetworkUtilsInterface
+import edu.utap.utils.NetworkUtilsImpl
 import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.LocationPermissionHandler
 import edu.utap.utils.NetworkMonitor
-import edu.utap.utils.NetworkUtils
-import edu.utap.utils.NetworkUtilsInterface
 import java.util.UUID
 import kotlin.getValue
 import kotlin.random.Random
@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
         Log.d("MainActivity_onCreate", "Initialized location permission handler")
 
         // Initialize network monitor and utils
-        networkMonitor = NetworkMonitor(applicationContext, NetworkUtils as NetworkUtilsInterface)
+        networkMonitor = NetworkMonitor(applicationContext, NetworkUtilsImpl())
 
         // Initialize AuthFlowManager
         authFlowManager = AuthFlowManager(authViewModel)
@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
         // Initialize NavigationManager
         navigationManager = NavigationManager(
             authFlowManager = authFlowManager,
-            networkUtils = NetworkUtils,
+            networkUtils = NetworkUtilsImpl(),
             networkMonitor = networkMonitor,
             locationPermissionHandler = locationPermissionHandler
         )
@@ -194,7 +194,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthenticatedApp(
-    networkUtils: NetworkUtils,
+    networkUtils: NetworkUtilsInterface,
     networkMonitor: NetworkMonitor,
     locationPermissionHandler: LocationPermissionHandler,
     authViewModel: AuthViewModelInterface
@@ -253,7 +253,7 @@ fun AuthenticatedApp(
                     locationPermissionHandler = locationPermissionHandler,
                     weatherViewModel = WeatherViewModel(),
                     floodReportRepository = floodReportRepository,
-                    networkUtils = NetworkUtils,
+                    networkUtils = NetworkUtilsImpl(),
                     modifier = Modifier
                 )
             }
@@ -302,7 +302,7 @@ fun AuthenticatedApp(
                         factory = FloodViewModelFactory(
                             context = LocalContext.current,
                             floodReportRepository = floodReportRepository,
-                            networkUtils = NetworkUtils
+                            networkUtils = NetworkUtilsImpl()
                         )
                     ),
                     onNavigateBack = {

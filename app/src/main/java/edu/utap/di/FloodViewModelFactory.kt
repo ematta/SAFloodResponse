@@ -9,7 +9,8 @@ import edu.utap.repository.FloodReportRepository
 import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.utils.LocationUtils
-import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsInterface
+import edu.utap.utils.NetworkUtilsImpl
 
 /**
  * Factory for creating [FloodReportViewModel] instances with required dependencies.
@@ -24,7 +25,7 @@ import edu.utap.utils.NetworkUtils
 class FloodViewModelFactory(
     private val context: Context,
     private val floodReportRepository: FloodReportRepository,
-    private val networkUtils: NetworkUtils
+    private val networkUtils: NetworkUtilsInterface
 ) : ViewModelProvider.Factory {
 
     /**
