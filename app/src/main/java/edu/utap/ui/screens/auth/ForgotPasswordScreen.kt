@@ -27,6 +27,12 @@ import androidx.compose.ui.unit.dp
 import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.utils.ValidationUtils
 
+import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import edu.utap.auth.AuthState
+import edu.utap.models.FirestoreUser
+
 /**
  * Forgot password screen composable.
  *
@@ -144,4 +150,47 @@ fun ForgotPasswordScreen(viewModel: AuthViewModelInterface, onNavigateToLogin: (
             }
         }
     }
+}
+
+private class MockAuthViewModel : AuthViewModelInterface {
+    override val authState: StateFlow<AuthState> = MutableStateFlow(AuthState.Idle.Unauthenticated)
+
+    override fun getCurrentUser(): FirestoreUser? = null
+
+    override fun login(email: String, password: String, function: (Boolean, String?) -> Unit) {
+        function(true, null)
+    }
+
+    override fun logout(): AuthState.Idle.Unauthenticated {
+        return AuthState.Idle.Unauthenticated
+    }
+
+    override fun register(
+        email: String,
+        password: String,
+        name: String,
+        role: String,
+        function: (Boolean, String?) -> Unit
+    ) {
+        function(true, null)
+    }
+
+    override fun restoreAuthState() { }
+
+    override fun updateAuthState(sent: AuthState) { }
+
+    override fun resetPassword(email: String, onResult: (Boolean, String?) -> Unit) {
+        // Fake implementation for preview
+        onResult(true, null)
+    }
+    // Other interface methods, if any, are left unimplemented for brevity
+}
+
+@Preview(name = "Forgot Password Screen", showBackground = true)
+@Composable
+fun ForgotPasswordScreenPreview() {
+    ForgotPasswordScreen(
+        viewModel = MockAuthViewModel(),
+        onNavigateToLogin = {}
+    )
 }
