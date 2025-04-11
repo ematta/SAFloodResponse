@@ -39,27 +39,62 @@ fun DashboardContent(
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Google Map - takes 60% of screen
-            GoogleMap(
-                modifier = Modifier.weight(0.6f),
-                cameraPositionState = cameraPositionState,
-                properties = MapProperties(isMyLocationEnabled = isLocationPermissionGranted)
-            ) {
-                // Add markers for flood alerts
-                allReports.forEach { report ->
-                    Marker(
-                        state = MarkerState(position = LatLng(report.latitude, report.longitude)),
-                        title = report.description,
-                        snippet = "Severity: ${report.severity}",
-                        icon = BitmapDescriptorFactory.defaultMarker(
-                            when (report.severity) {
-                                "low" -> BitmapDescriptorFactory.HUE_GREEN
-                                "medium" -> BitmapDescriptorFactory.HUE_YELLOW
-                                "high" -> BitmapDescriptorFactory.HUE_RED
-                                else -> BitmapDescriptorFactory.HUE_BLUE
-                            }
+            // If permission granted, show map; else, show limited functionality message
+            if (isLocationPermissionGranted) {
+                // Google Map - takes 60% of screen
+                GoogleMap(
+                    modifier = Modifier.weight(0.6f),
+                    cameraPositionState = cameraPositionState,
+                    properties = MapProperties(isMyLocationEnabled = isLocationPermissionGranted)
+                ) {
+                    // Add markers for flood alerts
+                    allReports.forEach { report ->
+                        Marker(
+                            state = MarkerState(position = LatLng(report.latitude, report.longitude)),
+                            title = report.description,
+                            snippet = "Severity: ${report.severity}",
+                            icon = BitmapDescriptorFactory.defaultMarker(
+                                when (report.severity) {
+                                    "low" -> BitmapDescriptorFactory.HUE_GREEN
+                                    "medium" -> BitmapDescriptorFactory.HUE_YELLOW
+                                    "high" -> BitmapDescriptorFactory.HUE_RED
+                                    else -> BitmapDescriptorFactory.HUE_BLUE
+                                }
+                            )
                         )
-                    )
+                    }
+                }
+            } else {
+                // Show clear, user-friendly message about limited functionality
+                Card(
+                    modifier = Modifier
+                        .weight(0.6f)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Location access denied",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Some features are limited. Grant location permission to view the map and see your position relative to flood alerts.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = onRequestLocationPermission) {
+                            Text("Grant Location Permission")
+                        }
+                    }
                 }
             }
             // Flood report list view
@@ -134,9 +169,40 @@ fun DashboardScreen(
     networkUtils: edu.utap.utils.NetworkUtilsInterface,
     modifier: Modifier = Modifier
 ) {
-    // ... (original ViewModel and runtime logic unchanged)
-    // Extracted UI logic now calls DashboardContent with real data
-    // (Omitted for brevity, as per instructions: do not change business logic)
+    // Permission state: null = not checked yet, true = granted, false = denied
+    var isLocationPermissionGranted by remember { mutableStateOf<Boolean?>(null) }
+    var permissionRequested by remember { mutableStateOf(false) }
+
+    // Prompt for location permission immediately on entry
+    LaunchedEffect(Unit) {
+        if (!permissionRequested) {
+            permissionRequested = true
+            locationPermissionHandler.checkAndRequestLocationPermission(
+                onGranted = { isLocationPermissionGranted = true },
+                onDenied = { isLocationPermissionGranted = false }
+            )
+        }
+    }
+
+    // TODO: Replace the following with real data from ViewModels/Repositories
+    val allReports = emptyList<edu.utap.models.FloodReport>()
+    val activeFloodReports = emptyList<edu.utap.models.FloodReport>()
+    val isLoading = false
+
+    DashboardContent(
+        isLocationPermissionGranted = isLocationPermissionGranted == true,
+        isLoading = isLoading,
+        allReports = allReports,
+        activeFloodReports = activeFloodReports,
+        onRequestLocationPermission = {
+            locationPermissionHandler.checkAndRequestLocationPermission(
+                onGranted = { isLocationPermissionGranted = true },
+                onDenied = { isLocationPermissionGranted = false }
+            )
+        },
+        onRefreshAlerts = { /* TODO: Implement refresh logic */ },
+        modifier = modifier
+    )
 }
 
 // --- Preview with Mock Data ---

@@ -145,11 +145,16 @@ open class AuthViewModel(
     override fun login(email: String, password: String, function: (Boolean, String?) -> Unit) {
         stateManager.updateState(AuthState.Loading.Login)
         viewModelScope.launch {
-            stateManager.updateState(AuthState.Idle.Authenticated)
-            function(true, null)
             val userResult = authRepository.getUserByEmail(email = email)
             userResult.onSuccess { firestoreUser ->
                 stateManager.updateCurrentUser(firestoreUser)
+                stateManager.updateState(AuthState.Idle.Authenticated)
+                function(true, null)
+            }
+            userResult.onFailure { error ->
+                // Optionally handle login failure here
+                function(false, error.message)
+                stateManager.updateState(AuthState.Idle.Unauthenticated)
             }
         }
     }
