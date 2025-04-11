@@ -36,6 +36,11 @@ import edu.utap.utils.RoleUtils
 import edu.utap.utils.ValidationUtils
 import android.util.Log
 
+import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import edu.utap.models.FirestoreUser
+
 // Test tags for UI testing
 const val REGISTER_NAME_FIELD_TAG = "edu.utap.auth.nameField"
 const val REGISTER_EMAIL_FIELD_TAG = "edu.utap.auth.emailField"
@@ -242,4 +247,67 @@ fun RegisterScreen(
             }
         }
     }
+}
+
+//
+// Preview for RegisterScreen using a fake ViewModel and no-op lambdas
+//
+
+class RegisterScreenFakeAuthViewModel : AuthViewModelInterface {
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Idle.Unauthenticated)
+    override val authState: StateFlow<AuthState> = _authState
+
+    override fun register(
+        email: String,
+        password: String,
+        name: String,
+        role: String,
+        function: (Boolean, String?) -> Unit
+    ) {
+        Log.d("RegisterScreenPreview", "Fake register called with email=$email, name=$name, role=$role")
+        function(false, "Preview mode: register not performed")
+    }
+
+    override fun login(email: String, password: String, function: (Boolean, String?) -> Unit) {
+        Log.d("RegisterScreenPreview", "Fake login called with email=$email, password=$password")
+        function(false, "Preview mode: login not performed")
+    }
+
+    override fun logout(): AuthState.Idle.Unauthenticated {
+        Log.d("RegisterScreenPreview", "Fake logout called")
+        return AuthState.Idle.Unauthenticated
+    }
+
+    override fun resetPassword(email: String, callback: (Boolean, String?) -> Unit) {
+        Log.d("RegisterScreenPreview", "Fake resetPassword called with email=$email")
+        callback(false, "Preview mode: resetPassword not performed")
+    }
+
+    override fun getCurrentUser(): FirestoreUser? {
+        Log.d("RegisterScreenPreview", "Fake getCurrentUser called")
+        return null
+    }
+
+    override fun restoreAuthState() {
+        Log.d("RegisterScreenPreview", "Fake restoreAuthState called")
+    }
+
+    override fun updateAuthState(sent: AuthState) {
+        Log.d("RegisterScreenPreview", "Fake updateAuthState called with $sent")
+    }
+}
+
+@Preview(
+    name = "RegisterScreen Preview",
+    showBackground = true,
+    group = "Auth"
+)
+@Composable
+fun RegisterScreenPreview() {
+    Log.d("RegisterScreenPreview", "Preview composable invoked")
+    RegisterScreen(
+        authViewModel = RegisterScreenFakeAuthViewModel(),
+        onNavigateToLogin = { Log.d("RegisterScreenPreview", "Login clicked (preview)") },
+        onRegisterSuccess = { Log.d("RegisterScreenPreview", "Register success (preview)") }
+    )
 }
