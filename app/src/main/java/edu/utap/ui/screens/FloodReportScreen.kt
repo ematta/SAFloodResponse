@@ -1,4 +1,4 @@
-package edu.utap.ui.screens.flood
+package edu.utap.ui.screens
 
 import android.location.Location
 import androidx.compose.foundation.layout.*
@@ -13,8 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import edu.utap.models.FloodReport
+import edu.utap.ui.components.BottomNavigationBar
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.ReportState
 import edu.utap.utils.LocationUtils
@@ -107,7 +109,8 @@ fun FloodReportScreenContent(
                     }
                 }
             )
-        }
+        },
+        bottomBar = { BottomNavigationBar(navController = rememberNavController()) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
