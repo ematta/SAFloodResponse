@@ -8,7 +8,7 @@
 // import com.google.firebase.firestore.CollectionReference
 // import com.google.firebase.firestore.DocumentReference
 // import com.google.firebase.firestore.FirebaseFirestore
-// import edu.utap.user.MainDispatcherRule
+// import edu.utap.auth.MainDispatcherRule
 // import io.mockk.MockKAnnotations
 // import io.mockk.coEvery
 // import io.mockk.coVerify

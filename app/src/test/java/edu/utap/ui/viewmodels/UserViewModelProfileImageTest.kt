@@ -1,16 +1,18 @@
-package edu.utap.user
+package edu.utap.ui.viewmodels
 
 import android.content.Context
 import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import edu.utap.auth.UserProfileState
-import edu.utap.models.UserProfile
 import edu.utap.ui.viewmodel.UserViewModel
 import edu.utap.repository.UserRepository
+import edu.utap.auth.MainDispatcherRule
+import edu.utap.models.UserProfile
 import edu.utap.utils.FirebaseStorageUtil
 import edu.utap.utils.NetworkUtils
 import edu.utap.utils.NetworkUtilsImpl
 import edu.utap.utils.NetworkUtilsInterface
+import edu.utap.utils.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -90,9 +92,9 @@ class UserViewModelProfileImageTest {
         userViewModel = UserViewModel(mockUserRepository, mockStorageUtil)
         assertTrue(userViewModel.profileState.value is UserProfileState.Idle, "Initial state should be Idle")
         
-        coEvery { mockStorageUtil.uploadProfileImage(any(), any(), any()) } returns edu.utap.utils.Result.Success(testDownloadUrl)
-        coEvery { mockUserRepository.updatePhotoUrl(any(), any()) } returns edu.utap.utils.Result.Success(Unit)
-        coEvery { mockUserRepository.getUserProfile(any()) } returns edu.utap.utils.Result.Success(testUserProfile)
+        coEvery { mockStorageUtil.uploadProfileImage(any(), any(), any()) } returns Result.Success(testDownloadUrl)
+        coEvery { mockUserRepository.updatePhotoUrl(any(), any()) } returns Result.Success(Unit)
+        coEvery { mockUserRepository.getUserProfile(any()) } returns Result.Success(testUserProfile)
             
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)
@@ -105,9 +107,9 @@ class UserViewModelProfileImageTest {
     @Test
     fun `uploadProfileImage updates photoUrl on successful upload`() = runTest {
         // Arrange
-        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns edu.utap.utils.Result.Success(testDownloadUrl)
-        coEvery { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) } returns edu.utap.utils.Result.Success(Unit)
-        coEvery { mockUserRepository.getUserProfile(testUid) } returns edu.utap.utils.Result.Success(testUserProfile.copy(photoUrl = testDownloadUrl))
+        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns Result.Success(testDownloadUrl)
+        coEvery { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) } returns Result.Success(Unit)
+        coEvery { mockUserRepository.getUserProfile(testUid) } returns Result.Success(testUserProfile.copy(photoUrl = testDownloadUrl))
         
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)
@@ -128,7 +130,7 @@ class UserViewModelProfileImageTest {
         // Arrange
         val errorMessage = "Upload failed"
         val exception = Exception(errorMessage)
-        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns edu.utap.utils.Result.Error(errorMessage, exception)
+        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns Result.Error(errorMessage, exception)
         
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)
@@ -147,8 +149,8 @@ class UserViewModelProfileImageTest {
         // Arrange
         val errorMessage = "Failed to update photo URL"
         val exception = Exception(errorMessage)
-        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns edu.utap.utils.Result.Success(testDownloadUrl)
-        coEvery { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) } returns edu.utap.utils.Result.Error(errorMessage, exception)
+        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns Result.Success(testDownloadUrl)
+        coEvery { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) } returns Result.Error(errorMessage, exception)
         
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)
@@ -167,9 +169,9 @@ class UserViewModelProfileImageTest {
     fun `uploadProfileImage handles complete flow from upload to profile refresh`() = runTest {
         // Arrange
         val updatedProfile = testUserProfile.copy(photoUrl = testDownloadUrl)
-        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns edu.utap.utils.Result.Success(testDownloadUrl)
-        coEvery { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) } returns edu.utap.utils.Result.Success(Unit)
-        coEvery { mockUserRepository.getUserProfile(testUid) } returns edu.utap.utils.Result.Success(updatedProfile)
+        coEvery { mockStorageUtil.uploadProfileImage(mockContext, mockUri, testUid) } returns Result.Success(testDownloadUrl)
+        coEvery { mockUserRepository.updatePhotoUrl(testUid, testDownloadUrl) } returns Result.Success(Unit)
+        coEvery { mockUserRepository.getUserProfile(testUid) } returns Result.Success(updatedProfile)
         
         // Act
         userViewModel.uploadProfileImage(mockContext, mockUri, testUid)

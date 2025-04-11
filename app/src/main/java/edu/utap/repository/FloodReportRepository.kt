@@ -10,6 +10,15 @@ import javax.inject.Inject
 
 private const val TAG = "FloodReportRepository"
 
+interface FloodReportRepositoryInterface {
+    suspend fun createReport(report: FloodReport): Result<FloodReport>
+    suspend fun getReportById(id: String): Result<FloodReport>
+    fun observeAllReports(): Flow<List<FloodReport>>
+    suspend fun updateReport(report: FloodReport): Result<FloodReport>
+    suspend fun deleteReport(id: String): Result<Unit>
+    fun getReportsInRadius(latitude: Double, longitude: Double, radiusKm: Double): Flow<List<FloodReport>>
+}
+
 class FloodReportRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : BaseRepository(), FloodReportRepositoryInterface {

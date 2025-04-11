@@ -1,7 +1,7 @@
 package edu.utap.auth
 
 import android.content.Context
-import edu.utap.user.MainDispatcherRule
+import edu.utap.auth.MainDispatcherRule
 import edu.utap.utils.ApplicationContextProviderInterface
 import edu.utap.utils.NetworkUtils
 import io.mockk.MockKAnnotations
