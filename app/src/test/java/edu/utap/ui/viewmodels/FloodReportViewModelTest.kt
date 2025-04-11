@@ -1,9 +1,11 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package edu.utap.models
+package edu.utap.ui.viewmodels
 
 import android.location.Location
 import com.google.android.gms.tasks.Task
+import edu.utap.models.FirestoreUser
+import edu.utap.models.FloodReport
 import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.utils.LocationUtils

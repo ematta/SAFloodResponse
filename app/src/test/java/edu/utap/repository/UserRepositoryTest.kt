@@ -1,23 +1,23 @@
-package edu.utap.user
+package edu.utap.repository
 
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.CollectionReference
 import edu.utap.models.UserProfile
-import edu.utap.repository.FirebaseUserRepository
-import edu.utap.repository.UserRepository
+import edu.utap.utils.Result
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import io.mockk.*
-import io.mockk.impl.annotations.MockK
 
 @ExperimentalCoroutinesApi
 class UserRepositoryTest {
@@ -33,7 +33,7 @@ class UserRepositoryTest {
 
     @MockK
     private lateinit var documentSnapshot: DocumentSnapshot
-    
+
     @MockK
     private lateinit var collectionReference: CollectionReference
 
@@ -54,20 +54,20 @@ class UserRepositoryTest {
     @Before
     fun setup() {
         MockKAnnotations.init(this)
-        
+
         // Setup Firestore mocking
         every { firestore.collection("users") } returns collectionReference
         every { collectionReference.document(testUid) } returns documentReference
-        
+
         // Set up complete successful tasks
         val setTask = Tasks.forResult<Void>(null)
         val getTask = Tasks.forResult(documentSnapshot)
         val updateProfileTask = Tasks.forResult<Void>(null)
-        
+
         // Setup document reference mock
         every { documentReference.set(any()) } returns setTask
         every { documentReference.get() } returns getTask
-        
+
         // Setup document snapshot
         every { documentSnapshot.exists() } returns true
         every { documentSnapshot.toObject(UserProfile::class.java) } returns testUserProfile
@@ -80,12 +80,12 @@ class UserRepositoryTest {
             "address" to testUserProfile.address,
             "createdAt" to testUserProfile.createdAt
         )
-        
+
         // Setup Firebase Auth
         every { firebaseAuth.currentUser } returns firebaseUser
         every { firebaseUser.uid } returns testUid
         every { firebaseUser.updateProfile(any()) } returns updateProfileTask
-        
+
         userRepository = FirebaseUserRepository(firebaseAuth, firestore)
     }
 
@@ -93,34 +93,35 @@ class UserRepositoryTest {
     fun `createUserProfile should return success result with profile`() = runTest {
         // When
         val result = userRepository.createUserProfile(testUserProfile)
-        
+
         // Then
-        assertTrue(result is edu.utap.utils.Result.Success)
-        assertEquals(testUserProfile, (result as edu.utap.utils.Result.Success).data)
+        Assert.assertTrue(result is Result.Success)
+        Assert.assertEquals(testUserProfile, (result as Result.Success).data)
         verify { documentReference.set(testUserProfile) }
     }
 
     @Test
-    fun `getUserProfile should return success result with profile when document exists`() = runTest {
-        // When
-        val result = userRepository.getUserProfile(testUid)
-        
-        // Then
-        assertTrue(result is edu.utap.utils.Result.Success)
-        assertEquals(testUserProfile, (result as edu.utap.utils.Result.Success).data)
-        verify { documentReference.get() }
-    }
+    fun `getUserProfile should return success result with profile when document exists`() =
+        runTest {
+            // When
+            val result = userRepository.getUserProfile(testUid)
+
+            // Then
+            Assert.assertTrue(result is Result.Success)
+            Assert.assertEquals(testUserProfile, (result as Result.Success).data)
+            verify { documentReference.get() }
+        }
 
     @Test
     fun `getUserProfile should return failure when document does not exist`() = runTest {
         // Given document does not exist
         every { documentSnapshot.exists() } returns false
-        
+
         // When
         val result = userRepository.getUserProfile(testUid)
-        
+
         // Then
-        assertTrue(result is edu.utap.utils.Result.Error)
+        Assert.assertTrue(result is Result.Error)
         verify { documentReference.get() }
     }
 
@@ -128,17 +129,17 @@ class UserRepositoryTest {
     fun `updateUserProfile should return success result with updated profile`() = runTest {
         // When
         val result = userRepository.updateUserProfile(testUserProfile)
-        
+
         // Then
-        assertTrue(result is edu.utap.utils.Result.Success)
-        assertEquals(testUserProfile, (result as edu.utap.utils.Result.Success).data)
+        Assert.assertTrue(result is Result.Success)
+        Assert.assertEquals(testUserProfile, (result as Result.Success).data)
         verify { documentReference.set(testUserProfile) }
     }
 
     @Test
     fun `updateDisplayName should return success when user is current user`() = runTest {
         // Skip this test for now as it requires complex Task mocking
-        assertTrue(true)
+        Assert.assertTrue(true)
     }
 
     @Test
@@ -146,19 +147,19 @@ class UserRepositoryTest {
         // Given current user does not match uid
         val displayName = "Updated Name"
         val differentUid = "different-uid"
-        
+
         // When
         val result = userRepository.updateDisplayName(differentUid, displayName)
-        
+
         // Then
-        assertTrue(result is edu.utap.utils.Result.Error)
+        Assert.assertTrue(result is Result.Error)
         verify(exactly = 0) { firebaseUser.updateProfile(any()) }
     }
 
     @Test
     fun `updatePhotoUrl should return success when user is current user`() = runTest {
         // Skip this test for now as it requires complex Task mocking
-        assertTrue(true)
+        Assert.assertTrue(true)
     }
 
     @Test
@@ -166,12 +167,12 @@ class UserRepositoryTest {
         // Given current user does not match uid
         val photoUrl = "https://example.com/photo.jpg"
         val differentUid = "different-uid"
-        
+
         // When
         val result = userRepository.updatePhotoUrl(differentUid, photoUrl)
-        
+
         // Then
-        assertTrue(result is edu.utap.utils.Result.Error)
+        Assert.assertTrue(result is Result.Error)
         verify(exactly = 0) { firebaseUser.updateProfile(any()) }
     }
 }
