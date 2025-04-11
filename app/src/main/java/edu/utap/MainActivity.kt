@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SAFloodResponseTheme {
-                navigationManager.NavigationHost(authViewModel)
+                navigationManager.NavigationHost()
             }
         }
     }
@@ -251,8 +251,7 @@ fun AuthenticatedApp(
                     weatherViewModel = WeatherViewModel(),
                     floodReportRepository = floodReportRepository,
                     networkUtils = NetworkUtils,
-                    modifier = Modifier,
-                    authViewModel = authViewModel
+                    modifier = Modifier
                 )
             }
 

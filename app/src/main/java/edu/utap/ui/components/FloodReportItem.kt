@@ -17,6 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import edu.utap.models.FloodReport
 import edu.utap.ui.theme.Dimensions
@@ -29,9 +32,10 @@ import edu.utap.ui.theme.Dimensions
  * @param report The [FloodReport] to display.
  * @param modifier Modifier to apply to the card.
  */
+@Preview
 @Composable
 fun FloodReportItem(
-    report: FloodReport,
+    @PreviewParameter(FloodReportParameterPreview::class) report: FloodReport,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -82,3 +86,5 @@ fun FloodReportItem(
         }
     }
 }
+
+class FloodReportParameterPreview(override val values: Sequence<FloodReport>) : PreviewParameterProvider<FloodReport>{}

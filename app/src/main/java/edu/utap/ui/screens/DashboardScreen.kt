@@ -36,7 +36,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import edu.utap.repository.FloodReportRepository
 import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationPermissionHandler
-import edu.utap.ui.components.AppBottomNavigation
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.platform.LocalContext
@@ -73,11 +72,9 @@ fun DashboardScreen(
     floodReportRepository: FloodReportRepositoryInterface,
     networkUtils: NetworkUtils,
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModelInterface
 ) {
     var isLocationPermissionGranted by remember { mutableStateOf(false) }
     val isLoading by weatherViewModel.isLoading.collectAsState()
-    val weatherError by weatherViewModel.error.collectAsState()
 
     val context = LocalContext.current
 
@@ -200,10 +197,6 @@ fun DashboardScreen(
                 )
             }
         }
-
-        val concreteAuthViewModel = authViewModel as? AuthViewModel
-        val isAuthenticated = concreteAuthViewModel?.getCachedUser() != null && !(concreteAuthViewModel?.isAuthExpired() ?: true)
-        AppBottomNavigation(navController, "dashboard", isAuthenticated)
 
         // Floating Action Button for refreshing alerts
         FloatingActionButton(
