@@ -61,6 +61,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    testImplementation("junit:junit:4.13.2")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
