@@ -35,6 +35,7 @@ interface AuthViewModelInterface {
         role: String = RoleUtils.ROLE_REGULAR,
         function: (boolean: Boolean, message: String?) -> Unit = { _, _ -> }
     )
+
     /**
      * Logs in an existing user.
      *
@@ -47,12 +48,14 @@ interface AuthViewModelInterface {
         password: String,
         function: (boolean: Boolean, message: String?) -> Unit
     )
+
     /**
      * Logs out the current user.
      *
      * @return The unauthenticated state.
      */
     fun logout(): AuthState.Idle.Unauthenticated
+
     /**
      * Sends a password reset email.
      *
@@ -60,16 +63,19 @@ interface AuthViewModelInterface {
      * @param callback Callback with success flag and optional message.
      */
     fun resetPassword(email: String, callback: (Boolean, String?) -> Unit)
+
     /**
      * Gets the current authenticated user profile, if any.
      *
      * @return The [edu.utap.models.FirestoreUser] or null if not authenticated.
      */
     fun getCurrentUser(): FirestoreUser?
+
     /**
      * Restores the authentication state, e.g., after app restart.
      */
     fun restoreAuthState()
+
     /**
      * Updates the current authentication state.
      *

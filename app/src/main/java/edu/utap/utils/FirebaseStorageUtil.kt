@@ -61,9 +61,9 @@ class FirebaseStorageUtil(
         val profileImagesRef = storageRef.child(
             "profile_images/$userId/${UUID.randomUUID()}.${getFileExtension(context, imageUri)}"
         )
-    
+
         profileImagesRef.putFile(imageUri).await()
-    
+
         profileImagesRef.downloadUrl.await().toString()
     }
 
@@ -72,11 +72,12 @@ class FirebaseStorageUtil(
      * @param imageUrl URL of the image to delete
      * @return Result containing Unit if successful, or an exception if failed
      */
-    override suspend fun deleteProfileImage(imageUrl: String): Result<Unit> = Result.runCatchingSuspend {
-        val imageRef = firebaseStorage.getReferenceFromUrl(imageUrl)
-        imageRef.delete().await()
-        Unit
-    }
+    override suspend fun deleteProfileImage(imageUrl: String): Result<Unit> =
+        Result.runCatchingSuspend {
+            val imageRef = firebaseStorage.getReferenceFromUrl(imageUrl)
+            imageRef.delete().await()
+            Unit
+        }
 
     /**
      * Gets the file extension from a URI

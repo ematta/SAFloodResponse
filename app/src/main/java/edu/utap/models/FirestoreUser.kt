@@ -45,13 +45,11 @@ data class FirestoreUser(
          * @param firebaseUser The Firebase Authentication user.
          * @return A corresponding [FirestoreUser].
          */
-        fun fromFirebaseUser(firebaseUser: FirebaseUser): FirestoreUser {
-            return FirestoreUser(
-                userId = firebaseUser.uid,
-                name = firebaseUser.displayName ?: "",
-                email = firebaseUser.email ?: "",
-                profilePic = firebaseUser.photoUrl?.toString()
-            )
-        }
+        fun fromFirebaseUser(firebaseUser: FirebaseUser): FirestoreUser = FirestoreUser(
+            userId = firebaseUser.uid,
+            name = firebaseUser.displayName ?: "",
+            email = firebaseUser.email ?: "",
+            profilePic = firebaseUser.photoUrl?.toString()
+        )
     }
 }

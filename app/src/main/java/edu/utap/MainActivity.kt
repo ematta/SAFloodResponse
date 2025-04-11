@@ -1,12 +1,5 @@
 package edu.utap
 
-import edu.utap.utils.NetworkUtilsInterface
-import edu.utap.utils.LocationPermissionHandler
-import edu.utap.ui.viewmodel.AuthViewModelInterface
-import edu.utap.ui.viewmodel.AuthViewModel
-import edu.utap.ui.navigation.NavigationManager
-import edu.utap.ui.NetworkConnectivitySnackbar
-
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
@@ -21,36 +14,41 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import edu.utap.auth.AuthFlowManager
 import edu.utap.auth.AuthState
-import edu.utap.di.ViewModelFactory
 import edu.utap.di.FloodViewModelFactory
+import edu.utap.di.ViewModelFactory
+import edu.utap.models.FloodReport
 import edu.utap.repository.FloodReportRepository
+import edu.utap.ui.NetworkConnectivitySnackbar
 import edu.utap.ui.components.AppHeader
+import edu.utap.ui.navigation.NavigationManager
 import edu.utap.ui.screens.DashboardScreen
-import edu.utap.ui.screens.user.ProfileScreen
 import edu.utap.ui.screens.discussion.DiscussionListScreen
 import edu.utap.ui.screens.discussion.DiscussionThreadScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
+import edu.utap.ui.screens.user.ProfileScreen
 import edu.utap.ui.theme.SAFloodResponseTheme
+import edu.utap.ui.viewmodel.AuthViewModel
+import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.ui.viewmodel.WeatherViewModel
+import edu.utap.utils.LocationPermissionHandler
 import edu.utap.utils.NetworkMonitor
-import kotlin.getValue
-import kotlinx.coroutines.launch
-
-import androidx.lifecycle.lifecycleScope
-import com.google.firebase.Timestamp
-import edu.utap.auth.AuthFlowManager
-import edu.utap.models.FloodReport
 import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsInterface
 import java.util.UUID
+import kotlin.getValue
 import kotlin.random.Random
+import kotlinx.coroutines.launch
 
 /**
  * Main [ComponentActivity] for the Flood Response application.
@@ -79,8 +77,10 @@ class MainActivity : ComponentActivity() {
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.i("MainActivity_onCreate",
-            "Creating activity [Thread: ${Thread.currentThread().name}]")
+        Log.i(
+            "MainActivity_onCreate",
+            "Creating activity [Thread: ${Thread.currentThread().name}]"
+        )
         super.onCreate(savedInstanceState)
 
         // Initialize location permission handler
@@ -135,7 +135,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.i("MainActivity_onDestroy", "Destroying activity [Thread: ${Thread.currentThread().name}]")
+        Log.i(
+            "MainActivity_onDestroy",
+            "Destroying activity [Thread: ${Thread.currentThread().name}]"
+        )
         lifecycle.removeObserver(locationPermissionHandler)
         networkMonitor.shutdown()
     }

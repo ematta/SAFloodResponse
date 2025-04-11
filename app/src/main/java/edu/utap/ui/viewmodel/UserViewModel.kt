@@ -4,11 +4,11 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.utap.utils.FirebaseStorageUtil
-import edu.utap.models.UserProfile
 import edu.utap.auth.UserProfileState
+import edu.utap.models.UserProfile
 import edu.utap.repository.FirebaseUserRepository
 import edu.utap.repository.UserRepository
+import edu.utap.utils.FirebaseStorageUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
  */
 class UserViewModel(
     private val userRepository: UserRepository = FirebaseUserRepository(),
-    private val storageUtil: FirebaseStorageUtil = FirebaseStorageUtil(),
+    private val storageUtil: FirebaseStorageUtil = FirebaseStorageUtil()
 ) : ViewModel() {
 
     /**
@@ -241,7 +241,8 @@ class UserViewModel(
                     if (url != null) {
                         updatePhotoUrl(uid, url)
                     } else {
-                        _profileState.value = UserProfileState.Error.Generic("Failed to upload profile image")
+                        _profileState.value =
+                            UserProfileState.Error.Generic("Failed to upload profile image")
                     }
                 }
                 is edu.utap.utils.Result.Error -> {

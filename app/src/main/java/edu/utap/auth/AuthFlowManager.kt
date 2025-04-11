@@ -12,9 +12,7 @@ import kotlinx.coroutines.launch
  * Manages authentication flow, state restoration, and exposes authentication state.
  * Delegates actual auth operations to AuthViewModel.
  */
-class AuthFlowManager(
-    val authViewModel: AuthViewModel
-) {
+class AuthFlowManager(val authViewModel: AuthViewModel) {
     private val scope = CoroutineScope(Dispatchers.Main)
 
     private val _isAuthenticated = MutableStateFlow(false)

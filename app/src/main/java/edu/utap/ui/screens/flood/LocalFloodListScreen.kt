@@ -1,17 +1,17 @@
 package edu.utap.ui.screens.flood
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -88,10 +88,7 @@ fun LocalFloodListScreenContent(
  * @param modifier Modifier to apply to the root container.
  */
 @Composable
-fun LocalFloodListScreen(
-    viewModel: FloodReportViewModel,
-    modifier: Modifier = Modifier
-) {
+fun LocalFloodListScreen(viewModel: FloodReportViewModel, modifier: Modifier = Modifier) {
     val reports by viewModel.localFloodReports.collectAsState()
     val isLoading by viewModel.reportsLoading.collectAsState()
     val error by viewModel.reportsError.collectAsState()

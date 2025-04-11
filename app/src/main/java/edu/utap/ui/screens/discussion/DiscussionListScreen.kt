@@ -29,25 +29,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.Date
-import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.di.DiscussionViewModelFactory
-import edu.utap.models.DiscussionThread
-import com.google.firebase.Timestamp
-import edu.utap.ui.viewmodel.DiscussionViewModel
-
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.Timestamp
+import edu.utap.di.DiscussionViewModelFactory
+import edu.utap.models.DiscussionThread
+import edu.utap.ui.viewmodel.DiscussionViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 /**
  * Discussion list screen composable.
  *
@@ -58,6 +55,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
  * @param viewModel The [DiscussionViewModel] managing discussion data.
  * @param onThreadClick Callback invoked when a thread is clicked.
  */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun DiscussionListScreen(
     navController: androidx.navigation.NavController,
     viewModel: DiscussionViewModel = viewModel(
@@ -183,24 +182,21 @@ fun DiscussionListScreenContent(
     }
 }
 
+/**
+ * Card composable displaying a single discussion thread summary.
+ *
+ * @param thread The [DiscussionThread] to display.
+ * @param onClick Callback invoked when the card is clicked.
+ */
+/**
+ * Card composable displaying a single discussion thread summary.
+ *
+ * @param thread The [DiscussionThread] to display.
+ * @param onClick Callback invoked when the card is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-/**
- * Card composable displaying a single discussion thread summary.
- *
- * @param thread The [DiscussionThread] to display.
- * @param onClick Callback invoked when the card is clicked.
- */
-/**
- * Card composable displaying a single discussion thread summary.
- *
- * @param thread The [DiscussionThread] to display.
- * @param onClick Callback invoked when the card is clicked.
- */
-fun ThreadCard(
-    thread: DiscussionThread,
-    onClick: () -> Unit
-) {
+fun ThreadCard(thread: DiscussionThread, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier
@@ -245,13 +241,11 @@ fun ThreadCard(
         }
     }
 }
-private fun formatTimestamp(date: Date): String {
-    return try {
-        val sdf = SimpleDateFormat("MMM d, yyyy h:mm a", Locale.getDefault())
-        sdf.format(date)
-    } catch (e: Exception) {
-        ""
-    }
+private fun formatTimestamp(date: Date): String = try {
+    val sdf = SimpleDateFormat("MMM d, yyyy h:mm a", Locale.getDefault())
+    sdf.format(date)
+} catch (e: Exception) {
+    ""
 }
 
 // --- Previews and sample data ---

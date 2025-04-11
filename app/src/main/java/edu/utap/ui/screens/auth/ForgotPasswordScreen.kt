@@ -23,15 +23,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import edu.utap.ui.viewmodel.AuthViewModelInterface
-import edu.utap.utils.ValidationUtils
-
 import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import androidx.compose.ui.unit.dp
 import edu.utap.auth.AuthState
 import edu.utap.models.FirestoreUser
+import edu.utap.ui.viewmodel.AuthViewModelInterface
+import edu.utap.utils.ValidationUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Forgot password screen composable.
@@ -161,9 +160,7 @@ private class MockAuthViewModel : AuthViewModelInterface {
         function(true, null)
     }
 
-    override fun logout(): AuthState.Idle.Unauthenticated {
-        return AuthState.Idle.Unauthenticated
-    }
+    override fun logout(): AuthState.Idle.Unauthenticated = AuthState.Idle.Unauthenticated
 
     override fun register(
         email: String,

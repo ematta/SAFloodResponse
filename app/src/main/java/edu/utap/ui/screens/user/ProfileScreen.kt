@@ -18,18 +18,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
+import edu.utap.auth.UserProfileState
+import edu.utap.models.UserProfile
 import edu.utap.ui.components.*
 import edu.utap.ui.viewmodel.UserViewModel
-import edu.utap.models.UserProfile
-import edu.utap.auth.UserProfileState
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -315,24 +315,24 @@ fun ProfileImagePicker(photoUrl: String, onImageSelected: (Uri) -> Unit) {
             }
         }
     }
-    
+
     //
     // Compose Previews: These must be top-level, parameterless, and public for Compose tooling.
     //
-    
+
     @Preview(name = "Profile Row", showBackground = true)
     @Composable
     fun ProfileRowPreview() {
         ProfileRow(label = "Email", value = "user@example.com")
     }
-    
+
     @Preview(name = "Profile Image Picker", showBackground = true)
     @Composable
     fun ProfileImagePickerPreview() {
         // Use empty photoUrl and a no-op callback for preview
         ProfileImagePicker(photoUrl = "", onImageSelected = {})
     }
-    
+
     @Preview(name = "Profile Screen (View Mode)", showBackground = true)
     @Composable
     fun ProfileScreenPreview() {
@@ -354,7 +354,6 @@ fun ProfileImagePicker(photoUrl: String, onImageSelected: (Uri) -> Unit) {
             }
         }
     }
-    
 }
 
 /**

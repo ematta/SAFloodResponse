@@ -6,14 +6,15 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.models.FirestoreUser
-import edu.utap.repository.BaseRepository
 import edu.utap.repository.AuthRepositoryInterface
+import edu.utap.repository.BaseRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 private const val TAG = "FirestoreAuthRepository"
+
 /**
  * Repository implementation handling user authentication and profile management
  * using Firebase Authentication and Firestore.
@@ -27,8 +28,9 @@ private const val TAG = "FirestoreAuthRepository"
  */
 class FirestoreAuthRepository(
     private val firebaseAuth: FirebaseAuth,
-    private val firestore: FirebaseFirestore,
-) : BaseRepository(), AuthRepositoryInterface {
+    private val firestore: FirebaseFirestore
+) : BaseRepository(),
+    AuthRepositoryInterface {
     private val usersCollection = firestore.collection("users")
 
     /**
@@ -119,12 +121,13 @@ class FirestoreAuthRepository(
      * @param user The user profile to be created.
      * @return [Result] containing the created [FirestoreUser] on success, or an exception on failure.
      */
-    override suspend fun createUser(user: FirestoreUser): Result<FirestoreUser> = safeFirestoreCall {
-        usersCollection.document(user.userId)
-            .set(user)
-            .await()
-        user
-    }
+    override suspend fun createUser(user: FirestoreUser): Result<FirestoreUser> =
+        safeFirestoreCall {
+            usersCollection.document(user.userId)
+                .set(user)
+                .await()
+            user
+        }
 
     /**
      * Retrieves a user by their email from Firestore.
@@ -158,12 +161,13 @@ class FirestoreAuthRepository(
      * @param user The updated user profile.
      * @return [Result] containing the updated [FirestoreUser] on success, or an exception on failure.
      */
-    override suspend fun updateUser(user: FirestoreUser): Result<FirestoreUser> = safeFirestoreCall {
-        usersCollection.document(user.userId)
-            .set(user)
-            .await()
-        user
-    }
+    override suspend fun updateUser(user: FirestoreUser): Result<FirestoreUser> =
+        safeFirestoreCall {
+            usersCollection.document(user.userId)
+                .set(user)
+                .await()
+            user
+        }
 
     /**
      * Synchronizes a Firebase user with Firestore.
@@ -173,13 +177,14 @@ class FirestoreAuthRepository(
      * @param remoteUser The Firebase user to synchronize.
      * @return [Result] containing the synchronized [FirestoreUser] on success, or an exception on failure.
      */
-    override suspend fun syncUser(remoteUser: FirebaseUser): Result<FirestoreUser> = safeFirestoreCall {
-        val firestoreUser = FirestoreUser.fromFirebaseUser(remoteUser)
-        usersCollection.document(firestoreUser.userId)
-            .set(firestoreUser)
-            .await()
-        firestoreUser
-    }
+    override suspend fun syncUser(remoteUser: FirebaseUser): Result<FirestoreUser> =
+        safeFirestoreCall {
+            val firestoreUser = FirestoreUser.fromFirebaseUser(remoteUser)
+            usersCollection.document(firestoreUser.userId)
+                .set(firestoreUser)
+                .await()
+            firestoreUser
+        }
 
     /**
      * Checks if the current user is authenticated.
@@ -199,14 +204,14 @@ class FirestoreAuthRepository(
                 close(error)
                 return@addSnapshotListener
             }
-            
+
             val users = querySnapshot?.documents?.mapNotNull { document ->
                 document.toDomainObject<FirestoreUser>()
             } ?: emptyList()
-            
+
             trySend(users)
         }
-        
+
         awaitClose { listener.remove() }
     }
 }

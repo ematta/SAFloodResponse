@@ -11,8 +11,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.models.FirestoreUser
+import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.utils.PermissionCheck
 import edu.utap.utils.RoleUtils
 
@@ -24,10 +24,7 @@ import edu.utap.utils.RoleUtils
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserRoleScreen(
-    authViewModel: AuthViewModel = viewModel(),
-    onNavigateBack: () -> Unit
-) {
+fun UserRoleScreen(authViewModel: AuthViewModel = viewModel(), onNavigateBack: () -> Unit) {
     val inPreview = androidx.compose.ui.platform.LocalInspectionMode.current
     val users: List<FirestoreUser> =
         if (inPreview) {
@@ -54,7 +51,9 @@ fun UserRoleScreen(
             )
         } else {
             // Get the list of all users from the repository
-            val usersState by authViewModel.observeAllUsers().collectAsStateWithLifecycle(emptyList())
+            val usersState by authViewModel.observeAllUsers().collectAsStateWithLifecycle(
+                emptyList()
+            )
             usersState
         }
 
@@ -208,7 +207,8 @@ fun UserRoleItem(user: FirestoreUser, onRoleChange: (String, String) -> Unit) {
 /**
  * PreviewParameterProvider for FirestoreUser to enable parameterized previews.
  */
-class FirestoreUserPreviewProvider : androidx.compose.ui.tooling.preview.PreviewParameterProvider<FirestoreUser> {
+class FirestoreUserPreviewProvider :
+    androidx.compose.ui.tooling.preview.PreviewParameterProvider<FirestoreUser> {
     override val values: Sequence<FirestoreUser> = sequenceOf(
         FirestoreUser(
             userId = "1",
@@ -296,7 +296,8 @@ fun PreviewUserRoleItemAdmin() {
 )
 @Composable
 fun PreviewUserRoleItemParameterized(
-    @androidx.compose.ui.tooling.preview.PreviewParameter(FirestoreUserPreviewProvider::class) user: FirestoreUser
+    @androidx.compose.ui.tooling.preview.PreviewParameter(FirestoreUserPreviewProvider::class) user:
+    FirestoreUser
 ) {
     UserRoleItem(
         user = user,

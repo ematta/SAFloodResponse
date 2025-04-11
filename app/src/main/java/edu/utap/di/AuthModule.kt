@@ -9,11 +9,7 @@ import edu.utap.repository.AuthRepositoryInterface
  * Factory class for providing AuthRepository instances.
  * Dependencies are injected manually without relying on singletons.
  */
-class AuthModule(
-    private val firebaseAuth: FirebaseAuth,
-    private val firestore: FirebaseFirestore,
-) {
-    fun provideAuthRepository(): AuthRepositoryInterface {
-        return FirestoreAuthRepository(firebaseAuth, firestore)
-    }
+class AuthModule(private val firebaseAuth: FirebaseAuth, private val firestore: FirebaseFirestore) {
+    fun provideAuthRepository(): AuthRepositoryInterface =
+        FirestoreAuthRepository(firebaseAuth, firestore)
 }

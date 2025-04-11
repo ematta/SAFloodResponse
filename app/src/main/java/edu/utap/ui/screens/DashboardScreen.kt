@@ -75,7 +75,8 @@ fun DashboardContent(
             // Show loading indicator
             if (isLoading) {
                 Box(
-                    contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(48.dp))
                 }
@@ -83,11 +84,13 @@ fun DashboardContent(
 
             if (!isLocationPermissionGranted) {
                 Snackbar(
-                    modifier = Modifier.padding(16.dp), action = {
+                    modifier = Modifier.padding(16.dp),
+                    action = {
                         TextButton(onClick = onRequestLocationPermission) {
                             Text("Grant Permission")
                         }
-                    }) {
+                    }
+                ) {
                     Text("Location permission is required to show your location on the map")
                 }
             }
@@ -129,7 +132,7 @@ fun DashboardScreen(
     weatherViewModel: edu.utap.ui.viewmodel.WeatherViewModel,
     floodReportRepository: edu.utap.repository.FloodReportRepositoryInterface,
     networkUtils: edu.utap.utils.NetworkUtils,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     // ... (original ViewModel and runtime logic unchanged)
     // Extracted UI logic now calls DashboardContent with real data
@@ -163,16 +166,24 @@ private fun sampleFloodReport(
 fun DashboardContentPreview() {
     val isInPreview = LocalInspectionMode.current
 
-    val mockAllReports = if (isInPreview) listOf(
-        sampleFloodReport("1", 29.425, -98.49, "Minor street flooding", "low"),
-        sampleFloodReport("2", 29.426, -98.491, "Major flooding near river", "high"),
-        sampleFloodReport("3", 29.427, -98.492, "Moderate flooding downtown", "medium")
-    ) else emptyList()
+    val mockAllReports = if (isInPreview) {
+        listOf(
+            sampleFloodReport("1", 29.425, -98.49, "Minor street flooding", "low"),
+            sampleFloodReport("2", 29.426, -98.491, "Major flooding near river", "high"),
+            sampleFloodReport("3", 29.427, -98.492, "Moderate flooding downtown", "medium")
+        )
+    } else {
+        emptyList()
+    }
 
-    val mockActiveReports = if (isInPreview) listOf(
-        sampleFloodReport("2", 29.426, -98.491, "Major flooding near river", "high"),
-        sampleFloodReport("3", 29.427, -98.492, "Moderate flooding downtown", "medium")
-    ) else emptyList()
+    val mockActiveReports = if (isInPreview) {
+        listOf(
+            sampleFloodReport("2", 29.426, -98.491, "Major flooding near river", "high"),
+            sampleFloodReport("3", 29.427, -98.492, "Moderate flooding downtown", "medium")
+        )
+    } else {
+        emptyList()
+    }
 
     DashboardContent(
         isLocationPermissionGranted = false,

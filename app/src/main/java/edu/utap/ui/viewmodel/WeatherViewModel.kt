@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
 
 /**
  * ViewModel for managing weather and flood alert data.
@@ -15,8 +14,7 @@ import okhttp3.OkHttpClient
  *
  * @param noaaService The NOAA service used to fetch flood alerts.
  */
-class WeatherViewModel() :
-    ViewModel() {
+class WeatherViewModel : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
