@@ -23,11 +23,15 @@ object RoleUtils {
      * @param requiredRole The minimum role required for the action
      * @return True if the user has sufficient permissions, false otherwise
      */
-    fun hasPermission(userRole: String, requiredRole: String): Boolean = when (requiredRole) {
-        ROLE_REGULAR -> true // Everyone has regular permissions
-        ROLE_VOLUNTEER -> userRole == ROLE_VOLUNTEER || userRole == ROLE_ADMIN
-        ROLE_ADMIN -> userRole == ROLE_ADMIN
-        else -> false
+    fun hasPermission(userRole: String, requiredRole: String): Boolean {
+        val validRoles = setOf(ROLE_REGULAR, ROLE_VOLUNTEER, ROLE_ADMIN)
+        if (userRole !in validRoles) return false
+        return when (requiredRole) {
+            ROLE_REGULAR -> true // Everyone has regular permissions
+            ROLE_VOLUNTEER -> userRole == ROLE_VOLUNTEER || userRole == ROLE_ADMIN
+            ROLE_ADMIN -> userRole == ROLE_ADMIN
+            else -> false
+        }
     }
 
     /**
