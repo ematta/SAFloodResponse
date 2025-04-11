@@ -30,6 +30,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.utils.ValidationUtils
+import androidx.compose.ui.tooling.preview.Preview
+import android.util.Log
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import edu.utap.auth.AuthState
+import edu.utap.models.FirestoreUser
+import edu.utap.utils.RoleUtils
 
 /**
  * LoginScreen is a composable function that displays the login screen for the application.
@@ -224,4 +231,68 @@ fun LoginScreen(
             Text("Forgot Password?")
         }
     }
+}
+
+//
+// Preview for LoginScreen using a fake ViewModel and no-op lambdas
+//
+
+private class FakeAuthViewModel : AuthViewModelInterface {
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Idle.Unauthenticated)
+    override val authState: StateFlow<AuthState> = _authState
+
+    override fun register(
+        email: String,
+        password: String,
+        name: String,
+        role: String,
+        function: (Boolean, String?) -> Unit
+    ) {
+        Log.d("LoginScreenPreview", "Fake register called with email=$email, name=$name, role=$role")
+        function(false, "Preview mode: register not performed")
+    }
+
+    override fun login(email: String, password: String, function: (Boolean, String?) -> Unit) {
+        Log.d("LoginScreenPreview", "Fake login called with email=$email, password=$password")
+        function(false, "Preview mode: login not performed")
+    }
+
+    override fun logout(): AuthState.Idle.Unauthenticated {
+        Log.d("LoginScreenPreview", "Fake logout called")
+        return AuthState.Idle.Unauthenticated
+    }
+
+    override fun resetPassword(email: String, callback: (Boolean, String?) -> Unit) {
+        Log.d("LoginScreenPreview", "Fake resetPassword called with email=$email")
+        callback(false, "Preview mode: resetPassword not performed")
+    }
+
+    override fun getCurrentUser(): FirestoreUser? {
+        Log.d("LoginScreenPreview", "Fake getCurrentUser called")
+        return null
+    }
+
+    override fun restoreAuthState() {
+        Log.d("LoginScreenPreview", "Fake restoreAuthState called")
+    }
+
+    override fun updateAuthState(sent: AuthState) {
+        Log.d("LoginScreenPreview", "Fake updateAuthState called with $sent")
+    }
+}
+
+@Preview(
+    name = "LoginScreen Preview",
+    showBackground = true,
+    group = "Auth"
+)
+@Composable
+fun LoginScreenPreview() {
+    Log.d("LoginScreenPreview", "Preview composable invoked")
+    LoginScreen(
+        authViewModel = FakeAuthViewModel(),
+        onNavigateToRegister = { Log.d("LoginScreenPreview", "Register clicked (preview)") },
+        onNavigateToForgotPassword = { Log.d("LoginScreenPreview", "Forgot Password clicked (preview)") },
+        onLoginSuccess = { Log.d("LoginScreenPreview", "Login success (preview)") }
+    )
 }
