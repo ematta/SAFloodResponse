@@ -13,7 +13,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import edu.utap.AuthenticatedRoutes
 import edu.utap.R
+import edu.utap.ui.navigation.OpenRoutes
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
@@ -26,7 +28,7 @@ fun BottomNavigationBar(navController: NavController) {
             label = { Text(stringResource(id = R.string.dashboard)) },
             selected = false, // Update based on navigation state
             onClick = {
-                navController.navigate("dashboard")
+                navController.navigate(OpenRoutes.DASHBOARD)
             }
         )
 
@@ -35,7 +37,7 @@ fun BottomNavigationBar(navController: NavController) {
             label = { Text(stringResource(id = R.string.profile)) },
             selected = false, // Update based on navigation state
             onClick = {
-                navController.navigate("profile")
+                navController.navigate(AuthenticatedRoutes.PROFILE)
             }
         )
 
@@ -44,7 +46,7 @@ fun BottomNavigationBar(navController: NavController) {
             label = { Text(stringResource(id = R.string.report)) },
             selected = false, // Update based on navigation state
             onClick = {
-                navController.navigate("report")
+                navController.navigate(AuthenticatedRoutes.FLOOD_REPORT)
             }
         )
 
@@ -53,7 +55,7 @@ fun BottomNavigationBar(navController: NavController) {
             label = { Text(stringResource(id = R.string.discussion)) },
             selected = false, // Update based on navigation state
             onClick = {
-                navController.navigate("discussion")
+                navController.navigate(AuthenticatedRoutes.DISCUSSIONS)
             }
         )
     }

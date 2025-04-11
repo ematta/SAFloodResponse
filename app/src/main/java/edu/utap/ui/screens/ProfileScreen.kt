@@ -1,4 +1,4 @@
-package edu.utap.ui.screens.user
+package edu.utap.ui.screens
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult

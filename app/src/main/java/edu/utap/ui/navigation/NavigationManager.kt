@@ -1,7 +1,5 @@
 package edu.utap.ui.navigation
 
-import android.app.Activity
-import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -17,7 +15,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.MainActivity
 import edu.utap.auth.AuthFlowManager
 import edu.utap.di.FloodViewModelFactory
 import edu.utap.repository.FloodReportRepository
@@ -30,7 +27,7 @@ import edu.utap.ui.screens.auth.RegisterScreen
 import edu.utap.ui.screens.discussion.DiscussionListScreen
 import edu.utap.ui.screens.discussion.DiscussionThreadScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
-import edu.utap.ui.screens.user.ProfileScreen
+import edu.utap.ui.screens.ProfileScreen
 import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.LocationPermissionHandler
 import edu.utap.utils.NetworkMonitor
@@ -47,33 +44,9 @@ class NavigationManager(
         val navController = rememberNavController()
         val context = LocalContext.current
 
-        val isAuthenticated by authFlowManager.isAuthenticated.collectAsState()
-
-        LaunchedEffect(isAuthenticated) {
-            if (!isAuthenticated) {
-                try {
-                    navController.navigate("login") {
-                        popUpTo(navController.graph.startDestinationId) {
-                            inclusive = true
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.w("NavigationManager", "Navigation error: ${e.message}")
-                }
-            }
-        }
-
         Scaffold(
             topBar = {
-                AppHeader(
-                    onTestScreenClick = {
-                        (context as? Activity)?.let { activity: Activity ->
-                            if (activity is MainActivity) {
-                                activity.onTestScreenClick()
-                            }
-                        }
-                    }
-                )
+                AppHeader(navController)
             },
             snackbarHost = {
                 NetworkConnectivitySnackbar(networkMonitor = networkMonitor)

@@ -9,6 +9,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import edu.utap.AuthenticatedRoutes
 import edu.utap.R
 
 /**
@@ -16,12 +18,12 @@ import edu.utap.R
  *
  * Displays the app logo and title, with an optional test screen button.
  *
- * @param onTestScreenClick Callback invoked when the test button is clicked.
+ * @param onClickEvent Callback invoked when the test button is clicked.
  */
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppHeader(onTestScreenClick: () -> Unit = {}) {
+fun AppHeader(navController: NavController) {
     TopAppBar(
         title = {
             Row(
@@ -29,7 +31,7 @@ fun AppHeader(onTestScreenClick: () -> Unit = {}) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_smiley_face),
+                    painter = painterResource(id = R.drawable.baseline_water_24),
                     contentDescription = "App Logo",
                     modifier = Modifier.size(32.dp)
                 )
@@ -42,11 +44,12 @@ fun AppHeader(onTestScreenClick: () -> Unit = {}) {
             }
         },
         actions = {
-            // Test screen button (temporary)
-            IconButton(onClick = onTestScreenClick) {
+            IconButton(onClick = {
+                navController.navigate(AuthenticatedRoutes.FLOOD_REPORT)
+            }) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_smiley_face),
-                    contentDescription = "Test Flood Map",
+                    painter = painterResource(id = R.drawable.baseline_login_24),
+                    contentDescription = "Login",
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
