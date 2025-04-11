@@ -1,16 +1,14 @@
 package edu.utap.ui.viewmodel
 
 import android.content.Context
-import com.google.gson.Gson
-import edu.utap.utils.DefaultSecurePrefsProvider
-
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import edu.utap.auth.AuthState
 import edu.utap.auth.AuthStateManager
 import edu.utap.models.FirestoreUser
 import edu.utap.repository.AuthRepositoryInterface
+import edu.utap.utils.DefaultSecurePrefsProvider
 import edu.utap.utils.FirebaseErrorMapper
 import edu.utap.utils.NetworkUtils
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +37,7 @@ open class AuthViewModel(
     AuthViewModelInterface {
 
     private val stateManager = AuthStateManager()
-    
+
     override var authState: StateFlow<AuthState> = stateManager.authState
 
     val currentUser: StateFlow<FirestoreUser?> = stateManager.currentUser
@@ -68,7 +66,7 @@ open class AuthViewModel(
                     authRepository.updateUser(updatedUser)
                     stateManager.updateCurrentUser(updatedUser)
                     cacheUser(firestoreUser)
-        }
+                }
             } else {
                 // Try to restore from cached user if exists and not expired
                 val cachedUser = getCachedUser()
@@ -262,7 +260,7 @@ open class AuthViewModel(
         if (currentUserRoleIndex < requiredRoleIndex) {
             return false
         }
-        // User has the required permission 
+        // User has the required permission
         return true
     }
 

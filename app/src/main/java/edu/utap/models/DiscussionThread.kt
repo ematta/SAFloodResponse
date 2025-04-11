@@ -2,8 +2,8 @@ package edu.utap.models
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId
-import com.google.firebase.firestore.ServerTimestamp
 import com.google.firebase.firestore.PropertyName
+import com.google.firebase.firestore.ServerTimestamp
 
 /**
  * Data class representing a discussion thread related to a flood report.

@@ -5,8 +5,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.di.AuthModule
 import edu.utap.repository.FirebaseUserRepository
-import edu.utap.utils.FirebaseStorageUtil
 import edu.utap.utils.*
+import edu.utap.utils.FirebaseStorageUtil
 
 /**
  * Custom [Application] class serving as a manual DI container.

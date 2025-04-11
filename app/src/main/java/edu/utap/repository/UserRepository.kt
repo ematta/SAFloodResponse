@@ -61,7 +61,8 @@ interface UserRepository {
 class FirebaseUserRepository(
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
-) : BaseRepository(), UserRepository {
+) : BaseRepository(),
+    UserRepository {
 
     private val usersCollection = firestore.collection("users")
 
@@ -76,19 +77,21 @@ class FirebaseUserRepository(
      * @param userProfile The user profile to create
      * @return Result containing the created profile or an error
      */
-    override suspend fun createUserProfile(userProfile: UserProfile): edu.utap.utils.Result<UserProfile> = edu.utap.utils.Result.runCatchingSuspend {
+    override suspend fun createUserProfile(
+        userProfile: UserProfile
+    ): edu.utap.utils.Result<UserProfile> = edu.utap.utils.Result.runCatchingSuspend {
         usersCollection.document(userProfile.uid)
             .set(userProfile)
             .await()
-    
+
         if (userProfile.displayName.isNotEmpty()) {
             updateDisplayName(userProfile.uid, userProfile.displayName)
         }
-    
+
         if (userProfile.photoUrl.isNotEmpty()) {
             updatePhotoUrl(userProfile.uid, userProfile.photoUrl)
         }
-    
+
         userProfile
     }
 
@@ -101,14 +104,16 @@ class FirebaseUserRepository(
      * @param uid The unique identifier of the user to retrieve
      * @return Result containing the user profile or an error if not found or parsing fails
      */
-    override suspend fun getUserProfile(uid: String): edu.utap.utils.Result<UserProfile> = edu.utap.utils.Result.runCatchingSuspend {
-        val document = usersCollection.document(uid).get().await()
-        if (document.exists()) {
-            document.toDomainObject<UserProfile>() ?: throw Exception("Failed to parse user profile")
-        } else {
-            throw Exception("User profile not found")
+    override suspend fun getUserProfile(uid: String): edu.utap.utils.Result<UserProfile> =
+        edu.utap.utils.Result.runCatchingSuspend {
+            val document = usersCollection.document(uid).get().await()
+            if (document.exists()) {
+                document.toDomainObject<UserProfile>()
+                    ?: throw Exception("Failed to parse user profile")
+            } else {
+                throw Exception("User profile not found")
+            }
         }
-    }
 
     /**
      * Updates an existing user profile in Firestore and Firebase Auth.
@@ -121,19 +126,21 @@ class FirebaseUserRepository(
      * @param userProfile The updated user profile data
      * @return Result containing the updated profile or an error
      */
-    override suspend fun updateUserProfile(userProfile: UserProfile): edu.utap.utils.Result<UserProfile> = edu.utap.utils.Result.runCatchingSuspend {
+    override suspend fun updateUserProfile(
+        userProfile: UserProfile
+    ): edu.utap.utils.Result<UserProfile> = edu.utap.utils.Result.runCatchingSuspend {
         usersCollection.document(userProfile.uid)
             .set(userProfile)
             .await()
-    
+
         if (userProfile.displayName.isNotEmpty()) {
             updateDisplayName(userProfile.uid, userProfile.displayName)
         }
-    
+
         if (userProfile.photoUrl.isNotEmpty()) {
             updatePhotoUrl(userProfile.uid, userProfile.photoUrl)
         }
-    
+
         userProfile
     }
 
@@ -148,7 +155,10 @@ class FirebaseUserRepository(
      * @param displayName The new display name
      * @return Result indicating success or failure
      */
-    override suspend fun updateDisplayName(uid: String, displayName: String): edu.utap.utils.Result<Unit> = edu.utap.utils.Result.runCatchingSuspend {
+    override suspend fun updateDisplayName(
+        uid: String,
+        displayName: String
+    ): edu.utap.utils.Result<Unit> = edu.utap.utils.Result.runCatchingSuspend {
         val currentUser = firebaseAuth.currentUser
         if (currentUser?.uid == uid) {
             val profileUpdates = userProfileChangeRequest {
@@ -172,7 +182,10 @@ class FirebaseUserRepository(
      * @param photoUrl The new photo URL
      * @return Result indicating success or failure
      */
-    override suspend fun updatePhotoUrl(uid: String, photoUrl: String): edu.utap.utils.Result<Unit> = edu.utap.utils.Result.runCatchingSuspend {
+    override suspend fun updatePhotoUrl(
+        uid: String,
+        photoUrl: String
+    ): edu.utap.utils.Result<Unit> = edu.utap.utils.Result.runCatchingSuspend {
         val currentUser = firebaseAuth.currentUser
         if (currentUser?.uid == uid) {
             val profileUpdates = userProfileChangeRequest {

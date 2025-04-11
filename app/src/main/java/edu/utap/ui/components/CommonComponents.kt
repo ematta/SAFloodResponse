@@ -41,17 +41,7 @@ fun LoadingIndicator(modifier: Modifier = Modifier) {
  * @param keyboardOptions Keyboard options such as input type.
  */
 @Composable
-fun AppTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    isError: Boolean = false,
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    supportingText: String? = null,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
-) {
+fun AppTextField(value: String, onValueChange: (String) -> Unit, label: String, modifier: Modifier = Modifier, enabled: Boolean = true, isError: Boolean = false, visualTransformation: VisualTransformation = VisualTransformation.None, supportingText: String? = null, keyboardOptions: KeyboardOptions = KeyboardOptions.Default) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,

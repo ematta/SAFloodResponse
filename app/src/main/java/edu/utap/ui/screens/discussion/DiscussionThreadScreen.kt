@@ -1,7 +1,5 @@
 package edu.utap.ui.screens.discussion
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,13 +31,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.tooling.preview.Preview
 import edu.utap.di.DiscussionViewModelFactory
 import edu.utap.models.DiscussionMessage
 import edu.utap.ui.viewmodel.DiscussionViewModel
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 /**
@@ -55,9 +52,11 @@ import edu.utap.ui.viewmodel.DiscussionViewModel
 @Composable
 fun DiscussionThreadScreen(
     threadId: String,
-    viewModel: DiscussionViewModel = viewModel(factory = DiscussionViewModelFactory.provideFactory(
-        LocalContext.current
-    )),
+    viewModel: DiscussionViewModel = viewModel(
+        factory = DiscussionViewModelFactory.provideFactory(
+            LocalContext.current
+        )
+    ),
     onBackClick: () -> Unit
 ) {
     val currentThread by viewModel.currentThread.collectAsState()
@@ -216,7 +215,12 @@ fun MessageCardPreview() {
 
 // Preview for DiscussionThreadScreen (UI only, no real ViewModel)
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, widthDp = 400, heightDp = 700, name = "DiscussionThreadScreenPreview")
+@Preview(
+    showBackground = true,
+    widthDp = 400,
+    heightDp = 700,
+    name = "DiscussionThreadScreenPreview"
+)
 @Composable
 fun DiscussionThreadScreenPreview() {
     // Provide sample state for preview

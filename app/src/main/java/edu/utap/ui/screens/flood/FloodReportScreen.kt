@@ -11,13 +11,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import edu.utap.models.FloodReport
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.ReportState
 import edu.utap.utils.LocationUtils
-import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * Composable function that displays the flood reporting screen.
@@ -29,8 +29,6 @@ import androidx.compose.ui.tooling.preview.Preview
  * - View nearby reports
  * - Confirm or deny reports
  */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 /**
  * Flood report submission screen composable.
  *
@@ -42,6 +40,8 @@ import androidx.compose.ui.tooling.preview.Preview
  * @param viewModel The [FloodReportViewModel] managing report data.
  * @param onNavigateToMap Callback invoked to navigate to the map screen.
  */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Unit) {
     val context = LocalContext.current
     val locationUtils = remember { LocationUtils(context) }
@@ -273,7 +273,6 @@ fun FloodReportScreenContent(
  * @param onConfirm Callback for when the report is confirmed
  * @param onDeny Callback for when the report is denied
  */
-@Composable
 /**
  * Card composable displaying a single flood report with confirm/deny buttons.
  *
@@ -281,6 +280,7 @@ fun FloodReportScreenContent(
  * @param onConfirm Callback invoked when the report is confirmed.
  * @param onDeny Callback invoked when the report is denied.
  */
+@Composable
 fun FloodReportItem(report: FloodReport, onConfirm: () -> Unit, onDeny: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -372,4 +372,3 @@ fun FloodReportItemPreview() {
         onDeny = {}
     )
 }
-

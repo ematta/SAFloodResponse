@@ -1,12 +1,12 @@
 package edu.utap.di
 
-import android.util.Log
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import edu.utap.repository.DiscussionRepositoryInterface
 import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.ui.viewmodel.AuthViewModelInterface
-import edu.utap.repository.DiscussionRepositoryInterface
 import edu.utap.ui.viewmodel.DiscussionViewModel
 
 /**
@@ -23,9 +23,8 @@ import edu.utap.ui.viewmodel.DiscussionViewModel
  */
 class DiscussionViewModelFactory private constructor() : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T =
         throw UnsupportedOperationException("Use provideFactory() instead")
-    }
 
     companion object {
         /**
@@ -66,7 +65,11 @@ class DiscussionViewModelFactory private constructor() : ViewModelProvider.Facto
                     val authViewModel: AuthViewModelInterface = try {
                         authViewModelAny as AuthViewModelInterface
                     } catch (e: Exception) {
-                        Log.e("DiscussionVMFactory", "Failed to cast AuthViewModel to AuthViewModelInterface", e)
+                        Log.e(
+                            "DiscussionVMFactory",
+                            "Failed to cast AuthViewModel to AuthViewModelInterface",
+                            e
+                        )
                         throw e
                     }
 

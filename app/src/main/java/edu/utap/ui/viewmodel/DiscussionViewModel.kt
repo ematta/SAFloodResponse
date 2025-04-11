@@ -65,7 +65,7 @@ class DiscussionViewModel(
     val error: StateFlow<String?> = _error
 
     // State to track discussion creation result
-    private val _discussionCreationSuccess = MutableStateFlow<Boolean?>(null) // null: initial, true: success, false: failure
+    private val _discussionCreationSuccess = MutableStateFlow<Boolean?>(null)
     val discussionCreationSuccess: StateFlow<Boolean?> = _discussionCreationSuccess
 
     fun setError(message: String) {
@@ -101,7 +101,7 @@ class DiscussionViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            
+
             try {
                 discussionRepository.observeAllThreads()
                     .collect { threads ->
@@ -119,7 +119,7 @@ class DiscussionViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            
+
             try {
                 // Get thread details
                 val threadResult = discussionRepository.getThreadById(threadId)
@@ -131,7 +131,7 @@ class DiscussionViewModel(
                         _error.value = error.message ?: "Failed to load thread"
                     }
                 )
-                
+
                 // Get messages
                 discussionRepository.observeThreadMessages(threadId)
                     .collect { messages ->
@@ -149,7 +149,7 @@ class DiscussionViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            
+
             try {
                 val currentUser = authViewModel.getCurrentUser()
                 if (currentUser == null) {
@@ -157,13 +157,13 @@ class DiscussionViewModel(
                     _isLoading.value = false
                     return@launch
                 }
-                
+
                 val newThread = DiscussionThread(
                     threadId = reportId, // Using reportId as threadId for 1:1 mapping
                     reportId = reportId,
                     createdBy = currentUser.userId
                 )
-                
+
                 val result = discussionRepository.createThread(newThread)
                 result.fold(
                     onSuccess = { thread ->
@@ -187,7 +187,7 @@ class DiscussionViewModel(
             _isLoading.value = true
             _error.value = null
             _discussionCreationSuccess.value = null // Reset status at the start
-            
+
             try {
                 val currentUser = authViewModel.getCurrentUser()
                 if (currentUser == null) {
@@ -196,24 +196,24 @@ class DiscussionViewModel(
                     _discussionCreationSuccess.value = false // Signal failure
                     return@launch
                 }
-                
+
                 if (_newDiscussionTitle.value.isBlank()) {
                     _error.value = "Title cannot be empty"
                     _isLoading.value = false
                     _discussionCreationSuccess.value = false // Signal failure
                     return@launch
                 }
-                
+
                 if (_newDiscussionMessage.value.isBlank()) {
                     _error.value = "Message cannot be empty"
                     _isLoading.value = false
                     _discussionCreationSuccess.value = false // Signal failure
                     return@launch
                 }
-                
+
                 // Generate a unique ID for the new thread
                 val threadId = System.currentTimeMillis().toString()
-                
+
                 val newThread = DiscussionThread(
                     threadId = threadId,
                     reportId = "", // No associated flood report
@@ -221,19 +221,22 @@ class DiscussionViewModel(
                     category = _newDiscussionCategory.value,
                     tags = _newDiscussionTags.value
                 )
-                
+
                 val newMessage = DiscussionMessage(
                     messageId = System.currentTimeMillis().toString(),
                     userId = currentUser.userId,
                     text = _newDiscussionMessage.value
                 )
-                
+
                 // First create the thread
                 val threadResult = discussionRepository.createThread(newThread)
                 threadResult.fold(
                     onSuccess = { thread ->
                         // Then add the initial message
-                        val messageResult = discussionRepository.addMessage(thread.threadId, newMessage)
+                        val messageResult = discussionRepository.addMessage(
+                            thread.threadId,
+                            newMessage
+                        )
                         messageResult.fold(
                             onSuccess = {
                                 _newDiscussionTitle.value = ""
@@ -245,7 +248,11 @@ class DiscussionViewModel(
                                 fetchAllThreads() // Refresh the list
                             },
                             onFailure = { error ->
-                                android.util.Log.e("DiscussionViewModel", "Failed to add initial message for thread ${thread.threadId}", error)
+                                android.util.Log.e(
+                                    "DiscussionViewModel",
+                                    "Failed to add initial message for thread ${thread.threadId}",
+                                    error
+                                )
                                 _error.value = error.message ?: "Failed to add initial message"
                                 _isLoading.value = false
                                 _discussionCreationSuccess.value = false // Signal failure
@@ -320,7 +327,7 @@ class DiscussionViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            
+
             try {
                 val currentUser = authViewModel.getCurrentUser()
                 if (currentUser == null) {
@@ -328,29 +335,29 @@ class DiscussionViewModel(
                     _isLoading.value = false
                     return@launch
                 }
-                
+
                 val currentThread = _currentThread.value
                 if (currentThread == null) {
                     _error.value = "No thread selected"
                     _isLoading.value = false
                     return@launch
                 }
-                
+
                 if (_newMessageText.value.isBlank()) {
                     _error.value = "Message cannot be empty"
                     _isLoading.value = false
                     return@launch
                 }
-                
+
                 val newMessage = DiscussionMessage(
                     messageId = System.currentTimeMillis().toString(),
                     userId = currentUser.userId,
                     text = _newMessageText.value
                 )
-                
+
                 val result = discussionRepository.addMessage(currentThread.threadId, newMessage)
                 result.fold(
-                    onSuccess = { 
+                    onSuccess = {
                         _newMessageText.value = ""
                         _isLoading.value = false
                     },
@@ -370,7 +377,7 @@ class DiscussionViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            
+
             try {
                 val currentMessage = _messages.value.find { it.messageId == messageId }
                 if (currentMessage == null) {
@@ -378,14 +385,14 @@ class DiscussionViewModel(
                     _isLoading.value = false
                     return@launch
                 }
-                
+
                 val updatedMessage = currentMessage.copy(
                     upvotes = currentMessage.upvotes + 1
                 )
-                
+
                 val result = discussionRepository.updateMessage(threadId, updatedMessage)
                 result.fold(
-                    onSuccess = { 
+                    onSuccess = {
                         _isLoading.value = false
                     },
                     onFailure = { error ->

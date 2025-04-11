@@ -1,11 +1,10 @@
 package edu.utap.repository
 
-import kotlinx.coroutines.channels.awaitClose
-
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.models.FirestoreUser
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -31,6 +30,7 @@ interface AuthRepositoryInterface {
         name: String,
         role: String
     ): Result<FirebaseUser>
+
     /**
      * Logs in an existing user.
      *
@@ -39,16 +39,19 @@ interface AuthRepositoryInterface {
      * @return Result containing the authenticated [FirebaseUser] or an error.
      */
     suspend fun loginUser(email: String, password: String): Result<FirebaseUser>
+
     /**
      * Gets the currently authenticated Firebase user.
      *
      * @return The [FirebaseUser], or null if not authenticated.
      */
     suspend fun getCurrentUser(): FirebaseUser?
+
     /**
      * Logs out the current user.
      */
     suspend fun logout()
+
     /**
      * Sends a password reset email.
      *
@@ -65,6 +68,7 @@ interface AuthRepositoryInterface {
      * @return Result containing the created profile or an error.
      */
     suspend fun createUser(user: FirestoreUser): Result<FirestoreUser>
+
     /**
      * Retrieves a user profile by email.
      *
@@ -72,6 +76,7 @@ interface AuthRepositoryInterface {
      * @return Result containing the [FirestoreUser] or an error.
      */
     suspend fun getUserByEmail(email: String): Result<FirestoreUser>
+
     /**
      * Retrieves a user profile by user ID.
      *
@@ -79,6 +84,7 @@ interface AuthRepositoryInterface {
      * @return Result containing the [FirestoreUser] or an error.
      */
     suspend fun getUserById(userId: String): Result<FirestoreUser>
+
     /**
      * Updates an existing user profile.
      *
@@ -95,6 +101,7 @@ interface AuthRepositoryInterface {
      * @return Result containing the synced [FirestoreUser] or an error.
      */
     suspend fun syncUser(remoteUser: FirebaseUser): Result<FirestoreUser>
+
     /**
      * Checks if a user is currently authenticated.
      *
@@ -134,7 +141,7 @@ class AuthRepositoryImpl(
                 .setDisplayName(name)
                 .build()
             com.google.android.gms.tasks.Tasks.await(user.updateProfile(profileUpdates))
-    
+
             val firestoreUser = FirestoreUser(
                 userId = user.uid,
                 email = email,
@@ -148,10 +155,7 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun loginUser(
-        email: String,
-        password: String
-    ): Result<FirebaseUser> {
+    override suspend fun loginUser(email: String, password: String): Result<FirebaseUser> {
         return try {
             val authResult = com.google.android.gms.tasks.Tasks.await(
                 firebaseAuth.signInWithEmailAndPassword(email, password)
@@ -163,9 +167,7 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun getCurrentUser(): FirebaseUser? {
-        return firebaseAuth.currentUser
-    }
+    override suspend fun getCurrentUser(): FirebaseUser? = firebaseAuth.currentUser
 
     override suspend fun logout() {
         firebaseAuth.signOut()
@@ -229,8 +231,8 @@ class AuthRepositoryImpl(
         Result.failure(e)
     }
 
-    override suspend fun syncUser(remoteUser: FirebaseUser): Result<FirestoreUser> {
-        return getUserById(remoteUser.uid).fold(
+    override suspend fun syncUser(remoteUser: FirebaseUser): Result<FirestoreUser> =
+        getUserById(remoteUser.uid).fold(
             onSuccess = { Result.success(it) },
             onFailure = { error ->
                 val newUser = FirestoreUser(
@@ -242,11 +244,8 @@ class AuthRepositoryImpl(
                 createUser(newUser)
             }
         )
-    }
 
-    override suspend fun isAuthenticated(): Boolean {
-        return firebaseAuth.currentUser != null
-    }
+    override suspend fun isAuthenticated(): Boolean = firebaseAuth.currentUser != null
 
     override fun observeUsers(): Flow<List<FirestoreUser>> = kotlinx.coroutines.flow.callbackFlow {
         val listenerRegistration = usersCollection.addSnapshotListener { snapshot, error ->

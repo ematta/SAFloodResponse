@@ -43,11 +43,9 @@ class DefaultSecurePrefsProvider(context: Context) : SecurePrefsProviderInterfac
             .apply()
     }
 
-    override fun getCachedUserData(): String? =
-        prefs.getString(KEY_CACHED_USER, null)
+    override fun getCachedUserData(): String? = prefs.getString(KEY_CACHED_USER, null)
 
-    override fun getInitialLoginTime(): Long =
-        prefs.getLong(KEY_INITIAL_LOGIN_TIME, 0L)
+    override fun getInitialLoginTime(): Long = prefs.getLong(KEY_INITIAL_LOGIN_TIME, 0L)
 
     override fun clearAuthCache() {
         prefs.edit().clear().apply()

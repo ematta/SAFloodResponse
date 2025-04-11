@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.repository.FloodReportRepository
+import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.utils.LocationUtils
 import edu.utap.utils.NetworkUtils
@@ -24,7 +24,7 @@ import edu.utap.utils.NetworkUtils
 class FloodViewModelFactory(
     private val context: Context,
     private val floodReportRepository: FloodReportRepository,
-    private val networkUtils: NetworkUtils,
+    private val networkUtils: NetworkUtils
 ) : ViewModelProvider.Factory {
 
     /**
@@ -40,7 +40,7 @@ class FloodViewModelFactory(
             // Get the AuthViewModel from the existing factory
             val authViewModel = AuthModule(
                 firebaseAuth = FirebaseAuth.getInstance(),
-                firestore = FirebaseFirestore.getInstance(),
+                firestore = FirebaseFirestore.getInstance()
             ).provideAuthRepository().let { repo ->
                 AuthViewModel(
                     repo,
@@ -56,7 +56,7 @@ class FloodViewModelFactory(
             FloodReportViewModel(
                 floodReportRepository = floodReportRepository,
                 authViewModel = authViewModel,
-                locationUtils = locationUtils,
+                locationUtils = locationUtils
             ) as T
         }
         else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

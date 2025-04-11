@@ -15,13 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.ui.theme.SAFloodResponseTheme
+import edu.utap.ui.viewmodel.DiscussionViewModel
+import edu.utap.ui.viewmodel.FloodReportViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DiscussionFormScreen(
-    viewModel: edu.utap.ui.viewmodel.DiscussionViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = edu.utap.di.DiscussionViewModelFactory.provideFactory(androidx.compose.ui.platform.LocalContext.current)
+    viewModel: DiscussionViewModel = viewModel(
+        factory = edu.utap.di.DiscussionViewModelFactory.provideFactory(
+            androidx.compose.ui.platform.LocalContext.current
+        )
     ),
     onNavigateBack: () -> Unit
 ) {
@@ -36,7 +41,7 @@ fun DiscussionFormScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // FloodReportViewModel instance
-    val floodReportViewModel: edu.utap.ui.viewmodel.FloodReportViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val floodReportViewModel: FloodReportViewModel = viewModel()
     LaunchedEffect(Unit) {
         floodReportViewModel.refreshActiveFloodReports()
     }
@@ -65,7 +70,11 @@ fun DiscussionFormScreen(
                         enabled = title.isNotEmpty() && message.isNotEmpty()
                     ) {
                         Icon(
-                            imageVector = if (showPreview) Icons.Default.Edit else Icons.Default.ArrowDropDown,
+                            imageVector = if (showPreview) {
+                                Icons.Default.Edit
+                            } else {
+                                Icons.Default.ArrowDropDown
+                            },
                             contentDescription = if (showPreview) "Edit" else "Preview"
                         )
                     }
@@ -102,7 +111,9 @@ fun DiscussionFormScreen(
             error = error,
             showPreview = showPreview,
             onShowPreviewChange = { showPreview = it },
-            floodReports = activeFloodReports.map { SimpleFloodReport(it.reportId, it.description) },
+            floodReports = activeFloodReports.map {
+                SimpleFloodReport(it.reportId, it.description)
+            },
             selectedFloodReportId = selectedFloodReportId,
             onFloodReportSelect = { selectedFloodReportId = it },
             floodDropdownExpanded = floodDropdownExpanded,
@@ -224,7 +235,10 @@ fun DiscussionFormScreenContent(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     if (selectedFloodReportId != null) {
-                        val selectedReport = floodReports.find { it.reportId == selectedFloodReportId }
+                        val selectedReport = floodReports.find {
+                            it.reportId ==
+                                selectedFloodReportId
+                        }
                         if (selectedReport != null) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
@@ -254,7 +268,9 @@ fun DiscussionFormScreenContent(
             // Flood Report Dropdown
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
-                    value = floodReports.find { it.reportId == selectedFloodReportId }?.description ?: "",
+                    value =
+                    floodReports.find { it.reportId == selectedFloodReportId }?.description
+                        ?: "",
                     onValueChange = {},
                     label = { Text("Link to Flood Report (optional)") },
                     modifier = Modifier.fillMaxWidth(),
@@ -476,7 +492,11 @@ fun PreviewDiscussionFormScreenContent_Light() {
     }
 }
 
-@Preview(name = "Discussion Form Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    name = "Discussion Form Dark",
+    showBackground = true,
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 fun PreviewDiscussionFormScreenContent_Dark() {
     SAFloodResponseTheme(darkTheme = true) {

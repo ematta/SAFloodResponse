@@ -5,11 +5,8 @@ package edu.utap.utils
  */
 sealed class Result<out T> {
     data class Success<out T>(val data: T) : Result<T>()
-    data class Error(
-        val message: String,
-        val cause: Throwable? = null,
-        val code: Int? = null
-    ) : Result<Nothing>()
+    data class Error(val message: String, val cause: Throwable? = null, val code: Int? = null) :
+        Result<Nothing>()
 
     val isSuccess get() = this is Success<T>
     val isError get() = this is Error
@@ -35,15 +32,14 @@ sealed class Result<out T> {
     }
 
     companion object {
-        inline fun <T> runCatching(block: () -> T): Result<T> =
-            try {
-                Success(block())
-            } catch (e: Throwable) {
-                Error(
-                    message = FirebaseErrorMapper.getErrorMessage(e),
-                    cause = e
-                )
-            }
+        inline fun <T> runCatching(block: () -> T): Result<T> = try {
+            Success(block())
+        } catch (e: Throwable) {
+            Error(
+                message = FirebaseErrorMapper.getErrorMessage(e),
+                cause = e
+            )
+        }
 
         suspend inline fun <T> runCatchingSuspend(crossinline block: suspend () -> T): Result<T> =
             try {

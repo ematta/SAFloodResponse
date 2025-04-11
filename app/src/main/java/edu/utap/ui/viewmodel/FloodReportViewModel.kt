@@ -6,11 +6,11 @@ import androidx.lifecycle.viewModelScope
 import edu.utap.models.FloodReport
 import edu.utap.repository.FloodReportRepositoryInterface
 import edu.utap.utils.LocationUtils
+import java.util.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import java.util.*
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel responsible for managing flood report state and operations.
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.first
 class FloodReportViewModel(
     private val floodReportRepository: FloodReportRepositoryInterface,
     private val authViewModel: AuthViewModelInterface,
-    private val locationUtils: LocationUtils,
+    private val locationUtils: LocationUtils
 ) : ViewModel() {
 
     private val _activeFloodReports = MutableStateFlow<List<FloodReport>>(emptyList())
@@ -194,7 +194,7 @@ class FloodReportViewModel(
         viewModelScope.launch {
             _reportsLoading.value = true
             _reportsError.value = null
-            
+
             try {
                 floodReportRepository.observeAllReports()
                     .collect { reports ->
@@ -215,7 +215,11 @@ class FloodReportViewModel(
             _reportsError.value = null
 
             try {
-                val firestoreReportsDeferred = floodReportRepository.getReportsInRadius(latitude, longitude, radiusKm).first()
+                val firestoreReportsDeferred = floodReportRepository.getReportsInRadius(
+                    latitude,
+                    longitude,
+                    radiusKm
+                ).first()
                 // _combinedFloodReports.value = firestoreReportsDeferred
                 _reportsLoading.value = false
             } catch (e: Exception) {

@@ -59,26 +59,28 @@ fun FloodReportItem(
                 },
                 modifier = Modifier.size(24.dp)
             )
-            
+
             Spacer(modifier = Modifier.size(Dimensions.spacing_16))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = report.description,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
-                
+
                 Spacer(modifier = Modifier.size(Dimensions.spacing_8))
-                
+
                 Text(
                     text = "Status: ${report.status}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
-                
+
                 Text(
-                    text = "Location: (${"%.4f".format(report.latitude)}, ${"%.4f".format(report.longitude)})",
+                    text = "Location: (${"%.4f".format(
+                        report.latitude
+                    )}, ${"%.4f".format(report.longitude)})",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
@@ -87,4 +89,5 @@ fun FloodReportItem(
     }
 }
 
-class FloodReportParameterPreview(override val values: Sequence<FloodReport>) : PreviewParameterProvider<FloodReport>{}
+class FloodReportParameterPreview(override val values: Sequence<FloodReport>) :
+    PreviewParameterProvider<FloodReport>

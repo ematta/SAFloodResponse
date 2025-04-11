@@ -77,5 +77,4 @@ data class FloodReport(
      */
     val location: LatLng
         get() = LatLng(latitude, longitude)
-
 }

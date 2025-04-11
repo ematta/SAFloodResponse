@@ -1,5 +1,6 @@
 package edu.utap.ui.screens.auth
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,19 +28,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.auth.AuthState
+import edu.utap.models.FirestoreUser
 import edu.utap.ui.viewmodel.AuthViewModel
 import edu.utap.ui.viewmodel.AuthViewModelInterface
 import edu.utap.utils.RoleUtils
 import edu.utap.utils.ValidationUtils
-import android.util.Log
-
-import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import edu.utap.models.FirestoreUser
 
 // Test tags for UI testing
 const val REGISTER_NAME_FIELD_TAG = "edu.utap.auth.nameField"
@@ -264,7 +263,10 @@ class RegisterScreenFakeAuthViewModel : AuthViewModelInterface {
         role: String,
         function: (Boolean, String?) -> Unit
     ) {
-        Log.d("RegisterScreenPreview", "Fake register called with email=$email, name=$name, role=$role")
+        Log.d(
+            "RegisterScreenPreview",
+            "Fake register called with email=$email, name=$name, role=$role"
+        )
         function(false, "Preview mode: register not performed")
     }
 

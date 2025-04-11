@@ -12,8 +12,7 @@ interface ApplicationContextProviderInterface {
 /**
  * Default implementation that simply returns the provided context.
  */
-class DefaultApplicationContextProvider(
-    private val context: Context
-) : ApplicationContextProviderInterface {
+class DefaultApplicationContextProvider(private val context: Context) :
+    ApplicationContextProviderInterface {
     override fun getApplicationContext(): Context = context
 }
