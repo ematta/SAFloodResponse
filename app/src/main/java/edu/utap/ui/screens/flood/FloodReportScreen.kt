@@ -17,6 +17,7 @@ import edu.utap.models.FloodReport
 import edu.utap.ui.viewmodel.FloodReportViewModel
 import edu.utap.ui.viewmodel.ReportState
 import edu.utap.utils.LocationUtils
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * Composable function that displays the flood reporting screen.
@@ -54,6 +55,45 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
     val latitude by viewModel.latitude.collectAsState()
     val longitude by viewModel.longitude.collectAsState()
 
+    FloodReportScreenContent(
+        reportState = reportState,
+        currentLocation = currentLocation,
+        selectedPhotos = selectedPhotos,
+        description = description,
+        isManualLocation = isManualLocation,
+        latitude = latitude,
+        longitude = longitude,
+        onNavigateToMap = onNavigateToMap,
+        onSetManualLocation = { viewModel.setManualLocation(it) },
+        onUpdateLatitude = { viewModel.updateLatitude(it) },
+        onUpdateLongitude = { viewModel.updateLongitude(it) },
+        onUpdateDescription = { viewModel.updateDescription(it) },
+        onAddPhoto = { viewModel.addPhoto(it) },
+        onSubmitReport = { viewModel.submitReport() }
+    )
+}
+
+/**
+ * Stateless UI content for the Flood Report screen, suitable for previews.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FloodReportScreenContent(
+    reportState: ReportState,
+    currentLocation: Location?,
+    selectedPhotos: List<String>,
+    description: String,
+    isManualLocation: Boolean,
+    latitude: Double,
+    longitude: Double,
+    onNavigateToMap: () -> Unit,
+    onSetManualLocation: (Boolean) -> Unit,
+    onUpdateLatitude: (Double) -> Unit,
+    onUpdateLongitude: (Double) -> Unit,
+    onUpdateDescription: (String) -> Unit,
+    onAddPhoto: (String) -> Unit,
+    onSubmitReport: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -109,7 +149,7 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                             Text("Manual Location")
                             Switch(
                                 checked = isManualLocation,
-                                onCheckedChange = { viewModel.setManualLocation(it) }
+                                onCheckedChange = onSetManualLocation
                             )
                         }
 
@@ -117,8 +157,8 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                             value = latitude.toString(),
                             onValueChange = {
                                 it.toDoubleOrNull()?.let { lat ->
-                                    viewModel.updateLatitude(lat)
-                                } ?: viewModel.updateLatitude(0.0)
+                                    onUpdateLatitude(lat)
+                                } ?: onUpdateLatitude(0.0)
                             },
                             label = { Text("Latitude") },
                             modifier = Modifier.fillMaxWidth()
@@ -127,8 +167,8 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                             value = longitude.toString(),
                             onValueChange = {
                                 it.toDoubleOrNull()?.let { lon ->
-                                    viewModel.updateLongitude(lon)
-                                } ?: viewModel.updateLongitude(0.0)
+                                    onUpdateLongitude(lon)
+                                } ?: onUpdateLongitude(0.0)
                             },
                             label = { Text("Longitude") },
                             modifier = Modifier.fillMaxWidth()
@@ -152,7 +192,7 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                         )
                         OutlinedTextField(
                             value = description,
-                            onValueChange = { viewModel.updateDescription(it) },
+                            onValueChange = onUpdateDescription,
                             label = { Text("Describe the flood") },
                             modifier = Modifier.fillMaxWidth(),
                             minLines = 3
@@ -186,9 +226,7 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
                             }
                         }
                         Button(
-                            onClick = {
-                                viewModel.addPhoto("https://example.com/photo.jpg")
-                            },
+                            onClick = { onAddPhoto("https://example.com/photo.jpg") },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Add Photo")
@@ -200,7 +238,7 @@ fun FloodReportScreen(viewModel: FloodReportViewModel, onNavigateToMap: () -> Un
             // Submit Button
             item {
                 Button(
-                    onClick = { viewModel.submitReport() },
+                    onClick = onSubmitReport,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = reportState !is ReportState.Loading
                 ) {
@@ -310,3 +348,28 @@ fun FloodReportItem(report: FloodReport, onConfirm: () -> Unit, onDeny: () -> Un
         }
     }
 }
+
+// --- Previews and Sample Data for Jetpack Compose Tooling ---
+// These previews follow official best practices for @Preview usage.
+
+@Preview(showBackground = true, name = "Flood Report Item")
+@Composable
+fun FloodReportItemPreview() {
+    val sampleReport = FloodReport(
+        latitude = 30.2672,
+        longitude = -97.7431,
+        severity = "moderate",
+        waterDepthInches = 12.0,
+        isRoadClosed = true,
+        description = "Sample flood report for preview. Water is rising quickly.",
+        photoUrls = listOf("https://via.placeholder.com/100"),
+        confirmedCount = 3,
+        deniedCount = 1
+    )
+    FloodReportItem(
+        report = sampleReport,
+        onConfirm = {},
+        onDeny = {}
+    )
+}
+
