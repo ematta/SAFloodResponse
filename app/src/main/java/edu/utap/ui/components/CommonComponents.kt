@@ -26,7 +26,6 @@ fun LoadingIndicator(modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 /**
  * Styled outlined text field used throughout the app.
  *
@@ -40,6 +39,7 @@ fun LoadingIndicator(modifier: Modifier = Modifier) {
  * @param supportingText Optional supporting/error text below the field.
  * @param keyboardOptions Keyboard options such as input type.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTextField(value: String, onValueChange: (String) -> Unit, label: String, modifier: Modifier = Modifier, enabled: Boolean = true, isError: Boolean = false, visualTransformation: VisualTransformation = VisualTransformation.None, supportingText: String? = null, keyboardOptions: KeyboardOptions = KeyboardOptions.Default) {
     OutlinedTextField(
@@ -112,4 +112,35 @@ fun ErrorMessage(message: String, modifier: Modifier = Modifier) {
 @Composable
 fun SpacerHeight(height: Int) {
     Spacer(modifier = Modifier.height(height.dp))
+}
+
+@Preview
+@Composable
+fun AppTextFieldPreview() {
+    AppTextField(
+        value = "Sample Text",
+        onValueChange = {},
+        label = "Label"
+    )
+}
+
+@Preview
+@Composable
+fun AppButtonPreview() {
+    AppButton(
+        onClick = {},
+        text = "Click Me"
+    )
+}
+
+@Preview
+@Composable
+fun ErrorMessagePreview() {
+    ErrorMessage(message = "This is an error message")
+}
+
+@Preview
+@Composable
+fun SpacerHeightPreview() {
+    SpacerHeight(height = 16)
 }

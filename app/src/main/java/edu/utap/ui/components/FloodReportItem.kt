@@ -32,10 +32,9 @@ import edu.utap.ui.theme.Dimensions
  * @param report The [FloodReport] to display.
  * @param modifier Modifier to apply to the card.
  */
-@Preview
 @Composable
 fun FloodReportItem(
-    @PreviewParameter(FloodReportParameterPreview::class) report: FloodReport,
+    report: FloodReport,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -89,5 +88,14 @@ fun FloodReportItem(
     }
 }
 
-class FloodReportParameterPreview(override val values: Sequence<FloodReport>) :
-    PreviewParameterProvider<FloodReport>
+@Preview
+@Composable
+fun FloodReportItemPreview() {
+    val sampleReport = FloodReport(
+        description = "Flood near riverbank",
+        status = "confirmed",
+        latitude = 37.7749,
+        longitude = -122.4194
+    )
+    FloodReportItem(report = sampleReport)
+}
