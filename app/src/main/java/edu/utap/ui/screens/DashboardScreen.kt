@@ -22,8 +22,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import edu.utap.models.FloodReport
 
-// --- Stateless UI Composable ---
-
 @Composable
 fun DashboardContent(
     isLocationPermissionGranted: Boolean,

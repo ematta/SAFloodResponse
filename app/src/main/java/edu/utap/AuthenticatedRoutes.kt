@@ -6,8 +6,6 @@ package edu.utap
  * These routes are used with the Navigation component to navigate between screens.
  */
 object AuthenticatedRoutes {
-    /** Route for the dashboard screen. */
-    const val DASHBOARD = "dashboard"
 
     /** Route for the discussions list screen. */
     const val DISCUSSIONS = "discussions"

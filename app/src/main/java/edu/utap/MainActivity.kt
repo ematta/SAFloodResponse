@@ -28,6 +28,7 @@ import edu.utap.auth.AuthState
 import edu.utap.di.FloodViewModelFactory
 import edu.utap.di.ViewModelFactory
 import edu.utap.models.FloodReport
+import edu.utap.ui.navigation.OpenRoutes
 import edu.utap.repository.FloodReportRepository
 import edu.utap.ui.NetworkConnectivitySnackbar
 import edu.utap.ui.components.AppHeader
@@ -244,10 +245,10 @@ fun AuthenticatedApp(
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = AuthenticatedRoutes.DASHBOARD,
+            startDestination = OpenRoutes.DASHBOARD,
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable(AuthenticatedRoutes.DASHBOARD) {
+            composable(OpenRoutes.DASHBOARD) {
                 DashboardScreen(
                     navController = navController,
                     locationPermissionHandler = locationPermissionHandler,
