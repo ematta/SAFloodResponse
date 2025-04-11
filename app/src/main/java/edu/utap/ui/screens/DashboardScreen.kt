@@ -131,7 +131,7 @@ fun DashboardScreen(
     locationPermissionHandler: edu.utap.utils.LocationPermissionHandler,
     weatherViewModel: edu.utap.ui.viewmodel.WeatherViewModel,
     floodReportRepository: edu.utap.repository.FloodReportRepositoryInterface,
-    networkUtils: edu.utap.utils.NetworkUtils,
+    networkUtils: edu.utap.utils.NetworkUtilsInterface,
     modifier: Modifier = Modifier
 ) {
     // ... (original ViewModel and runtime logic unchanged)

@@ -10,7 +10,7 @@ import edu.utap.models.FirestoreUser
 import edu.utap.repository.AuthRepositoryInterface
 import edu.utap.utils.DefaultSecurePrefsProvider
 import edu.utap.utils.FirebaseErrorMapper
-import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsInterface
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
  */
 open class AuthViewModel(
     private val authRepository: AuthRepositoryInterface,
-    private val networkUtils: NetworkUtils,
+    private val networkUtils: NetworkUtilsInterface,
     private val context: Context
 ) : ViewModel(),
     AuthViewModelInterface {

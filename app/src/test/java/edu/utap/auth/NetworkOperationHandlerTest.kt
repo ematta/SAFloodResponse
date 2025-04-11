@@ -3,7 +3,7 @@ package edu.utap.auth
 import android.content.Context
 import edu.utap.auth.MainDispatcherRule
 import edu.utap.utils.ApplicationContextProviderInterface
-import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsInterface
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -25,6 +25,9 @@ class NetworkOperationHandlerTest {
     @MockK
     private lateinit var contextProvider: ApplicationContextProviderInterface
 
+    @MockK
+    private lateinit var networkUtils: NetworkUtilsInterface
+
     private lateinit var handler: NetworkOperationHandler
 
     private val noNetworkMessage = "No internet connection. Please check your network settings and try again."
@@ -32,14 +35,13 @@ class NetworkOperationHandlerTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
-        mockkObject(NetworkUtils)
         every { contextProvider.getApplicationContext() } returns mockk(relaxed = true)
-        handler = NetworkOperationHandler(NetworkUtils, contextProvider)
+        handler = NetworkOperationHandler(networkUtils, contextProvider)
     }
 
     @Test
     fun `checkNetworkAvailability returns null when network is available`() = runTest {
-        every { NetworkUtils.isNetworkAvailable(any()) } returns true
+        every { networkUtils.isNetworkAvailable(any()) } returns true
 
         val result = handler.checkNetworkAvailability()
 
@@ -48,7 +50,7 @@ class NetworkOperationHandlerTest {
 
     @Test
     fun `checkNetworkAvailability returns AuthState_Error_Network when network is unavailable`() = runTest {
-        every { NetworkUtils.isNetworkAvailable(any()) } returns false
+        every { networkUtils.isNetworkAvailable(any()) } returns false
 
         val result = handler.checkNetworkAvailability()
 
@@ -59,7 +61,7 @@ class NetworkOperationHandlerTest {
 
     @Test
     fun `executeWithNetworkCheck returns failure when network is unavailable`() = runTest {
-        every { NetworkUtils.isNetworkAvailable(any()) } returns false
+        every { networkUtils.isNetworkAvailable(any()) } returns false
 
         val result = handler.executeWithNetworkCheck { "Should not run" }
 
@@ -71,7 +73,7 @@ class NetworkOperationHandlerTest {
 
     @Test
     fun `executeWithNetworkCheck returns success when network is available and operation succeeds`() = runTest {
-        every { NetworkUtils.isNetworkAvailable(any()) } returns true
+        every { networkUtils.isNetworkAvailable(any()) } returns true
 
         val expected = "Success"
         val result = handler.executeWithNetworkCheck { expected }
@@ -82,7 +84,7 @@ class NetworkOperationHandlerTest {
 
     @Test
     fun `executeWithNetworkCheck returns failure when network is available but operation throws`() = runTest {
-        every { NetworkUtils.isNetworkAvailable(any()) } returns true
+        every { networkUtils.isNetworkAvailable(any()) } returns true
 
         val exception = RuntimeException("Operation failed")
         val result = handler.executeWithNetworkCheck { throw exception }

@@ -2,14 +2,14 @@ package edu.utap.auth
 
 import android.util.Log
 import edu.utap.utils.ApplicationContextProviderInterface
-import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsInterface
 
 /**
  * Handles network-related operations for authentication.
  * This class provides methods to check network connectivity and handle network-dependent operations.
  */
 class NetworkOperationHandler(
-    private val networkUtils: NetworkUtils,
+    private val networkUtils: NetworkUtilsInterface,
     private val context: ApplicationContextProviderInterface
 ) {
     /**

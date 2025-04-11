@@ -34,11 +34,11 @@ import edu.utap.ui.screens.user.ProfileScreen
 import edu.utap.ui.viewmodel.WeatherViewModel
 import edu.utap.utils.LocationPermissionHandler
 import edu.utap.utils.NetworkMonitor
-import edu.utap.utils.NetworkUtils
+import edu.utap.utils.NetworkUtilsInterface
 
 class NavigationManager(
     private val authFlowManager: AuthFlowManager,
-    private val networkUtils: NetworkUtils,
+    private val networkUtils: NetworkUtilsInterface,
     private val networkMonitor: NetworkMonitor,
     private val locationPermissionHandler: LocationPermissionHandler
 ) {
