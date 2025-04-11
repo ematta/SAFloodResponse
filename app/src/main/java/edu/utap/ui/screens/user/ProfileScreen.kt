@@ -18,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -311,6 +312,87 @@ fun ProfileImagePicker(photoUrl: String, onImageSelected: (Uri) -> Unit) {
                 IconButton(onClick = { galleryLauncher.launch("image/*") }) {
                     Icon(Icons.TwoTone.Edit, "Choose from Gallery")
                 }
+            }
+        }
+    }
+    
+    //
+    // Compose Previews: These must be top-level, parameterless, and public for Compose tooling.
+    //
+    
+    @Preview(name = "Profile Row", showBackground = true)
+    @Composable
+    fun ProfileRowPreview() {
+        ProfileRow(label = "Email", value = "user@example.com")
+    }
+    
+    @Preview(name = "Profile Image Picker", showBackground = true)
+    @Composable
+    fun ProfileImagePickerPreview() {
+        // Use empty photoUrl and a no-op callback for preview
+        ProfileImagePicker(photoUrl = "", onImageSelected = {})
+    }
+    
+    @Preview(name = "Profile Screen (View Mode)", showBackground = true)
+    @Composable
+    fun ProfileScreenPreview() {
+        // Simulate the view mode of ProfileScreen with sample data
+        MaterialTheme {
+            Surface {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    ProfileRow(label = "Display Name", value = "Jane Doe")
+                    ProfileRow(label = "Email", value = "jane.doe@example.com")
+                    ProfileRow(label = "Phone Number", value = "+1 555-123-4567")
+                    ProfileRow(label = "Address", value = "123 Main St, Springfield")
+                }
+            }
+        }
+    }
+    
+}
+
+/**
+ * Previews for Jetpack Compose tooling.
+ * These previews use sample/mock data and avoid real ViewModel or navigation dependencies,
+ * in accordance with official Compose @Preview best practices.
+ */
+
+@Preview(name = "Profile Row", showBackground = true)
+@Composable
+fun ProfileRowPreview() {
+    ProfileRow(label = "Email", value = "user@example.com")
+}
+
+@Preview(name = "Profile Image Picker", showBackground = true)
+@Composable
+fun ProfileImagePickerPreview() {
+    // Use empty photoUrl and a no-op callback for preview
+    ProfileImagePicker(photoUrl = "", onImageSelected = {})
+}
+
+@Preview(name = "Profile Screen (View Mode)", showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
+    // Simulate the view mode of ProfileScreen with sample data
+    MaterialTheme {
+        Surface {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                ProfileRow(label = "Display Name", value = "Jane Doe")
+                ProfileRow(label = "Email", value = "jane.doe@example.com")
+                ProfileRow(label = "Phone Number", value = "+1 555-123-4567")
+                ProfileRow(label = "Address", value = "123 Main St, Springfield")
             }
         }
     }
