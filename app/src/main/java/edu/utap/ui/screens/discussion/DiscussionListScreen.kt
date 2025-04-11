@@ -39,7 +39,12 @@ import java.util.Date
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.utap.di.DiscussionViewModelFactory
 import edu.utap.models.DiscussionThread
+import com.google.firebase.Timestamp
 import edu.utap.ui.viewmodel.DiscussionViewModel
+
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +73,28 @@ fun DiscussionListScreen(
         viewModel.fetchAllThreads()
     }
 
+    DiscussionListScreenContent(
+        isLoading = isLoading,
+        error = error,
+        allThreads = allThreads,
+        onThreadClick = { thread -> onThreadClick(thread.threadId) },
+        onAddClick = { navController.navigate("discussions/new") }
+    )
+}
+
+/**
+ * Stateless UI content for the discussion list screen.
+ * This is previewable with sample/mock data.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DiscussionListScreenContent(
+    isLoading: Boolean,
+    error: String?,
+    allThreads: List<DiscussionThread>,
+    onThreadClick: (DiscussionThread) -> Unit,
+    onAddClick: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -76,7 +103,7 @@ fun DiscussionListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate("discussions/new") },
+                onClick = onAddClick,
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
@@ -109,7 +136,7 @@ fun DiscussionListScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = error.toString(),
+                        text = error,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -147,7 +174,7 @@ fun DiscussionListScreen(
                     items(allThreads) { thread ->
                         ThreadCard(
                             thread = thread,
-                            onClick = { onThreadClick(thread.threadId) }
+                            onClick = { onThreadClick(thread) }
                         )
                     }
                 }
@@ -164,7 +191,13 @@ fun DiscussionListScreen(
  * @param thread The [DiscussionThread] to display.
  * @param onClick Callback invoked when the card is clicked.
  */
-private fun ThreadCard(
+/**
+ * Card composable displaying a single discussion thread summary.
+ *
+ * @param thread The [DiscussionThread] to display.
+ * @param onClick Callback invoked when the card is clicked.
+ */
+fun ThreadCard(
     thread: DiscussionThread,
     onClick: () -> Unit
 ) {
@@ -219,4 +252,111 @@ private fun formatTimestamp(date: Date): String {
     } catch (e: Exception) {
         ""
     }
+}
+
+// --- Previews and sample data ---
+
+// Sample data provider for DiscussionThread
+class DiscussionThreadPreviewParameterProvider : PreviewParameterProvider<DiscussionThread> {
+    override val values: Sequence<DiscussionThread> = sequenceOf(
+        DiscussionThread(
+            threadId = "1",
+            reportId = "RPT-123",
+            category = "Flood",
+            messages = listOf(),
+            tags = listOf("urgent", "weather"),
+            timestamp = Timestamp.now(),
+            editTimestamp = null
+        ),
+        DiscussionThread(
+            threadId = "2",
+            reportId = "",
+            category = "General",
+            messages = listOf(),
+            tags = emptyList(),
+            timestamp = Timestamp.now(),
+            editTimestamp = null
+        )
+    )
+}
+
+// Preview for ThreadCard
+@Preview(showBackground = true, name = "ThreadCard Preview")
+@Composable
+fun ThreadCardPreview(
+    @PreviewParameter(DiscussionThreadPreviewParameterProvider::class) thread: DiscussionThread
+) {
+    ThreadCard(thread = thread, onClick = {})
+}
+
+// Preview for DiscussionListScreenContent with sample data
+@Preview(showBackground = true, widthDp = 400, name = "DiscussionListScreenContent Preview")
+@Composable
+fun DiscussionListScreenContentPreview() {
+    val sampleThreads = listOf(
+        DiscussionThread(
+            threadId = "1",
+            reportId = "RPT-123",
+            category = "Flood",
+            messages = listOf(),
+            tags = listOf("urgent", "weather"),
+            timestamp = Timestamp.now(),
+            editTimestamp = null
+        ),
+        DiscussionThread(
+            threadId = "2",
+            reportId = "",
+            category = "General",
+            messages = listOf(),
+            tags = emptyList(),
+            timestamp = Timestamp.now(),
+            editTimestamp = null
+        )
+    )
+    DiscussionListScreenContent(
+        isLoading = false,
+        error = null,
+        allThreads = sampleThreads,
+        onThreadClick = {},
+        onAddClick = {}
+    )
+}
+
+// Preview for DiscussionListScreenContent loading state
+@Preview(showBackground = true, name = "DiscussionListScreenContent Loading")
+@Composable
+fun DiscussionListScreenContentLoadingPreview() {
+    DiscussionListScreenContent(
+        isLoading = true,
+        error = null,
+        allThreads = emptyList(),
+        onThreadClick = {},
+        onAddClick = {}
+    )
+}
+
+// Preview for DiscussionListScreenContent error state
+@Preview(showBackground = true, name = "DiscussionListScreenContent Error")
+@Composable
+fun DiscussionListScreenContentErrorPreview() {
+    DiscussionListScreenContent(
+        isLoading = false,
+        error = "Network error",
+        allThreads = emptyList(),
+        onThreadClick = {},
+        onAddClick = {}
+    )
+}
+
+// Preview for DiscussionListScreenContent empty state
+@Preview(showBackground = true, name = "DiscussionListScreenContent Empty")
+@Composable
+fun DiscussionListScreenContentEmptyPreview() {
+    DiscussionListScreenContent(
+        isLoading = false,
+        error = null,
+        allThreads = emptyList(),
+        onThreadClick = {},
+        onAddClick = {}
+    )
 }
