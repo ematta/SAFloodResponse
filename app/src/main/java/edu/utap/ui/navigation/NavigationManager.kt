@@ -81,7 +81,7 @@ class NavigationManager(
         ) { paddingValues: PaddingValues ->
             NavHost(
                 navController = navController,
-                startDestination = if (isAuthenticated) AuthenticatedRoutes.DASHBOARD else "login",
+                startDestination = OpenRoutes.DASHBOARD,
                 modifier = Modifier.padding(paddingValues)
             ) {
                 addAuthGraph(navController)
@@ -103,7 +103,7 @@ class NavigationManager(
                     navController.navigate("forgotPassword")
                 },
                 onLoginSuccess = {
-                    navController.navigate(AuthenticatedRoutes.DASHBOARD) {
+                    navController.navigate(OpenRoutes.DASHBOARD) {
                         popUpTo("login") { inclusive = true }
                     }
                 }
@@ -117,7 +117,7 @@ class NavigationManager(
                     navController.popBackStack()
                 },
                 onRegisterSuccess = {
-                    navController.navigate(AuthenticatedRoutes.DASHBOARD) {
+                    navController.navigate(OpenRoutes.LOGIN) {
                         popUpTo("register") { inclusive = true }
                     }
                 }
@@ -132,7 +132,7 @@ class NavigationManager(
                 }
             )
         }
-        composable(AuthenticatedRoutes.DASHBOARD) {
+        composable(OpenRoutes.DASHBOARD) {
             DashboardScreen(
                 navController = navController,
                 locationPermissionHandler = locationPermissionHandler,
@@ -200,7 +200,6 @@ class NavigationManager(
  * Routes for authenticated navigation graph.
  */
 object AuthenticatedRoutes {
-    const val DASHBOARD = "dashboard"
     const val DISCUSSIONS = "discussions"
     const val DISCUSSIONS_THREAD = "discussions/{threadId}"
     const val PROFILE = "profile"
@@ -214,4 +213,5 @@ object OpenRoutes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val FORGOT_PASSWORD = "forgotPassword"
+    const val DASHBOARD = "dashboard"
 }
