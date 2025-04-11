@@ -1,6 +1,5 @@
 package edu.utap.auth
 
-import android.content.Context
 import android.util.Log
 import edu.utap.utils.ApplicationContextProviderInterface
 import edu.utap.utils.NetworkUtils

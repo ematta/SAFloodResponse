@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -44,7 +45,7 @@ class NavigationManager(
     private val locationPermissionHandler: LocationPermissionHandler
 ) {
     @Composable
-    fun NavigationHost(authViewModel: AuthViewModelInterface) {
+    fun NavigationHost() {
         val navController = rememberNavController()
         val context = LocalContext.current
 
@@ -85,12 +86,12 @@ class NavigationManager(
                 startDestination = if (isAuthenticated) AuthenticatedRoutes.DASHBOARD else "login",
                 modifier = Modifier.padding(paddingValues)
             ) {
-                addAuthGraph(navController, authViewModel)
+                addAuthGraph(navController)
             }
         }
     }
 
-    private fun NavGraphBuilder.addAuthGraph(navController: NavHostController, authViewModel: AuthViewModelInterface) {
+    private fun NavGraphBuilder.addAuthGraph(navController: NavHostController) {
         val firestore = FirebaseFirestore.getInstance()
         val floodReportRepository = FloodReportRepository(firestore)
 
@@ -140,7 +141,6 @@ class NavigationManager(
                 weatherViewModel = WeatherViewModel(),
                 floodReportRepository = floodReportRepository,
                 networkUtils = networkUtils,
-                authViewModel = authViewModel,
                 modifier = Modifier
             )
         }

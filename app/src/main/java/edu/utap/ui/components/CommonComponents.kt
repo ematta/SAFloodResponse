@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 /**
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
  *
  * @param modifier Modifier to apply to the container.
  */
+@Preview
 @Composable
 fun LoadingIndicator(modifier: Modifier = Modifier) {
     Box(
@@ -120,14 +122,4 @@ fun ErrorMessage(message: String, modifier: Modifier = Modifier) {
 @Composable
 fun SpacerHeight(height: Int) {
     Spacer(modifier = Modifier.height(height.dp))
-}
-
-/**
- * Spacer with fixed width.
- *
- * @param width Width in dp.
- */
-@Composable
-fun SpacerWidth(width: Int) {
-    Spacer(modifier = Modifier.width(width.dp))
 }
