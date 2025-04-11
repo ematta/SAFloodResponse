@@ -1,6 +1,10 @@
 package edu.utap.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
+import edu.utap.di.FloodViewModelFactory
+import edu.utap.repository.FloodReportRepository
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -184,9 +188,17 @@ fun DashboardScreen(
         }
     }
 
-    // TODO: Replace the following with real data from ViewModels/Repositories
-    val allReports = emptyList<edu.utap.models.FloodReport>()
-    val activeFloodReports = emptyList<edu.utap.models.FloodReport>()
+    // Obtain FloodReportViewModel instance
+    val context = LocalContext.current
+    val floodReportViewModel: edu.utap.ui.viewmodel.FloodReportViewModel = viewModel(
+        factory = FloodViewModelFactory(
+            context = context,
+            floodReportRepository = floodReportRepository as FloodReportRepository,
+            networkUtils = networkUtils
+        )
+    )
+    val allReports by floodReportViewModel.allReports.collectAsState()
+    val activeFloodReports by floodReportViewModel.activeFloodReports.collectAsState()
     val isLoading = false
 
     DashboardContent(
