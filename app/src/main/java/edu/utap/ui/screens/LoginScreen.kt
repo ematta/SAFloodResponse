@@ -1,4 +1,4 @@
-package edu.utap.ui.screens.auth
+package edu.utap.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -69,7 +69,7 @@ fun LoginScreen(
 
     // Check if user is already authenticated
     if (
-        authState is edu.utap.auth.AuthState.Idle.Authenticated &&
+        authState is AuthState.Idle.Authenticated &&
         authViewModel.getCurrentUser() != null
     ) {
         onLoginSuccess()
@@ -159,12 +159,12 @@ fun LoginScreen(
                     }
                 }
             },
-            enabled = authState !is edu.utap.auth.AuthState.Loading,
+            enabled = authState !is AuthState.Loading,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("loginButton")
         ) {
-            if (authState is edu.utap.auth.AuthState.Loading) {
+            if (authState is AuthState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
                     color = MaterialTheme.colorScheme.onPrimary
@@ -280,6 +280,10 @@ private class FakeAuthViewModel : AuthViewModelInterface {
 
     override fun updateAuthState(sent: AuthState) {
         Log.d("LoginScreenPreview", "Fake updateAuthState called with $sent")
+    }
+
+    override fun isUserLoggedIn(): Boolean {
+        return true
     }
 }
 

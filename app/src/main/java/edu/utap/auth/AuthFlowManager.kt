@@ -65,4 +65,8 @@ class AuthFlowManager(val authViewModel: AuthViewModel) {
     fun clearAuthCache() {
         authViewModel.clearAuthCache()
     }
+
+    fun isUserLoggedIn(): Boolean {
+        return authViewModel.isUserLoggedIn()
+    }
 }

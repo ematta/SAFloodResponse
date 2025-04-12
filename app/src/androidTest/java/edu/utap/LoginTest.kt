@@ -4,7 +4,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import edu.utap.ui.screens.auth.LoginScreen
+import edu.utap.ui.screens.LoginScreen
 import edu.utap.ui.viewmodel.AuthViewModelInterface
 import org.junit.Rule
 import org.junit.Test

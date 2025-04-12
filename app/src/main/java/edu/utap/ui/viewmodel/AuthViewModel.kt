@@ -289,6 +289,10 @@ open class AuthViewModel(
         stateManager.updateState(sent)
     }
 
+    override fun isUserLoggedIn(): Boolean {
+        return stateManager.currentUser.value != null
+    }
+
     fun getCachedUser(): FirestoreUser? {
         val json = DefaultSecurePrefsProvider(
             context = context

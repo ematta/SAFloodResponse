@@ -1,4 +1,4 @@
-package edu.utap.ui.screens.auth
+package edu.utap.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -296,6 +296,10 @@ class RegisterScreenFakeAuthViewModel : AuthViewModelInterface {
 
     override fun updateAuthState(sent: AuthState) {
         Log.d("RegisterScreenPreview", "Fake updateAuthState called with $sent")
+    }
+
+    override fun isUserLoggedIn(): Boolean {
+        return true
     }
 }
 

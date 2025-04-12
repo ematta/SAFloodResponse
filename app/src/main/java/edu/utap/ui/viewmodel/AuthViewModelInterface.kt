@@ -82,4 +82,9 @@ interface AuthViewModelInterface {
      * @param sent The new [AuthState].
      */
     fun updateAuthState(sent: AuthState)
+
+    /**
+     * Checks to see if user is logged in and authenticated
+     */
+    fun isUserLoggedIn(): Boolean
 }

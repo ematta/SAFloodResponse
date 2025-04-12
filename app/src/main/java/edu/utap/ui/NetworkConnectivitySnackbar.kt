@@ -31,7 +31,6 @@ fun NetworkConnectivitySnackbar(
     onNetworkAvailable: () -> Unit = {},
     onNetworkUnavailable: () -> Unit = {}
 ) {
-    val context = LocalContext.current
     val networkState by networkMonitor.networkState().collectAsState(
         initial = NetworkState.AVAILABLE
     )

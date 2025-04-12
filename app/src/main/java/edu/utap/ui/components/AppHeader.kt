@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import edu.utap.AuthenticatedRoutes
 import edu.utap.R
+import edu.utap.ui.navigation.OpenRoutes
 
 /**
  * Top app bar composable for the Flood Response app.
@@ -45,7 +46,7 @@ fun AppHeader(navController: NavController) {
         },
         actions = {
             IconButton(onClick = {
-                navController.navigate(AuthenticatedRoutes.FLOOD_REPORT)
+                navController.navigate(OpenRoutes.LOGIN)
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_login_24),

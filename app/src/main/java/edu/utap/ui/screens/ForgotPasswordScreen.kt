@@ -1,4 +1,4 @@
-package edu.utap.ui.screens.auth
+package edu.utap.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -175,6 +175,9 @@ private class MockAuthViewModel : AuthViewModelInterface {
     override fun restoreAuthState() { }
 
     override fun updateAuthState(sent: AuthState) { }
+    override fun isUserLoggedIn(): Boolean {
+        return true
+    }
 
     override fun resetPassword(email: String, onResult: (Boolean, String?) -> Unit) {
         // Fake implementation for preview

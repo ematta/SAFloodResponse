@@ -51,7 +51,6 @@ fun DashboardContent(
                 title = { Text("Dashboard") }
             )
         },
-        bottomBar = { BottomNavigationBar(navController = rememberNavController()) }
     ) {
         Box(modifier = modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {

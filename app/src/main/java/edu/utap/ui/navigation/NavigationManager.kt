@@ -20,6 +20,7 @@ import edu.utap.di.FloodViewModelFactory
 import edu.utap.repository.FloodReportRepository
 import edu.utap.ui.NetworkConnectivitySnackbar
 import edu.utap.ui.components.AppHeader
+import edu.utap.ui.components.BottomNavigationBar
 import edu.utap.ui.screens.DashboardScreen
 import edu.utap.ui.screens.auth.ForgotPasswordScreen
 import edu.utap.ui.screens.auth.LoginScreen
@@ -42,7 +43,6 @@ class NavigationManager(
     @Composable
     fun NavigationHost() {
         val navController = rememberNavController()
-        val context = LocalContext.current
 
         Scaffold(
             topBar = {
@@ -50,6 +50,9 @@ class NavigationManager(
             },
             snackbarHost = {
                 NetworkConnectivitySnackbar(networkMonitor = networkMonitor)
+            },
+            bottomBar = {
+                BottomNavigationBar(navController)
             }
         ) { paddingValues: PaddingValues ->
             NavHost(
@@ -62,7 +65,7 @@ class NavigationManager(
         }
     }
 
-    private fun NavGraphBuilder.addAuthGraph(navController: NavHostController) {
+    private fun NavGraphBuilder.addAuthGraph(navController: NavHostController, authFlowManager: AuthFlowManager = this@NavigationManager.authFlowManager) {
         val firestore = FirebaseFirestore.getInstance()
         val floodReportRepository = FloodReportRepository(firestore)
 
@@ -70,14 +73,14 @@ class NavigationManager(
             LoginScreen(
                 authViewModel = authFlowManager.authViewModel,
                 onNavigateToRegister = {
-                    navController.navigate("register")
+                    navController.navigate(OpenRoutes.REGISTER)
                 },
                 onNavigateToForgotPassword = {
-                    navController.navigate("forgotPassword")
+                    navController.navigate(OpenRoutes.FORGOT_PASSWORD)
                 },
                 onLoginSuccess = {
                     navController.navigate(OpenRoutes.DASHBOARD) {
-                        popUpTo("login") { inclusive = true }
+                        popUpTo(OpenRoutes.LOGIN) { inclusive = true }
                     }
                 }
             )
@@ -119,7 +122,7 @@ class NavigationManager(
         composable(AuthenticatedRoutes.DISCUSSIONS) {
             DiscussionListScreen(
                 onThreadClick = { threadId ->
-                    navController.navigate("discussions/$threadId")
+                    navController.navigate("${AuthenticatedRoutes.DISCUSSIONS}/$threadId")
                 },
                 navController = navController
             )
@@ -153,18 +156,32 @@ class NavigationManager(
         }
 
         composable(AuthenticatedRoutes.FLOOD_REPORT) {
-            FloodReportFormScreen(
-                viewModel = viewModel(
-                    factory = FloodViewModelFactory(
-                        context = LocalContext.current,
-                        floodReportRepository = floodReportRepository,
-                        networkUtils = networkUtils
-                    )
-                ),
-                onNavigateBack = {
-                    navController.popBackStack()
+            val authState by authFlowManager.authViewModel.authState.collectAsState()
+
+            if (authState is edu.utap.auth.AuthState.Success) {
+                // User is authenticated, show the report form
+                FloodReportFormScreen(
+                    viewModel = viewModel(
+                        factory = FloodViewModelFactory(
+                            context = LocalContext.current,
+                            floodReportRepository = floodReportRepository,
+                            networkUtils = networkUtils
+                        )
+                    ),
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            } else {
+                // User is not authenticated, redirect to login
+                // Use LaunchedEffect to navigate outside of composition
+                LaunchedEffect(authState) {
+                    navController.navigate(OpenRoutes.LOGIN) {
+                        // Optional: Clear back stack up to dashboard or handle as needed
+                        popUpTo(OpenRoutes.DASHBOARD)
+                    }
                 }
-            )
+            }
         }
     }
 }
