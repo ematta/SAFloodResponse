@@ -16,15 +16,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.utap.auth.AuthFlowManager
+import edu.utap.auth.AuthState
 import edu.utap.di.FloodViewModelFactory
 import edu.utap.repository.FloodReportRepository
 import edu.utap.ui.NetworkConnectivitySnackbar
 import edu.utap.ui.components.AppHeader
 import edu.utap.ui.components.BottomNavigationBar
 import edu.utap.ui.screens.DashboardScreen
-import edu.utap.ui.screens.auth.ForgotPasswordScreen
-import edu.utap.ui.screens.auth.LoginScreen
-import edu.utap.ui.screens.auth.RegisterScreen
+import edu.utap.ui.screens.ForgotPasswordScreen
+import edu.utap.ui.screens.LoginScreen
+import edu.utap.ui.screens.RegisterScreen
 import edu.utap.ui.screens.discussion.DiscussionListScreen
 import edu.utap.ui.screens.discussion.DiscussionThreadScreen
 import edu.utap.ui.screens.flood.FloodReportFormScreen
@@ -60,69 +61,24 @@ class NavigationManager(
                 startDestination = OpenRoutes.DASHBOARD,
                 modifier = Modifier.padding(paddingValues)
             ) {
+                if (authFlowManager.isAuthenticated.value) {
+                    addAuthenticatedGraph(navController)
+                } else {
+                    addAuthGraph(navController)
+                }
                 addAuthGraph(navController)
             }
         }
     }
 
-    private fun NavGraphBuilder.addAuthGraph(navController: NavHostController, authFlowManager: AuthFlowManager = this@NavigationManager.authFlowManager) {
+    private fun NavGraphBuilder.addAuthenticatedGraph(navController: NavHostController) {
         val firestore = FirebaseFirestore.getInstance()
         val floodReportRepository = FloodReportRepository(firestore)
-
-        composable(OpenRoutes.LOGIN) {
-            LoginScreen(
-                authViewModel = authFlowManager.authViewModel,
-                onNavigateToRegister = {
-                    navController.navigate(OpenRoutes.REGISTER)
-                },
-                onNavigateToForgotPassword = {
-                    navController.navigate(OpenRoutes.FORGOT_PASSWORD)
-                },
-                onLoginSuccess = {
-                    navController.navigate(OpenRoutes.DASHBOARD) {
-                        popUpTo(OpenRoutes.LOGIN) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(OpenRoutes.REGISTER) {
-            RegisterScreen(
-                authViewModel = authFlowManager.authViewModel,
-                onNavigateToLogin = {
-                    navController.popBackStack()
-                },
-                onRegisterSuccess = {
-                    navController.navigate(OpenRoutes.LOGIN) {
-                        popUpTo("register") { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(OpenRoutes.FORGOT_PASSWORD) {
-            ForgotPasswordScreen(
-                viewModel = authFlowManager.authViewModel,
-                onNavigateToLogin = {
-                    navController.popBackStack()
-                }
-            )
-        }
-        composable(OpenRoutes.DASHBOARD) {
-            DashboardScreen(
-                navController = navController,
-                locationPermissionHandler = locationPermissionHandler,
-                weatherViewModel = WeatherViewModel(),
-                floodReportRepository = floodReportRepository,
-                networkUtils = networkUtils,
-                modifier = Modifier
-            )
-        }
 
         composable(AuthenticatedRoutes.DISCUSSIONS) {
             DiscussionListScreen(
                 onThreadClick = { threadId ->
-                    navController.navigate("${AuthenticatedRoutes.DISCUSSIONS}/$threadId")
+                    navController.navigate("discussions/$threadId")
                 },
                 navController = navController
             )
@@ -156,32 +112,74 @@ class NavigationManager(
         }
 
         composable(AuthenticatedRoutes.FLOOD_REPORT) {
-            val authState by authFlowManager.authViewModel.authState.collectAsState()
+            FloodReportFormScreen(
+                viewModel = viewModel(
+                    factory = FloodViewModelFactory(
+                        context = LocalContext.current,
+                        floodReportRepository = floodReportRepository,
+                        networkUtils = networkUtils
+                    )
+                ),
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+    }
 
-            if (authState is edu.utap.auth.AuthState.Success) {
-                // User is authenticated, show the report form
-                FloodReportFormScreen(
-                    viewModel = viewModel(
-                        factory = FloodViewModelFactory(
-                            context = LocalContext.current,
-                            floodReportRepository = floodReportRepository,
-                            networkUtils = networkUtils
-                        )
-                    ),
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    }
-                )
-            } else {
-                // User is not authenticated, redirect to login
-                // Use LaunchedEffect to navigate outside of composition
-                LaunchedEffect(authState) {
-                    navController.navigate(OpenRoutes.LOGIN) {
-                        // Optional: Clear back stack up to dashboard or handle as needed
-                        popUpTo(OpenRoutes.DASHBOARD)
+    private fun NavGraphBuilder.addAuthGraph(navController: androidx.navigation.NavHostController) {
+        val firestore = FirebaseFirestore.getInstance()
+        val floodReportRepository = FloodReportRepository(firestore)
+        composable(OpenRoutes.LOGIN) {
+            LoginScreen(
+                authViewModel = authFlowManager.authViewModel,
+                onNavigateToRegister = {
+                    navController.navigate("register")
+                },
+                onNavigateToForgotPassword = {
+                    navController.navigate("forgotPassword")
+                },
+                onLoginSuccess = {
+                    navController.navigate(OpenRoutes.DASHBOARD) {
+                        popUpTo("login") { inclusive = true }
                     }
                 }
-            }
+            )
+        }
+
+        composable(OpenRoutes.REGISTER) {
+            RegisterScreen(
+                authViewModel = authFlowManager.authViewModel,
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                },
+                onRegisterSuccess = {
+                    navController.navigate(OpenRoutes.DASHBOARD) {
+                        popUpTo(OpenRoutes.REGISTER) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(OpenRoutes.FORGOT_PASSWORD) {
+            ForgotPasswordScreen(
+                viewModel = authFlowManager.authViewModel,
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(OpenRoutes.DASHBOARD) {
+            val weatherViewModel = WeatherViewModel()
+            DashboardScreen(
+                navController = navController,
+                locationPermissionHandler = locationPermissionHandler,
+                weatherViewModel = weatherViewModel,
+                floodReportRepository = floodReportRepository,
+                networkUtils = networkUtils,
+                modifier = Modifier
+            )
         }
     }
 }
