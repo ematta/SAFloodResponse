@@ -45,6 +45,8 @@ class NavigationManager(
     fun NavigationHost() {
         val navController = rememberNavController()
 
+        val isAuthenticated by authFlowManager.isAuthenticated.collectAsState()
+
         Scaffold(
             topBar = {
                 AppHeader(navController)
@@ -61,12 +63,11 @@ class NavigationManager(
                 startDestination = OpenRoutes.DASHBOARD,
                 modifier = Modifier.padding(paddingValues)
             ) {
-                if (authFlowManager.isAuthenticated.value) {
+                if (isAuthenticated) {
                     addAuthenticatedGraph(navController)
                 } else {
                     addAuthGraph(navController)
                 }
-                addAuthGraph(navController)
             }
         }
     }
